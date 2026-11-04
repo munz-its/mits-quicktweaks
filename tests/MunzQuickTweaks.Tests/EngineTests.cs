@@ -469,3 +469,68 @@ public sealed class PowerPlanAndAccountTests : IDisposable
         }
     }
 }
+
+public sealed class SelfTestRunnerTests : IDisposable
+{
+    private readonly string _dir = Path.Combine(Path.GetTempPath(), "mqt-self-" + Guid.NewGuid().ToString("N"));
+    private readonly FakeRegistry _reg = new();
+
+    private static TweakDefinition Reg(string id, string name, string value = "0", int minBuild = 19045) => new()
+    {
+        Id = id,
+        MinBuild = minBuild,
+        Actions = { new RegistryAction { Hive = RegistryHive.HKCU, Key = @"Software\Test", Name = name, Kind = RegistryKind.DWord, Value = value } },
+    };
+
+    [Fact]
+    public void Reports_ok_unavailable_skipped_and_failed()
+    {
+        _reg.Seed(RegistryHive.HKCU, @"Software\Test", "A", RegistryKind.DWord, "1");
+        _reg.IgnoreWritesTo = "C";
+
+        var userJournal = new JournalStore(Path.Combine(_dir, "user.json"));
+        userJournal.Set(new JournalEntry { TweakId = "t.skip" });
+        var engine = new TweakEngine(_reg, new JournalStore(Path.Combine(_dir, "test.json")), new FakeNotifier(), 19045);
+
+        var results = new SelfTestRunner(engine, userJournal).Run(new[]
+        {
+            Reg("t.ok", "A"),
+            Reg("t.win11", "B", minBuild: 22000),
+            Reg("t.skip", "D"),
+            Reg("t.fail", "C"),
+        }).ToDictionary(r => r.TweakId);
+
+        Assert.Equal(SelfTestOutcome.Ok, results["t.ok"].Outcome);
+        Assert.True(results["t.ok"].StateRestored);
+        Assert.Equal("1", _reg.Read(RegistryHive.HKCU, @"Software\Test", "A")!.Data);
+
+        Assert.Equal(SelfTestOutcome.NotAvailable, results["t.win11"].Outcome);
+        Assert.Contains("22000", results["t.win11"].Note);
+
+        Assert.Equal(SelfTestOutcome.Skipped, results["t.skip"].Outcome);
+        Assert.Null(_reg.Read(RegistryHive.HKCU, @"Software\Test", "D"));
+
+        Assert.Equal(SelfTestOutcome.Failed, results["t.fail"].Outcome);
+    }
+
+    [Fact]
+    public void Report_lists_failures_first_with_summary()
+    {
+        var report = SelfTestRunner.FormatReport(new[]
+        {
+            new SelfTestResult("a.ok", SelfTestOutcome.Ok, TweakStatus.NotApplied, TweakStatus.Applied, TweakStatus.NotApplied, true, ""),
+            new SelfTestResult("b.bad", SelfTestOutcome.Failed, TweakStatus.NotApplied, TweakStatus.NotApplied, TweakStatus.NotApplied, true, "Kontrolle"),
+        }, "Windows 11", "0.7.0", new DateTime(2026, 11, 4, 19, 0, 0));
+
+        Assert.Contains("OK: 1 · Fehler: 1", report);
+        Assert.True(report.IndexOf("== FEHLER ==", StringComparison.Ordinal) < report.IndexOf("== OK ==", StringComparison.Ordinal));
+    }
+
+    public void Dispose()
+    {
+        if (Directory.Exists(_dir))
+        {
+            Directory.Delete(_dir, recursive: true);
+        }
+    }
+}

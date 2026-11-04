@@ -98,12 +98,22 @@ public partial class App : Application
                 services.AddSingleton<SettingsViewModel>();
                 services.AddSingleton<MainViewModel>();
                 services.AddSingleton<MainWindow>();
+                services.AddTransient<SelfTestWindow>();
             })
             .Build();
 
         var settings = _host.Services.GetRequiredService<SettingsService>();
         Controls.UiMotion.Enabled = settings.Current.AnimationsEnabled;
         _host.Services.GetRequiredService<LocalizationService>().Apply(settings.Current.Language);
+
+        // Versteckter Testmodus für Test-VMs: MunzQuickTweaks.exe --selftest
+        if (e.Args.Any(a => string.Equals(a, "--selftest", StringComparison.OrdinalIgnoreCase)))
+        {
+            var test = _host.Services.GetRequiredService<SelfTestWindow>();
+            MainWindow = test;
+            test.Show();
+            return;
+        }
 
         var window = _host.Services.GetRequiredService<MainWindow>();
         MainWindow = window;

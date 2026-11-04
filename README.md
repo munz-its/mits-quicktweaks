@@ -4,7 +4,7 @@ Kostenlose Windows-App von Munz IT Service. Macht Windows 10 22H2 und Windows 11
 
 ## Stand
 
-Version 0.6.0, Phase 6 (Design): Umsetzung der freigegebenen Mockups. Kopfzeile mit Label, Kacheln auf Dashboard und Wiederherstellung, Profilkarten mit Pixel-Icons und Zählern, "Zuletzt geändert", Filter-Chips, Pixel-Wisch nach dem Anwenden, Einzel-Zurücksetzen, sanfter Seitenwechsel.
+Version 0.7.0, Phase 7 (Test): versteckter Selbsttest mit Bericht auf dem Desktop, Start mit `MunzQuickTweaks.exe --selftest` oder `tools/selftest/Selbsttest starten.bat`. Design aus Phase 6 inklusive weicher Übergänge.
 
 ## Technik
 

@@ -193,6 +193,59 @@ public sealed class TweakEngine
         return TweakResult.Ok;
     }
 
+    /// <summary>
+    /// Momentaufnahme aller Werte, die der Tweak berührt (für den Selbsttest:
+    /// nach Anwenden und Zurücksetzen muss sie exakt gleich sein).
+    /// </summary>
+    public IReadOnlyList<string> CaptureState(TweakDefinition tweak)
+    {
+        var state = new List<string>();
+        foreach (var step in Expand(tweak))
+        {
+            string value;
+            try
+            {
+                var current = _registry.Read(step.Hive, step.Key, step.Name);
+                value = current is null ? "(fehlt)" : $"{current.Kind}:{current.Data}";
+            }
+            catch (Exception ex) when (IsExpected(ex))
+            {
+                value = $"(Fehler: {ex.GetType().Name})";
+            }
+
+            state.Add($"{step.Hive}\\{step.Key}\\{step.Name} = {value}");
+        }
+
+        if (PowerAction(tweak) is not null && _power is { IsSupported: true })
+        {
+            state.Add($"Energieplan aktiv = {_power.GetActive()}");
+        }
+
+        return state;
+    }
+
+    /// <summary>Warum ein Tweak nicht verfügbar ist, für Berichte.</summary>
+    public string UnavailableReason(TweakDefinition tweak)
+    {
+        if (!tweak.SupportsBuild(_build))
+        {
+            return $"Windows-Build {_build} außerhalb {tweak.MinBuild}..{(tweak.MaxBuild == 0 ? "∞" : tweak.MaxBuild)}";
+        }
+
+        if (IsBlockedByAccount(tweak))
+        {
+            return "Fremdes Admin-Konto";
+        }
+
+        if (PowerAction(tweak) is not null && (_power is null || !_power.IsSupported))
+        {
+            return "Modern Standby, keine eigenen Energiepläne";
+        }
+
+        var missing = tweak.Actions.OfType<ServiceAction>().FirstOrDefault(s => !_registry.KeyExists(RegistryHive.HKLM, ServicesKey + s.Name));
+        return missing is null ? "unbekannt" : $"Dienst {missing.Name} fehlt";
+    }
+
     /// <summary>Alle Registry-Schlüssel, die der Tweak berührt (für den .reg-Export vor dem Anwenden).</summary>
     public IReadOnlyCollection<(RegistryHive Hive, string Key)> AffectedKeys(TweakDefinition tweak) =>
         Expand(tweak).Select(s => (s.Hive, s.Key)).Distinct().ToList();
