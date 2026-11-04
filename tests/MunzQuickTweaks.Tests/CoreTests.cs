@@ -105,6 +105,34 @@ public class StringResourceTests
         Assert.Empty(english.Except(german));
     }
 
+    // Ein doppelter Schlüssel lässt WPF schon beim Start abstürzen, ohne Fenster und ohne Meldung
+    [Fact]
+    public void No_xaml_file_has_duplicate_keys()
+    {
+        var appDir = Path.Combine(FindRepoRoot(), "src", "MunzQuickTweaks.App");
+        var problems = new List<string>();
+
+        foreach (var file in Directory.EnumerateFiles(appDir, "*.xaml", SearchOption.AllDirectories)
+                     .Where(f => !f.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}")
+                              && !f.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}")))
+        {
+            // Pro Ressourcen-Container (Resources-Block oder Wörterbuch) eindeutig
+            foreach (var container in XDocument.Load(file).Descendants()
+                         .Where(e => e.Name.LocalName.EndsWith("Resources", StringComparison.Ordinal) || e.Name.LocalName == "ResourceDictionary"))
+            {
+                var duplicates = container.Elements()
+                    .Select(e => (string?)e.Attribute(X + "Key"))
+                    .OfType<string>()
+                    .GroupBy(k => k)
+                    .Where(g => g.Count() > 1)
+                    .Select(g => $"{Path.GetFileName(file)}: {g.Key}");
+                problems.AddRange(duplicates);
+            }
+        }
+
+        Assert.Empty(problems);
+    }
+
     private static HashSet<string> ReadKeys(string fileName)
     {
         var path = Path.Combine(FindRepoRoot(), "src", "MunzQuickTweaks.App", "Resources", fileName);

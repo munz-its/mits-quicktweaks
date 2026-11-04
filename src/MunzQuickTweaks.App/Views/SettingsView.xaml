@@ -12,7 +12,7 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel Margin="0,0,24,0" VerticalAlignment="Center">
                     <TextBlock Text="{DynamicResource Settings.Language}" Style="{StaticResource H2}" FontSize="16" />
-                    <TextBlock Text="{DynamicResource Settings.LanguageHint}" Style="{StaticResource Muted}" Margin="0,4,0,0" />
+                    <TextBlock Text="{DynamicResource Settings.LanguageHint}" Style="{StaticResource MutedText}" Margin="0,4,0,0" />
                 </StackPanel>
                 <Border Grid.Column="1" Background="{StaticResource Bg3}" CornerRadius="8" BorderBrush="{StaticResource Line}" BorderThickness="1" VerticalAlignment="Center">
                     <StackPanel Orientation="Horizontal">
@@ -33,7 +33,7 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel Margin="0,0,24,0">
                     <TextBlock Text="{DynamicResource Settings.Animations}" Style="{StaticResource H2}" FontSize="16" />
-                    <TextBlock Text="{DynamicResource Settings.AnimationsHint}" Style="{StaticResource Muted}" Margin="0,4,0,0" />
+                    <TextBlock Text="{DynamicResource Settings.AnimationsHint}" Style="{StaticResource MutedText}" Margin="0,4,0,0" />
                 </StackPanel>
                 <CheckBox Grid.Column="1" Style="{StaticResource Toggle}" IsChecked="{Binding AnimationsEnabled}" VerticalAlignment="Center"
                           AutomationProperties.Name="{DynamicResource Settings.Animations}" />
@@ -61,7 +61,7 @@
                 <TextBlock Text="{DynamicResource Settings.Privacy}" Style="{StaticResource Label}" Foreground="{StaticResource Muted}" Margin="0,0,0,6" />
                 <TextBlock Text="{DynamicResource Settings.PrivacyText}" Style="{StaticResource Body2}" Margin="0,0,0,18" />
 
-                <TextBlock Text="{DynamicResource Settings.Licenses}" Style="{StaticResource Muted}" />
+                <TextBlock Text="{DynamicResource Settings.Licenses}" Style="{StaticResource MutedText}" />
             </StackPanel>
         </Border>
     </StackPanel>

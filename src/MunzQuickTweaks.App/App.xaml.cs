@@ -18,6 +18,19 @@ public partial class App : Application
     private Mutex? _singleInstance;
     private IHost? _host;
 
+    public App()
+    {
+        // Läuft vor dem Laden von App.xaml: Fehler beim Start dürfen nie lautlos verschwinden
+        AppDomain.CurrentDomain.UnhandledException += (_, args) =>
+        {
+            var exception = (Exception)args.ExceptionObject;
+            CrashLog.Write("Unbehandelter Fehler", exception);
+            MessageBox.Show(
+                $"Munz Quick Tweaks konnte nicht gestartet werden.\n\n{exception.GetBaseException().Message}\n\nDetails stehen in:\n{CrashLog.FilePath}",
+                "Munz Quick Tweaks", MessageBoxButton.OK, MessageBoxImage.Error);
+        };
+    }
+
     protected override void OnStartup(StartupEventArgs e)
     {
         _singleInstance = new Mutex(initiallyOwned: true, MutexName, out var isFirst);
@@ -30,8 +43,6 @@ public partial class App : Application
         }
 
         DispatcherUnhandledException += OnDispatcherUnhandledException;
-        AppDomain.CurrentDomain.UnhandledException += (_, args) =>
-            CrashLog.Write("Unbehandelter Fehler", (Exception)args.ExceptionObject);
 
         base.OnStartup(e);
 
