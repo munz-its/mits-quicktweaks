@@ -74,4 +74,41 @@
     <sys:String x:Key="Tweak.Failed">Fehlgeschlagen, nichts wurde geändert:</sys:String>
     <sys:String x:Key="Tweak.Partial">⚠️ Nur teilweise aktiv, vermutlich durch ein Windows-Update zurückgesetzt. Einschalten stellt den Tweak wieder her.</sys:String>
     <sys:String x:Key="Confirm.Medium">Dieser Tweak hat Risiko mittel: eine Windows-Funktion fällt weg oder ein Neustart ist nötig. Du kannst ihn jederzeit zurücksetzen. Fortfahren?</sys:String>
+    <sys:String x:Key="Safety.AskEnable" xml:space="preserve">Der Windows-Systemschutz ist ausgeschaltet. Ohne ihn kann vor den Änderungen kein Wiederherstellungspunkt entstehen.
+
+Ja: Systemschutz einschalten und Punkt erstellen (empfohlen)
+Nein: ohne Wiederherstellungspunkt fortfahren
+Abbrechen: nichts ändern
+
+Jeder alte Wert wird in jedem Fall zusätzlich von der App gesichert.</sys:String>
+    <sys:String x:Key="Safety.Policy">Wiederherstellungspunkte sind auf diesem PC per Richtlinie gesperrt (z. B. durch die IT-Abteilung). Jeder alte Wert wird trotzdem von der App gesichert. Ohne Wiederherstellungspunkt fortfahren?</sys:String>
+    <sys:String x:Key="Safety.CreateFailed">Der Wiederherstellungspunkt konnte nicht erstellt werden.</sys:String>
+    <sys:String x:Key="Safety.ContinueAnyway">Jeder alte Wert wird trotzdem von der App gesichert. Ohne Wiederherstellungspunkt fortfahren?</sys:String>
+    <sys:String x:Key="Safety.Stage.enable">Systemschutz wird eingeschaltet …</sys:String>
+    <sys:String x:Key="Safety.Stage.create">Wiederherstellungspunkt wird erstellt, das kann bis zu einer Minute dauern …</sys:String>
+    <sys:String x:Key="Safety.Stage.backup">Registry wird gesichert …</sys:String>
+    <sys:String x:Key="Safety.Stage.apply">Wird angewendet …</sys:String>
+    <sys:String x:Key="Protection.Enabled">Systemschutz ist eingeschaltet ✓</sys:String>
+    <sys:String x:Key="Protection.Disabled">Systemschutz ist ausgeschaltet</sys:String>
+    <sys:String x:Key="Protection.BlockedByPolicy">Systemschutz ist per Richtlinie gesperrt</sys:String>
+    <sys:String x:Key="Protection.Unknown">Status des Systemschutzes unbekannt</sys:String>
+    <sys:String x:Key="Restore.Points">Wiederherstellungspunkte</sys:String>
+    <sys:String x:Key="Restore.Enable">Einschalten</sys:String>
+    <sys:String x:Key="Restore.CreateNow">Jetzt Punkt erstellen</sys:String>
+    <sys:String x:Key="Restore.OpenWindows">Windows-Systemwiederherstellung</sys:String>
+    <sys:String x:Key="Restore.OpenFolder">Sicherungsordner öffnen</sys:String>
+    <sys:String x:Key="Restore.Created">Wiederherstellungspunkt erstellt ✓</sys:String>
+    <sys:String x:Key="Restore.Active">Aktive Tweaks</sys:String>
+    <sys:String x:Key="Restore.NoActive">Keine Tweaks aktiv.</sys:String>
+    <sys:String x:Key="Restore.RevertAll">Alle zurücksetzen</sys:String>
+    <sys:String x:Key="Restore.ConfirmRevertAll">Alle aktiven Tweaks auf ihren ursprünglichen Zustand zurücksetzen?</sys:String>
+    <sys:String x:Key="Restore.AllReverted">Alle Tweaks zurückgesetzt ✓</sys:String>
+    <sys:String x:Key="Restore.RevertErrors">Nicht zurückgesetzt: {0} Tweaks. Details im Protokoll.</sys:String>
+    <sys:String x:Key="Restore.History">Änderungsprotokoll</sys:String>
+    <sys:String x:Key="History.Applied">Angewendet</sys:String>
+    <sys:String x:Key="History.Reverted">Zurückgesetzt</sys:String>
+    <sys:String x:Key="History.RestorePointCreated">Wiederherstellungspunkt erstellt</sys:String>
+    <sys:String x:Key="History.RestorePointSkipped">Ohne Wiederherstellungspunkt fortgefahren</sys:String>
+    <sys:String x:Key="History.ProtectionEnabled">Systemschutz eingeschaltet</sys:String>
+    <sys:String x:Key="History.RegistryExported">Registry gesichert</sys:String>
 </ResourceDictionary>

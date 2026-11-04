@@ -86,9 +86,11 @@ public sealed partial class TweakItemViewModel : ObservableObject
 
         IsBusy = true;
         Message = string.Empty;
+        MessageIsError = false;
         try
         {
-            var result = turnOn ? await _service.ApplyAsync(Definition) : await _service.RevertAsync(Definition);
+            var prompt = new DialogSafetyPrompt(_localization, stage => Message = stage);
+            var result = turnOn ? await _service.ApplyAsync(Definition, prompt) : await _service.RevertAsync(Definition);
             RefreshStatus();
             MessageIsError = !result.Success;
             Message = result.Success

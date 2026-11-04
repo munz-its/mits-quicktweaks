@@ -1,30 +1,42 @@
-using System.Text;
 using MunzQuickTweaks.Core;
+using Serilog;
 
 namespace MunzQuickTweaks.App.Services;
 
 /// <summary>
-/// Einfaches Fehlerprotokoll für Phase 1. Wird in Phase 3 durch das vollständige Logging ersetzt.
+/// Zentrales Logging mit Serilog: eine Datei pro Tag unter %ProgramData%\MunzQuickTweaks\logs,
+/// 14 Tage aufbewahrt. Wird als Erstes beim Start eingerichtet, damit auch Startfehler im Protokoll landen.
 /// </summary>
 public static class CrashLog
 {
-    public static string FilePath => Path.Combine(AppPaths.LogDirectory, "error.log");
+    public static string Directory => AppPaths.LogDirectory;
 
-    public static void Write(string context, Exception exception)
+    /// <summary>Pfad für Fehlermeldungen an den Nutzer.</summary>
+    public static string FilePath => Path.Combine(AppPaths.LogDirectory, $"mqt-{DateTime.Now:yyyyMMdd}.log");
+
+    public static void Initialize(string version)
     {
         try
         {
-            Directory.CreateDirectory(AppPaths.LogDirectory);
-            var entry = new StringBuilder()
-                .Append('[').Append(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")).Append("] ")
-                .AppendLine(context)
-                .AppendLine(exception.ToString())
-                .AppendLine();
-            File.AppendAllText(FilePath, entry.ToString());
+            System.IO.Directory.CreateDirectory(AppPaths.LogDirectory);
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Information()
+                .Enrich.FromLogContext()
+                .WriteTo.File(
+                    Path.Combine(AppPaths.LogDirectory, "mqt-.log"),
+                    rollingInterval: RollingInterval.Day,
+                    retainedFileCountLimit: 14,
+                    outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}")
+                .CreateLogger();
+            Log.Information("Munz Quick Tweaks {Version} gestartet, Windows {OsVersion}", version, Environment.OSVersion.Version);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
-            // Protokollieren darf nie selbst einen Absturz auslösen
+            // Ohne Schreibrechte läuft die App ohne Protokoll weiter
         }
     }
+
+    public static void Write(string context, Exception exception) => Log.Error(exception, "{Context}", context);
+
+    public static void Close() => Log.CloseAndFlush();
 }

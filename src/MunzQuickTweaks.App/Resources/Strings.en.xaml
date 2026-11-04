@@ -74,4 +74,41 @@
     <sys:String x:Key="Tweak.Failed">Failed, nothing was changed:</sys:String>
     <sys:String x:Key="Tweak.Partial">⚠️ Only partly active, probably reset by a Windows update. Turning it on restores the tweak.</sys:String>
     <sys:String x:Key="Confirm.Medium">This tweak has medium risk: a Windows feature goes away or a restart is required. You can undo it at any time. Continue?</sys:String>
+    <sys:String x:Key="Safety.AskEnable" xml:space="preserve">Windows System Protection is turned off. Without it, no restore point can be created before the changes.
+
+Yes: turn on System Protection and create a point (recommended)
+No: continue without a restore point
+Cancel: change nothing
+
+Every previous value is saved by the app in any case.</sys:String>
+    <sys:String x:Key="Safety.Policy">Restore points are blocked by policy on this PC (e.g. by your IT department). Every previous value is still saved by the app. Continue without a restore point?</sys:String>
+    <sys:String x:Key="Safety.CreateFailed">The restore point could not be created.</sys:String>
+    <sys:String x:Key="Safety.ContinueAnyway">Every previous value is still saved by the app. Continue without a restore point?</sys:String>
+    <sys:String x:Key="Safety.Stage.enable">Turning on System Protection …</sys:String>
+    <sys:String x:Key="Safety.Stage.create">Creating restore point, this can take up to a minute …</sys:String>
+    <sys:String x:Key="Safety.Stage.backup">Backing up registry …</sys:String>
+    <sys:String x:Key="Safety.Stage.apply">Applying …</sys:String>
+    <sys:String x:Key="Protection.Enabled">System Protection is on ✓</sys:String>
+    <sys:String x:Key="Protection.Disabled">System Protection is off</sys:String>
+    <sys:String x:Key="Protection.BlockedByPolicy">System Protection is blocked by policy</sys:String>
+    <sys:String x:Key="Protection.Unknown">System Protection status unknown</sys:String>
+    <sys:String x:Key="Restore.Points">Restore points</sys:String>
+    <sys:String x:Key="Restore.Enable">Turn on</sys:String>
+    <sys:String x:Key="Restore.CreateNow">Create point now</sys:String>
+    <sys:String x:Key="Restore.OpenWindows">Windows System Restore</sys:String>
+    <sys:String x:Key="Restore.OpenFolder">Open backup folder</sys:String>
+    <sys:String x:Key="Restore.Created">Restore point created ✓</sys:String>
+    <sys:String x:Key="Restore.Active">Active tweaks</sys:String>
+    <sys:String x:Key="Restore.NoActive">No tweaks active.</sys:String>
+    <sys:String x:Key="Restore.RevertAll">Revert all</sys:String>
+    <sys:String x:Key="Restore.ConfirmRevertAll">Revert all active tweaks to their original state?</sys:String>
+    <sys:String x:Key="Restore.AllReverted">All tweaks reverted ✓</sys:String>
+    <sys:String x:Key="Restore.RevertErrors">Not reverted: {0} tweaks. Details in the log.</sys:String>
+    <sys:String x:Key="Restore.History">Change log</sys:String>
+    <sys:String x:Key="History.Applied">Applied</sys:String>
+    <sys:String x:Key="History.Reverted">Reverted</sys:String>
+    <sys:String x:Key="History.RestorePointCreated">Restore point created</sys:String>
+    <sys:String x:Key="History.RestorePointSkipped">Continued without restore point</sys:String>
+    <sys:String x:Key="History.ProtectionEnabled">System Protection turned on</sys:String>
+    <sys:String x:Key="History.RegistryExported">Registry backed up</sys:String>
 </ResourceDictionary>

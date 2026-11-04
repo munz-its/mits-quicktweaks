@@ -97,7 +97,18 @@
                     <TextBlock Text="{DynamicResource Dashboard.ActiveTweaks}" Style="{StaticResource Label}" Foreground="{StaticResource Muted}" />
                     <TextBlock Text="{Binding ActiveTweaks}" Style="{StaticResource Display}" FontSize="34" Foreground="{StaticResource BlueL}" Margin="0,2,0,18" />
                     <TextBlock Text="{DynamicResource Dashboard.LastRestore}" Style="{StaticResource Label}" Foreground="{StaticResource Muted}" />
-                    <TextBlock Text="{DynamicResource Dashboard.NotYet}" Style="{StaticResource TextBase}" Margin="0,4,0,0" />
+                    <TextBlock Margin="0,4,0,0">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock" BasedOn="{StaticResource TextBase}">
+                                <Setter Property="Text" Value="{Binding LastRestorePoint}" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasRestorePoint}" Value="False">
+                                        <Setter Property="Text" Value="{DynamicResource Dashboard.NotYet}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
                 </StackPanel>
             </Border>
         </Grid>

@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Windows;
 using System.Windows.Threading;
 using Microsoft.Extensions.DependencyInjection;
@@ -5,8 +6,11 @@ using Microsoft.Extensions.Hosting;
 using MunzQuickTweaks.App.Services;
 using MunzQuickTweaks.App.ViewModels;
 using MunzQuickTweaks.Core;
+using MunzQuickTweaks.Core.Safety;
 using MunzQuickTweaks.Core.Settings;
+using MunzQuickTweaks.Core.Tweaks;
 using MunzQuickTweaks.Windows;
+using Serilog;
 
 namespace MunzQuickTweaks.App;
 
@@ -20,11 +24,15 @@ public partial class App : Application
 
     public App()
     {
+        var version = Assembly.GetEntryAssembly()?.GetName().Version?.ToString(3) ?? "?";
+        CrashLog.Initialize(version);
+
         // Läuft vor dem Laden von App.xaml: Fehler beim Start dürfen nie lautlos verschwinden
         AppDomain.CurrentDomain.UnhandledException += (_, args) =>
         {
             var exception = (Exception)args.ExceptionObject;
             CrashLog.Write("Unbehandelter Fehler", exception);
+            CrashLog.Close();
             MessageBox.Show(
                 $"Munz Quick Tweaks konnte nicht gestartet werden.\n\n{exception.GetBaseException().Message}\n\nDetails stehen in:\n{CrashLog.FilePath}",
                 "Munz Quick Tweaks", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -47,16 +55,32 @@ public partial class App : Application
         base.OnStartup(e);
 
         _host = Host.CreateDefaultBuilder()
+            .UseSerilog(Log.Logger, dispose: false)
             .ConfigureServices(services =>
             {
                 services.AddSingleton(new SettingsStore(AppPaths.SettingsFile));
                 services.AddSingleton<SettingsService>();
                 services.AddSingleton<LocalizationService>();
                 services.AddSingleton<SystemInfoProvider>();
+
+                // Tweaks und Sicherung
+                services.AddSingleton<IRegistry, WindowsRegistry>();
+                services.AddSingleton<ISystemNotifier, WindowsNotifier>();
+                services.AddSingleton<IRestorePointService, WindowsRestorePoints>();
+                services.AddSingleton(new JournalStore(Path.Combine(AppPaths.MachineData, "state", "journal.json")));
+                services.AddSingleton(new HistoryStore(Path.Combine(AppPaths.MachineData, "state", "history.jsonl")));
+                services.AddSingleton<IRegistryBackup>(sp => new RegExeBackup(AppPaths.BackupDirectory, sp.GetRequiredService<IRegistry>()));
+                services.AddSingleton<RestorePointGate>();
+                services.AddSingleton(sp => new TweakEngine(
+                    sp.GetRequiredService<IRegistry>(),
+                    sp.GetRequiredService<JournalStore>(),
+                    sp.GetRequiredService<ISystemNotifier>(),
+                    sp.GetRequiredService<SystemInfoProvider>().ReadBuild()));
                 services.AddSingleton<TweakService>();
 
                 services.AddSingleton<DashboardViewModel>();
                 services.AddSingleton<TweaksViewModel>();
+                services.AddSingleton<RestoreViewModel>();
                 services.AddSingleton<SettingsViewModel>();
                 services.AddSingleton<MainViewModel>();
                 services.AddSingleton<MainWindow>();
@@ -88,6 +112,8 @@ public partial class App : Application
             _singleInstance.Dispose();
         }
 
+        Log.Information("Munz Quick Tweaks beendet");
+        CrashLog.Close();
         base.OnExit(e);
     }
 
@@ -95,7 +121,7 @@ public partial class App : Application
     {
         CrashLog.Write("Fehler in der Oberfläche", e.Exception);
         MessageBox.Show(
-            $"Es ist ein unerwarteter Fehler aufgetreten.\n\nDetails stehen in:\n{CrashLog.FilePath}",
+            $"Es ist ein unerwarteter Fehler aufgetreten.\n\n{e.Exception.GetBaseException().Message}\n\nDetails stehen in:\n{CrashLog.FilePath}",
             "Munz Quick Tweaks", MessageBoxButton.OK, MessageBoxImage.Error);
         e.Handled = true;
     }

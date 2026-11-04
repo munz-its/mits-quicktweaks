@@ -16,4 +16,7 @@ public static class AppPaths
     public static string SettingsFile => Path.Combine(UserData, "settings.json");
 
     public static string LogDirectory => Path.Combine(MachineData, "logs");
+
+    /// <summary>.reg-Exporte vor dem ersten Anwenden eines Tweaks.</summary>
+    public static string BackupDirectory => Path.Combine(MachineData, "backups");
 }

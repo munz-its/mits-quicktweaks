@@ -1,6 +1,7 @@
 using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using MunzQuickTweaks.App.Services;
+using MunzQuickTweaks.Core.Safety;
 using MunzQuickTweaks.Windows;
 
 namespace MunzQuickTweaks.App.ViewModels;
@@ -10,14 +11,23 @@ public sealed partial class DashboardViewModel : PageViewModel
 {
     private readonly SystemInfoProvider _provider;
     private readonly TweakService _tweaks;
+    private readonly IRestorePointService _restorePoints;
     private bool _loaded;
 
-    public DashboardViewModel(SystemInfoProvider provider, TweakService tweaks)
+    public DashboardViewModel(SystemInfoProvider provider, TweakService tweaks, IRestorePointService restorePoints)
         : base("Nav.Dashboard")
     {
         _provider = provider;
         _tweaks = tweaks;
+        _restorePoints = restorePoints;
     }
+
+    /// <summary>Datum des neuesten Wiederherstellungspunkts, leer = keiner vorhanden.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasRestorePoint))]
+    private string _lastRestorePoint = string.Empty;
+
+    public bool HasRestorePoint => LastRestorePoint.Length > 0;
 
     [ObservableProperty]
     private int _activeTweaks;
@@ -46,7 +56,9 @@ public sealed partial class DashboardViewModel : PageViewModel
     public override async Task OnNavigatedToAsync()
     {
         // Zähler bei jedem Öffnen aktualisieren, Systemdaten nur einmal lesen
-        ActiveTweaks = await Task.Run(_tweaks.CountApplied);
+        var (count, last) = await Task.Run(() => (_tweaks.CountApplied(), _restorePoints.List().FirstOrDefault()));
+        ActiveTweaks = count;
+        LastRestorePoint = last is null ? string.Empty : last.Created.ToString("g", CultureInfo.CurrentUICulture);
 
         if (_loaded)
         {

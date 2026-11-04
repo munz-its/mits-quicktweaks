@@ -4,7 +4,7 @@ Kostenlose Windows-App von Munz IT Service. Macht Windows 10 22H2 und Windows 11
 
 ## Stand
 
-Version 0.2.0, Phase 2 (Engine): Tweaks prüfen, sichern, anwenden, kontrollieren und rückgängig machen. 5 Test-Tweaks auf der Tweaks-Seite. Journal unter `%ProgramData%\MunzQuickTweaks\state\journal.json`.
+Version 0.3.0, Phase 3 (Sicherheit): Wiederherstellungspunkt vor dem ersten Tweak jeder Sitzung, Prüfung des Systemschutzes, .reg-Export vor dem ersten Anwenden, Logging mit Serilog, Seite Wiederherstellung mit Änderungsprotokoll und "Alle zurücksetzen".
 
 ## Technik
 
@@ -34,7 +34,9 @@ Ergebnis: `publish/MunzQuickTweaks.exe`. Bei jedem Push baut GitHub Actions die 
 ## Speicherorte
 
 - Einstellungen: `%LocalAppData%\MunzQuickTweaks\settings.json`
-- Protokolle: `%ProgramData%\MunzQuickTweaks\logs`
+- Protokolle: `%ProgramData%\MunzQuickTweaks\logs` (eine Datei pro Tag, 14 Tage)
+- Journal und Änderungsprotokoll: `%ProgramData%\MunzQuickTweaks\state`
+- Registry-Sicherungen (.reg): `%ProgramData%\MunzQuickTweaks\backups`
 
 ## Lizenzen
 

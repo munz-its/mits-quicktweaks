@@ -14,6 +14,7 @@ public sealed partial class MainViewModel : ObservableObject
         LocalizationService localization,
         DashboardViewModel dashboard,
         TweaksViewModel tweaks,
+        RestoreViewModel restore,
         SettingsViewModel settings)
     {
         _localization = localization;
@@ -27,7 +28,7 @@ public sealed partial class MainViewModel : ObservableObject
             new("Nav.Debloat", "11111/01110/01010/01010/01110", new PlaceholderViewModel("Nav.Debloat", "Desc.Debloat", 5)),
             new("Nav.Startup", "00100/10101/10101/10001/01110", new PlaceholderViewModel("Nav.Startup", "Desc.Startup", 5)),
             new("Nav.Care", "00100/00100/11111/00100/00100", new PlaceholderViewModel("Nav.Care", "Desc.Care", 5)),
-            new("Nav.Restore", "01110/10101/10111/10001/01110", new PlaceholderViewModel("Nav.Restore", "Desc.Restore", 3)),
+            new("Nav.Restore", "01110/10101/10111/10001/01110", restore),
         };
         SettingsItem = new NavItem("Nav.Settings", "10101/01110/11011/01110/10101", settings);
 

@@ -160,6 +160,10 @@ public sealed class TweakEngine
         return TweakResult.Ok;
     }
 
+    /// <summary>Alle Registry-Schlüssel, die der Tweak berührt (für den .reg-Export vor dem Anwenden).</summary>
+    public IReadOnlyCollection<(RegistryHive Hive, string Key)> AffectedKeys(TweakDefinition tweak) =>
+        Expand(tweak).Select(s => (s.Hive, s.Key)).Distinct().ToList();
+
     private static bool IsExpected(Exception ex) =>
         ex is UnauthorizedAccessException or IOException or System.Security.SecurityException or NotSupportedException;
 
