@@ -82,7 +82,19 @@ public sealed class RestorePointGate
                 return GateResult.Proceed;
             }
 
-            var result = Run(prompt);
+            GateResult result;
+            try
+            {
+                result = Run(prompt);
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                // Unerwarteter Fehler beim Wiederherstellungspunkt: Nutzer entscheidet, Journal sichert trotzdem
+                _history.Add(HistoryAction.RestorePointCreated, null, false, $"{ex.GetType().Name}: {ex.Message}");
+                result = prompt.AskContinueWithoutRestorePoint($"{ex.GetType().Name} (0x{ex.HResult:X8})")
+                    ? GateResult.Proceed
+                    : GateResult.Cancelled;
+            }
             if (result == GateResult.Proceed)
             {
                 _settledThisSession = true;

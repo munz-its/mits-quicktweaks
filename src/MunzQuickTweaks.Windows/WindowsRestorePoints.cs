@@ -14,6 +14,13 @@ public sealed class WindowsRestorePoints : IRestorePointService
     private const int ModifySettings = 12;
     private const int BeginSystemChange = 100;
 
+    /// <summary>Fehlertext mit HRESULT, auch wenn Windows keine Meldung liefert.</summary>
+    private static string Describe(Exception ex)
+    {
+        var text = string.IsNullOrWhiteSpace(ex.Message) ? ex.GetType().Name : ex.Message.Trim();
+        return $"{text} (0x{ex.HResult:X8})";
+    }
+
     private static string SystemDrive => (Environment.GetEnvironmentVariable("SystemDrive") ?? "C:") + "\\";
 
     public ProtectionState GetProtectionState()
@@ -52,19 +59,29 @@ public sealed class WindowsRestorePoints : IRestorePointService
             var code = Convert.ToUInt32(output?["ReturnValue"] ?? 1u, CultureInfo.InvariantCulture);
             return code == 0 ? OperationResult.Ok : OperationResult.Fail($"Enable: Code {code}");
         }
-        catch (ManagementException ex)
+        catch (Exception ex) when (ex is ManagementException or System.Runtime.InteropServices.COMException or UnauthorizedAccessException)
         {
-            return OperationResult.Fail(ex.Message);
+            return OperationResult.Fail(Describe(ex));
         }
     }
 
     public OperationResult Create(string description)
     {
         // Windows erlaubt standardmäßig nur einen Punkt pro 24 Stunden: Sperre kurz aussetzen
-        using var hklm = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64);
-        using var sr = hklm.CreateSubKey(SrKey, writable: true);
-        var previous = sr.GetValue(FrequencyValue);
+        RegistryKey sr;
+        object? previous;
+        try
+        {
+            using var hklm = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64);
+            sr = hklm.CreateSubKey(SrKey, writable: true);
+            previous = sr.GetValue(FrequencyValue);
+        }
+        catch (Exception ex) when (ex is UnauthorizedAccessException or System.Security.SecurityException or IOException)
+        {
+            return OperationResult.Fail(Describe(ex));
+        }
 
+        using var _ = sr;
         try
         {
             sr.SetValue(FrequencyValue, 0, RegistryValueKind.DWord);
@@ -78,9 +95,9 @@ public sealed class WindowsRestorePoints : IRestorePointService
             var code = Convert.ToUInt32(output?["ReturnValue"] ?? 1u, CultureInfo.InvariantCulture);
             return code == 0 ? OperationResult.Ok : OperationResult.Fail($"CreateRestorePoint: Code {code}");
         }
-        catch (ManagementException ex)
+        catch (Exception ex) when (ex is ManagementException or System.Runtime.InteropServices.COMException or UnauthorizedAccessException)
         {
-            return OperationResult.Fail(ex.Message);
+            return OperationResult.Fail(Describe(ex));
         }
         finally
         {
@@ -113,7 +130,7 @@ public sealed class WindowsRestorePoints : IRestorePointService
                 }
             }
         }
-        catch (ManagementException)
+        catch (Exception ex) when (ex is ManagementException or System.Runtime.InteropServices.COMException or UnauthorizedAccessException)
         {
             // Systemschutz aus oder WMI nicht erreichbar: leere Liste
         }

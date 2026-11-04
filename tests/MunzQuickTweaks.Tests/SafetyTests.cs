@@ -215,3 +215,39 @@ public sealed class HistoryStoreTests : IDisposable
         }
     }
 }
+
+public sealed class GateExceptionTests : IDisposable
+{
+    private readonly string _dir = Path.Combine(Path.GetTempPath(), "mqt-gatex-" + Guid.NewGuid().ToString("N"));
+
+    private sealed class ExplodingRestorePoints : IRestorePointService
+    {
+        public ProtectionState GetProtectionState() => ProtectionState.Enabled;
+
+        public OperationResult EnableProtection() => OperationResult.Ok;
+
+        public OperationResult Create(string description) => throw new System.Runtime.InteropServices.COMException();
+
+        public IReadOnlyList<RestorePointInfo> List() => Array.Empty<RestorePointInfo>();
+    }
+
+    [Theory]
+    [InlineData(true, GateResult.Proceed)]
+    [InlineData(false, GateResult.Cancelled)]
+    public void Unexpected_exception_asks_user_instead_of_crashing(bool answer, GateResult expected)
+    {
+        var prompt = new FakePrompt { ContinueAnswer = answer };
+        var gate = new RestorePointGate(new ExplodingRestorePoints(), new HistoryStore(Path.Combine(_dir, "h.jsonl")));
+
+        Assert.Equal(expected, gate.Ensure(prompt));
+        Assert.Contains("COMException", Assert.Single(prompt.ContinueReasons));
+    }
+
+    public void Dispose()
+    {
+        if (Directory.Exists(_dir))
+        {
+            Directory.Delete(_dir, recursive: true);
+        }
+    }
+}
