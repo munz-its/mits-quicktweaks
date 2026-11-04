@@ -200,34 +200,71 @@
 
     <!-- Navigationseintrag: blaue Pixel-Markierung links bei Auswahl -->
     <Style x:Key="NavItem" TargetType="RadioButton">
-        <Setter Property="Foreground" Value="{StaticResource Text2}" />
         <Setter Property="FontFamily" Value="{StaticResource FontSans}" />
         <Setter Property="FontSize" Value="14" />
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="Margin" Value="0,1" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="RadioButton">
-                    <Border x:Name="Bd" Background="Transparent" CornerRadius="8" Padding="12,9">
-                        <Grid>
-                            <Rectangle x:Name="Marker" Width="4" Height="4" Fill="{StaticResource Blue}"
-                                       HorizontalAlignment="Left" VerticalAlignment="Center" Margin="-8,0,0,0" Visibility="Hidden" />
-                            <ContentPresenter VerticalAlignment="Center" />
-                        </Grid>
-                    </Border>
+                    <!-- Auswahl-Hintergrund und Markierung zeichnet das Hauptfenster als gleitende Ebene -->
+                    <Grid Background="Transparent">
+                        <Border x:Name="Hover" CornerRadius="8" Background="{StaticResource HoverSoft}" Opacity="0" />
+                        <Border x:Name="Focus" CornerRadius="8" BorderThickness="1" BorderBrush="Transparent" />
+                        <ContentPresenter x:Name="Content" Margin="12,9" VerticalAlignment="Center">
+                            <TextElement.Foreground>
+                                <SolidColorBrush Color="{StaticResource Text2Color}" />
+                            </TextElement.Foreground>
+                        </ContentPresenter>
+                    </Grid>
                     <ControlTemplate.Triggers>
+                        <!-- Hover blendet weich ein und langsamer wieder aus -->
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Bd" Property="Background" Value="{StaticResource HoverSoft}" />
-                            <Setter Property="Foreground" Value="{StaticResource Text}" />
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="Hover" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.18">
+                                            <DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut" /></DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="Hover" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.32">
+                                            <DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut" /></DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
                         </Trigger>
-                        <Trigger Property="IsChecked" Value="True">
-                            <Setter TargetName="Bd" Property="Background" Value="{StaticResource BlueSoft}" />
-                            <Setter TargetName="Marker" Property="Visibility" Value="Visible" />
-                            <Setter Property="Foreground" Value="{StaticResource Text}" />
-                        </Trigger>
+                        <!-- Schrift hell, sobald der Eintrag gewählt oder überfahren ist; Farbwechsel gleitend -->
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsMouseOver" Value="False" />
+                                <Condition Property="IsChecked" Value="False" />
+                            </MultiTrigger.Conditions>
+                            <MultiTrigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <ColorAnimation Storyboard.TargetName="Content" Storyboard.TargetProperty="(TextElement.Foreground).(SolidColorBrush.Color)"
+                                                        To="{StaticResource Text2Color}" Duration="0:0:0.3" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </MultiTrigger.EnterActions>
+                            <MultiTrigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <ColorAnimation Storyboard.TargetName="Content" Storyboard.TargetProperty="(TextElement.Foreground).(SolidColorBrush.Color)"
+                                                        To="{StaticResource TextColor}" Duration="0:0:0.18" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </MultiTrigger.ExitActions>
+                        </MultiTrigger>
                         <Trigger Property="IsKeyboardFocused" Value="True">
-                            <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource BlueL}" />
-                            <Setter TargetName="Bd" Property="BorderThickness" Value="1" />
+                            <Setter TargetName="Focus" Property="BorderBrush" Value="{StaticResource BlueL}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

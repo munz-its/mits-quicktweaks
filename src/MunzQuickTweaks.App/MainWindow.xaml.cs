@@ -1,5 +1,8 @@
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Threading;
 using MunzQuickTweaks.App.Services;
 using MunzQuickTweaks.App.ViewModels;
 
@@ -29,6 +32,9 @@ public partial class MainWindow : Window
                 AnimatePageIn();
             }
         };
+        viewModel.SelectionChanged += (_, item) => UpdateNavIndicator(item, animate: true);
+        viewModel.BeforePageChange = FadePageOutAsync;
+        SizeChanged += (_, _) => UpdateNavIndicator(CurrentNavItem(), animate: false);
         StateChanged += (_, _) => UpdateMaximizedMargin();
     }
 
@@ -51,19 +57,123 @@ public partial class MainWindow : Window
         Splash.BeginAnimation(OpacityProperty, fade);
     }
 
-    // Sanfter Seitenwechsel: neue Seite blendet ein und rutscht 8 Pixel nach oben
+    private static readonly TimeSpan GlideDuration = TimeSpan.FromSeconds(0.38);
+    private static readonly TimeSpan FadeOutDuration = TimeSpan.FromSeconds(0.14);
+    private static readonly TimeSpan FadeInDuration = TimeSpan.FromSeconds(0.38);
+
+    private bool _indicatorPlaced;
+
+    // Seitenwechsel, Teil 1: alte Seite blendet kurz aus und hebt sich leicht an
+    private Task FadePageOutAsync()
+    {
+        if (!Controls.UiMotion.Enabled)
+        {
+            return Task.CompletedTask;
+        }
+
+        var done = new TaskCompletionSource();
+        var ease = new SineEase { EasingMode = EasingMode.EaseIn };
+        var fade = new DoubleAnimation(PageHost.Opacity, 0, FadeOutDuration) { EasingFunction = ease };
+        fade.Completed += (_, _) => done.TrySetResult();
+        PageHost.BeginAnimation(OpacityProperty, fade);
+        Transform(PageHost).BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(0, -6, FadeOutDuration) { EasingFunction = ease });
+        return done.Task;
+    }
+
+    // Seitenwechsel, Teil 2: neue Seite blendet weich ein und gleitet 12 Pixel nach oben
     private void AnimatePageIn()
     {
         if (!Controls.UiMotion.Enabled)
         {
+            PageHost.BeginAnimation(OpacityProperty, null);
+            PageHost.Opacity = 1;
             return;
         }
 
-        var duration = TimeSpan.FromSeconds(0.22);
-        var ease = new CubicEase { EasingMode = EasingMode.EaseOut };
-        PageHost.BeginAnimation(OpacityProperty, new DoubleAnimation(0, 1, duration) { EasingFunction = ease });
-        ((System.Windows.Media.TranslateTransform)PageHost.RenderTransform)
-            .BeginAnimation(System.Windows.Media.TranslateTransform.YProperty, new DoubleAnimation(8, 0, duration) { EasingFunction = ease });
+        var ease = new QuinticEase { EasingMode = EasingMode.EaseOut };
+        PageHost.BeginAnimation(OpacityProperty, new DoubleAnimation(0, 1, FadeInDuration) { EasingFunction = ease });
+        Transform(PageHost).BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(12, 0, FadeInDuration) { EasingFunction = ease });
+    }
+
+    private static TranslateTransform Transform(UIElement element) => (TranslateTransform)element.RenderTransform;
+
+    private NavItem? CurrentNavItem() => _viewModel.Items.Append(_viewModel.SettingsItem).FirstOrDefault(i => i.IsSelected);
+
+    /// <summary>Schiebt Auswahl-Hintergrund und blaues Pixel zum gewählten Eintrag.</summary>
+    private void UpdateNavIndicator(NavItem? item, bool animate)
+    {
+        if (item is null)
+        {
+            return;
+        }
+
+        // Erst nach dem Layout messen, sonst stimmen die Positionen noch nicht
+        Dispatcher.BeginInvoke(DispatcherPriority.Loaded, () =>
+        {
+            var button = FindNavButton(item);
+            if (button is null || button.ActualHeight <= 0)
+            {
+                return;
+            }
+
+            var top = button.TranslatePoint(new Point(0, 0), NavOverlay).Y;
+            var height = button.ActualHeight;
+            var markerTop = top + (height / 2) - 2;
+            var smooth = animate && _indicatorPlaced && Controls.UiMotion.Enabled;
+
+            if (smooth)
+            {
+                var ease = new QuarticEase { EasingMode = EasingMode.EaseInOut };
+                NavPill.BeginAnimation(Canvas.TopProperty, new DoubleAnimation(top, GlideDuration) { EasingFunction = ease });
+                NavPill.BeginAnimation(HeightProperty, new DoubleAnimation(height, GlideDuration) { EasingFunction = ease });
+                NavMarker.BeginAnimation(Canvas.TopProperty, new DoubleAnimation(markerTop, GlideDuration) { EasingFunction = ease });
+            }
+            else
+            {
+                NavPill.BeginAnimation(Canvas.TopProperty, null);
+                NavPill.BeginAnimation(HeightProperty, null);
+                NavMarker.BeginAnimation(Canvas.TopProperty, null);
+                Canvas.SetTop(NavPill, top);
+                NavPill.Height = height;
+                Canvas.SetTop(NavMarker, markerTop);
+            }
+
+            if (!_indicatorPlaced)
+            {
+                _indicatorPlaced = true;
+                var appear = Controls.UiMotion.Enabled ? TimeSpan.FromSeconds(0.3) : TimeSpan.Zero;
+                NavPill.BeginAnimation(OpacityProperty, new DoubleAnimation(1, appear));
+                NavMarker.BeginAnimation(OpacityProperty, new DoubleAnimation(1, appear));
+            }
+        });
+    }
+
+    private RadioButton? FindNavButton(NavItem item)
+    {
+        DependencyObject? container = ReferenceEquals(item, _viewModel.SettingsItem)
+            ? SettingsNav
+            : NavList.ItemContainerGenerator.ContainerFromItem(item);
+        return container is null ? null : FindChild<RadioButton>(container);
+    }
+
+    private static T? FindChild<T>(DependencyObject parent)
+        where T : DependencyObject
+    {
+        for (var i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+        {
+            var child = VisualTreeHelper.GetChild(parent, i);
+            if (child is T match)
+            {
+                return match;
+            }
+
+            if (FindChild<T>(child) is { } nested)
+            {
+                return nested;
+            }
+        }
+
+        return null;
     }
 
     // Maximiert ragt ein randloses Fenster über den Bildschirm hinaus: Rand ausgleichen

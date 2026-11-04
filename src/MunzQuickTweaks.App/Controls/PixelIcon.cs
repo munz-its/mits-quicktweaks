@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Documents;
 using System.Windows.Media;
 
 namespace MunzQuickTweaks.App.Controls;
@@ -13,9 +14,10 @@ public sealed class PixelIcon : FrameworkElement
         nameof(Pattern), typeof(string), typeof(PixelIcon),
         new FrameworkPropertyMetadata(string.Empty, FrameworkPropertyMetadataOptions.AffectsRender));
 
-    public static readonly DependencyProperty ForegroundProperty = DependencyProperty.Register(
-        nameof(Foreground), typeof(Brush), typeof(PixelIcon),
-        new FrameworkPropertyMetadata(Brushes.White, FrameworkPropertyMetadataOptions.AffectsRender));
+    // Erbt die Textfarbe der Umgebung: in der Navigation wechselt das Icon gleitend mit der Schrift
+    public static readonly DependencyProperty ForegroundProperty = TextElement.ForegroundProperty.AddOwner(
+        typeof(PixelIcon),
+        new FrameworkPropertyMetadata(Brushes.White, FrameworkPropertyMetadataOptions.Inherits | FrameworkPropertyMetadataOptions.AffectsRender));
 
     public PixelIcon()
     {
