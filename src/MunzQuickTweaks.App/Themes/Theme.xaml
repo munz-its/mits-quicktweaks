@@ -200,6 +200,8 @@
 
     <!-- Navigationseintrag: blaue Pixel-Markierung links bei Auswahl -->
     <Style x:Key="NavItem" TargetType="RadioButton">
+        <!-- Feste helle Schrift; abgeblendet wird über die Deckkraft (robuster als eine Farbanimation) -->
+        <Setter Property="Foreground" Value="{StaticResource Text}" />
         <Setter Property="FontFamily" Value="{StaticResource FontSans}" />
         <Setter Property="FontSize" Value="14" />
         <Setter Property="Cursor" Value="Hand" />
@@ -212,11 +214,7 @@
                     <Grid Background="Transparent">
                         <Border x:Name="Hover" CornerRadius="8" Background="{StaticResource HoverSoft}" Opacity="0" />
                         <Border x:Name="Focus" CornerRadius="8" BorderThickness="1" BorderBrush="Transparent" />
-                        <ContentPresenter x:Name="Content" Margin="12,9" VerticalAlignment="Center">
-                            <TextElement.Foreground>
-                                <SolidColorBrush Color="{StaticResource Text2Color}" />
-                            </TextElement.Foreground>
-                        </ContentPresenter>
+                        <ContentPresenter x:Name="Content" Margin="12,9" VerticalAlignment="Center" Opacity="0.78" />
                     </Grid>
                     <ControlTemplate.Triggers>
                         <!-- Hover blendet weich ein und langsamer wieder aus -->
@@ -249,16 +247,14 @@
                             <MultiTrigger.EnterActions>
                                 <BeginStoryboard>
                                     <Storyboard>
-                                        <ColorAnimation Storyboard.TargetName="Content" Storyboard.TargetProperty="(TextElement.Foreground).(SolidColorBrush.Color)"
-                                                        To="{StaticResource Text2Color}" Duration="0:0:0.3" />
+                                        <DoubleAnimation Storyboard.TargetName="Content" Storyboard.TargetProperty="Opacity" To="0.78" Duration="0:0:0.3" />
                                     </Storyboard>
                                 </BeginStoryboard>
                             </MultiTrigger.EnterActions>
                             <MultiTrigger.ExitActions>
                                 <BeginStoryboard>
                                     <Storyboard>
-                                        <ColorAnimation Storyboard.TargetName="Content" Storyboard.TargetProperty="(TextElement.Foreground).(SolidColorBrush.Color)"
-                                                        To="{StaticResource TextColor}" Duration="0:0:0.18" />
+                                        <DoubleAnimation Storyboard.TargetName="Content" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.18" />
                                     </Storyboard>
                                 </BeginStoryboard>
                             </MultiTrigger.ExitActions>
