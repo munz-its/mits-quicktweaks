@@ -39,20 +39,28 @@ public sealed partial class TweakGroupViewModel : ObservableObject
     }
 }
 
-/// <summary>Alle Tweaks, nach Kategorie gruppiert, mit Suche.</summary>
-public sealed partial class TweaksViewModel : PageViewModel
+/// <summary>Tweaks-Seite: alle Kategorien außer Datenschutz (der hat eine eigene Seite).</summary>
+public partial class TweaksViewModel : PageViewModel
 {
     private readonly TweakService _service;
     private readonly LocalizationService _localization;
+    private readonly string _descriptionKey;
 
     public TweaksViewModel(TweakService service, LocalizationService localization)
-        : base("Nav.Tweaks")
+        : this(service, localization, "Nav.Tweaks", "Desc.Tweaks", c => c != TweakCategory.Privacy)
+    {
+    }
+
+    protected TweaksViewModel(TweakService service, LocalizationService localization, string titleKey, string descriptionKey, Func<TweakCategory, bool> categories)
+        : base(titleKey)
     {
         _service = service;
         _localization = localization;
+        _descriptionKey = descriptionKey;
 
         Groups = new ObservableCollection<TweakGroupViewModel>(
             service.Tweaks
+                .Where(t => categories(t.Category))
                 .GroupBy(t => t.Category)
                 .OrderBy(g => g.Key)
                 .Select(g => new TweakGroupViewModel(
@@ -61,6 +69,7 @@ public sealed partial class TweaksViewModel : PageViewModel
 
         CatalogError = service.CatalogError;
         RefreshGroupTitles();
+        Description = localization.Get(descriptionKey);
 
         foreach (var item in AllItems)
         {
@@ -76,6 +85,7 @@ public sealed partial class TweaksViewModel : PageViewModel
         localization.LanguageChanged += (_, _) =>
         {
             RefreshGroupTitles();
+            Description = _localization.Get(_descriptionKey);
             foreach (var item in AllItems)
             {
                 item.RefreshTexts();
@@ -94,6 +104,9 @@ public sealed partial class TweaksViewModel : PageViewModel
     public bool HasCatalogError => CatalogError is not null;
 
     public bool IsForeignAccount => _service.IsForeignAccount;
+
+    [ObservableProperty]
+    private string _description = string.Empty;
 
     [ObservableProperty]
     private string _searchText = string.Empty;
@@ -149,5 +162,14 @@ public sealed partial class TweaksViewModel : PageViewModel
     {
         var text = $"{definition.Title.Get(_localization.CurrentLanguage)}\n\n{_localization.Get("Confirm.Medium")}";
         return MessageBox.Show(text, _localization.Get("App.Name"), MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes;
+    }
+}
+
+/// <summary>Seite Datenschutz: nur die Datenschutz-Tweaks.</summary>
+public sealed class PrivacyViewModel : TweaksViewModel
+{
+    public PrivacyViewModel(TweakService service, LocalizationService localization)
+        : base(service, localization, "Nav.Privacy", "Desc.Privacy", c => c == TweakCategory.Privacy)
+    {
     }
 }

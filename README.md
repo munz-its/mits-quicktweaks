@@ -4,7 +4,7 @@ Kostenlose Windows-App von Munz IT Service. Macht Windows 10 22H2 und Windows 11
 
 ## Stand
 
-Version 0.4.0, Phase 4 (Katalog): 56 Tweaks in 6 Kategorien, Energieplan Ultimative Leistung, Suche, unpassende Tweaks werden ausgeblendet, Sperre der Benutzer-Tweaks bei fremdem Admin-Konto.
+Version 0.5.0, Phase 5 (Module): eigene Seite Datenschutz, Debloat (nur für den angemeldeten Nutzer, Neuinstallation über den Store), Autostart (wie im Task-Manager, verlustfrei umkehrbar), System Care (Aufräumen, DNS, SFC, DISM, Windows-Update-Reset), Profile im Dashboard.
 
 ## Technik
 

@@ -6,7 +6,7 @@
     </UserControl.Resources>
 
     <StackPanel>
-        <TextBlock Text="{DynamicResource Desc.Tweaks}" Style="{StaticResource Body2}" MaxWidth="680" HorizontalAlignment="Left" Margin="0,0,0,20" />
+        <TextBlock Text="{Binding Description}" Style="{StaticResource Body2}" MaxWidth="680" HorizontalAlignment="Left" Margin="0,0,0,20" />
 
         <!-- Fremdes Admin-Konto: Benutzer-Tweaks gesperrt -->
         <Border Background="#1AFFB547" BorderBrush="{StaticResource Warn}" BorderThickness="1" CornerRadius="10" Padding="16,12" Margin="0,0,0,20"

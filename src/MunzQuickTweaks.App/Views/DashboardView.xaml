@@ -24,6 +24,76 @@
             <TextBlock Text="{DynamicResource Dashboard.Unsupported}" Style="{StaticResource TextBase}" Foreground="{StaticResource Warn}" />
         </Border>
 
+        <!-- Profile: ein Klick für mehrere Tweaks -->
+        <TextBlock Text="{DynamicResource Profile.Title}" Style="{StaticResource Label}" Margin="2,0,0,10" />
+        <UniformGrid Columns="4" Margin="0,0,0,8">
+            <UniformGrid.Resources>
+                <Style x:Key="ProfileButton" TargetType="Button">
+                    <Setter Property="Cursor" Value="Hand" />
+                    <Setter Property="Margin" Value="0,0,12,0" />
+                    <Setter Property="Command" Value="{Binding ApplyProfileCommand}" />
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="Bd" Background="{StaticResource Bg2}" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="12" Padding="16,14">
+                                    <ContentPresenter />
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource Blue}" />
+                                    </Trigger>
+                                    <Trigger Property="IsEnabled" Value="False">
+                                        <Setter TargetName="Bd" Property="Opacity" Value="0.5" />
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </UniformGrid.Resources>
+            <Button Style="{StaticResource ProfileButton}" CommandParameter="Recommended">
+                <StackPanel>
+                    <TextBlock Text="⭐" FontSize="18" Margin="0,0,0,6" />
+                    <TextBlock Text="{DynamicResource Profile.Recommended}" Style="{StaticResource TextBase}" FontWeight="SemiBold" />
+                    <TextBlock Text="{DynamicResource Profile.Recommended.Hint}" Style="{StaticResource MutedText}" FontSize="12" Margin="0,2,0,0" />
+                </StackPanel>
+            </Button>
+            <Button Style="{StaticResource ProfileButton}" CommandParameter="Gaming">
+                <StackPanel>
+                    <TextBlock Text="🎮" FontSize="18" Margin="0,0,0,6" />
+                    <TextBlock Text="{DynamicResource Profile.Gaming}" Style="{StaticResource TextBase}" FontWeight="SemiBold" />
+                    <TextBlock Text="{DynamicResource Profile.Gaming.Hint}" Style="{StaticResource MutedText}" FontSize="12" Margin="0,2,0,0" />
+                </StackPanel>
+            </Button>
+            <Button Style="{StaticResource ProfileButton}" CommandParameter="Privacy">
+                <StackPanel>
+                    <TextBlock Text="🔒" FontSize="18" Margin="0,0,0,6" />
+                    <TextBlock Text="{DynamicResource Profile.Privacy}" Style="{StaticResource TextBase}" FontWeight="SemiBold" />
+                    <TextBlock Text="{DynamicResource Profile.Privacy.Hint}" Style="{StaticResource MutedText}" FontSize="12" Margin="0,2,0,0" />
+                </StackPanel>
+            </Button>
+            <Button Style="{StaticResource ProfileButton}" CommandParameter="ResetAll" Margin="0">
+                <StackPanel>
+                    <TextBlock Text="↩️" FontSize="18" Margin="0,0,0,6" />
+                    <TextBlock Text="{DynamicResource Profile.ResetAll}" Style="{StaticResource TextBase}" FontWeight="SemiBold" />
+                    <TextBlock Text="{DynamicResource Profile.ResetAll.Hint}" Style="{StaticResource MutedText}" FontSize="12" Margin="0,2,0,0" />
+                </StackPanel>
+            </Button>
+        </UniformGrid>
+        <TextBlock Text="{Binding ProfileStatus}" Margin="2,4,0,0">
+            <TextBlock.Style>
+                <Style TargetType="TextBlock" BasedOn="{StaticResource TextBase}">
+                    <Setter Property="Foreground" Value="{StaticResource BlueXl}" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ProfileStatus}" Value="">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
+        <Border Height="24" />
+
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="3*" />

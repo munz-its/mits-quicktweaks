@@ -26,6 +26,15 @@
         <DataTemplate DataType="{x:Type vm:TweaksViewModel}">
             <views:TweaksView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:DebloatViewModel}">
+            <views:DebloatView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:StartupViewModel}">
+            <views:StartupView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:CareViewModel}">
+            <views:CareView />
+        </DataTemplate>
         <DataTemplate DataType="{x:Type vm:RestoreViewModel}">
             <views:RestoreView />
         </DataTemplate>

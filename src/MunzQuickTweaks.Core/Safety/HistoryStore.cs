@@ -11,6 +11,11 @@ public enum HistoryAction
     RestorePointSkipped,
     ProtectionEnabled,
     RegistryExported,
+    AppRemoved,
+    StartupEnabled,
+    StartupDisabled,
+    CleanupDone,
+    ProfileApplied,
 }
 
 public sealed record HistoryEntry(DateTimeOffset Time, HistoryAction Action, string? TweakId, bool Success, string? Message);

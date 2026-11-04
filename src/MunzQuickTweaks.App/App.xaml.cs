@@ -6,6 +6,7 @@ using Microsoft.Extensions.Hosting;
 using MunzQuickTweaks.App.Services;
 using MunzQuickTweaks.App.ViewModels;
 using MunzQuickTweaks.Core;
+using MunzQuickTweaks.Core.Modules;
 using MunzQuickTweaks.Core.Safety;
 using MunzQuickTweaks.Core.Settings;
 using MunzQuickTweaks.Core.Tweaks;
@@ -83,9 +84,16 @@ public partial class App : Application
                     UserHiveAllowed = !AccountInfo.IsForeignElevation(),
                 });
                 services.AddSingleton<TweakService>();
+                services.AddSingleton<IAppxManager, WindowsAppx>();
+                services.AddSingleton<IStartupManager>(_ => new WindowsStartup(includeUserLevel: !AccountInfo.IsForeignElevation()));
+                services.AddSingleton<WindowsCleanup>();
 
                 services.AddSingleton<DashboardViewModel>();
                 services.AddSingleton<TweaksViewModel>();
+                services.AddSingleton<PrivacyViewModel>();
+                services.AddSingleton<DebloatViewModel>();
+                services.AddSingleton<StartupViewModel>();
+                services.AddSingleton<CareViewModel>();
                 services.AddSingleton<RestoreViewModel>();
                 services.AddSingleton<SettingsViewModel>();
                 services.AddSingleton<MainViewModel>();

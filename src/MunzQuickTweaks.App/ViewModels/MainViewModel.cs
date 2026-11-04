@@ -14,6 +14,10 @@ public sealed partial class MainViewModel : ObservableObject
         LocalizationService localization,
         DashboardViewModel dashboard,
         TweaksViewModel tweaks,
+        PrivacyViewModel privacy,
+        DebloatViewModel debloat,
+        StartupViewModel startup,
+        CareViewModel care,
         RestoreViewModel restore,
         SettingsViewModel settings)
     {
@@ -24,10 +28,10 @@ public sealed partial class MainViewModel : ObservableObject
         {
             new("Nav.Dashboard", "11011/11011/00000/11011/11011", dashboard),
             new("Nav.Tweaks", "01000/11111/00000/00010/11111", tweaks),
-            new("Nav.Privacy", "01110/10001/11111/11011/11111", new PlaceholderViewModel("Nav.Privacy", "Desc.Privacy", 5)),
-            new("Nav.Debloat", "11111/01110/01010/01010/01110", new PlaceholderViewModel("Nav.Debloat", "Desc.Debloat", 5)),
-            new("Nav.Startup", "00100/10101/10101/10001/01110", new PlaceholderViewModel("Nav.Startup", "Desc.Startup", 5)),
-            new("Nav.Care", "00100/00100/11111/00100/00100", new PlaceholderViewModel("Nav.Care", "Desc.Care", 5)),
+            new("Nav.Privacy", "01110/10001/11111/11011/11111", privacy),
+            new("Nav.Debloat", "11111/01110/01010/01010/01110", debloat),
+            new("Nav.Startup", "00100/10101/10101/10001/01110", startup),
+            new("Nav.Care", "00100/00100/11111/00100/00100", care),
             new("Nav.Restore", "01110/10101/10111/10001/01110", restore),
         };
         SettingsItem = new NavItem("Nav.Settings", "10101/01110/11011/01110/10101", settings);

@@ -1,0 +1,105 @@
+<UserControl x:Class="MunzQuickTweaks.App.Views.CareView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <StackPanel MaxWidth="820" HorizontalAlignment="Left">
+        <TextBlock Text="{DynamicResource Desc.Care}" Style="{StaticResource Body2}" Margin="0,0,0,20" />
+
+        <TextBlock Text="{Binding Status}" Margin="0,0,0,16">
+            <TextBlock.Style>
+                <Style TargetType="TextBlock" BasedOn="{StaticResource TextBase}">
+                    <Setter Property="Foreground" Value="{StaticResource BlueXl}" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Status}" Value="">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
+
+        <!-- Aufräumen -->
+        <Border Style="{StaticResource Card}" Margin="0,0,0,16">
+            <StackPanel>
+                <Grid Margin="0,0,0,14">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="{DynamicResource Care.Cleanup}" Style="{StaticResource H2}" FontSize="16" VerticalAlignment="Center" />
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="{DynamicResource Care.Total}" Style="{StaticResource Label}" Foreground="{StaticResource Muted}" Margin="0,0,6,0" />
+                        <TextBlock Text="{Binding Total}" Style="{StaticResource Label}" />
+                    </StackPanel>
+                </Grid>
+
+                <ItemsControl ItemsSource="{Binding Items}" Focusable="False" Margin="0,0,0,10">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="90" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Title}" Style="{StaticResource TextBase}" FontWeight="SemiBold" />
+                                    <TextBlock Text="{Binding Hint}" Style="{StaticResource MutedText}" FontSize="12" Margin="0,2,0,0" />
+                                </StackPanel>
+                                <TextBlock Grid.Column="1" Text="{Binding Size}" Style="{StaticResource Label}" VerticalAlignment="Center" TextAlignment="Right" Margin="0,0,16,0" />
+                                <CheckBox Grid.Column="2" Style="{StaticResource Toggle}" IsChecked="{Binding IsSelected}" VerticalAlignment="Center"
+                                          AutomationProperties.Name="{Binding Title}" />
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <WrapPanel>
+                    <Button Style="{StaticResource PrimaryButton}" Content="{DynamicResource Care.Clean}" Command="{Binding CleanCommand}" Margin="0,0,10,0" />
+                    <Button Style="{StaticResource SecondaryButton}" Content="{DynamicResource Care.FlushDns}" Command="{Binding FlushDnsCommand}" />
+                </WrapPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- Reparatur -->
+        <Border Style="{StaticResource Card}">
+            <StackPanel>
+                <TextBlock Text="{DynamicResource Care.Repair}" Style="{StaticResource H2}" FontSize="16" Margin="0,0,0,6" />
+                <TextBlock Text="{DynamicResource Care.RepairHint}" Style="{StaticResource MutedText}" Margin="0,0,0,16" />
+
+                <Grid Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Margin="0,0,16,0">
+                        <TextBlock Text="{DynamicResource Care.Sfc}" Style="{StaticResource TextBase}" FontWeight="SemiBold" />
+                        <TextBlock Text="{DynamicResource Care.Sfc.Hint}" Style="{StaticResource MutedText}" FontSize="12" Margin="0,2,0,0" />
+                    </StackPanel>
+                    <Button Grid.Column="1" Style="{StaticResource SecondaryButton}" Content="{DynamicResource Care.Start}" Command="{Binding RepairCommand}" CommandParameter="Sfc" VerticalAlignment="Center" />
+                </Grid>
+                <Grid Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Margin="0,0,16,0">
+                        <TextBlock Text="{DynamicResource Care.Dism}" Style="{StaticResource TextBase}" FontWeight="SemiBold" />
+                        <TextBlock Text="{DynamicResource Care.Dism.Hint}" Style="{StaticResource MutedText}" FontSize="12" Margin="0,2,0,0" />
+                    </StackPanel>
+                    <Button Grid.Column="1" Style="{StaticResource SecondaryButton}" Content="{DynamicResource Care.Start}" Command="{Binding RepairCommand}" CommandParameter="Dism" VerticalAlignment="Center" />
+                </Grid>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Margin="0,0,16,0">
+                        <TextBlock Text="{DynamicResource Care.UpdateReset}" Style="{StaticResource TextBase}" FontWeight="SemiBold" />
+                        <TextBlock Text="{DynamicResource Care.UpdateReset.Hint}" Style="{StaticResource MutedText}" FontSize="12" Margin="0,2,0,0" />
+                    </StackPanel>
+                    <Button Grid.Column="1" Style="{StaticResource SecondaryButton}" Content="{DynamicResource Care.Start}" Command="{Binding RepairCommand}" CommandParameter="UpdateReset" VerticalAlignment="Center" />
+                </Grid>
+            </StackPanel>
+        </Border>
+    </StackPanel>
+</UserControl>
