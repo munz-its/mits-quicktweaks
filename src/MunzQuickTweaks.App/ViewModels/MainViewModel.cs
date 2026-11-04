@@ -37,6 +37,7 @@ public sealed partial class MainViewModel : ObservableObject
         SettingsItem = new NavItem("Nav.Settings", "10101/01110/11011/01110/10101", settings);
 
         _localization.LanguageChanged += (_, _) => RefreshTitles();
+        dashboard.NavigateRequested = key => _ = NavigateToAsync(key);
         RefreshTitles();
     }
 
@@ -59,12 +60,20 @@ public sealed partial class MainViewModel : ObservableObject
         await item.Page.OnNavigatedToAsync();
     }
 
+    /// <summary>Öffnet eine Seite über ihren Titel-Schlüssel, z. B. Nav.Restore.</summary>
+    public Task NavigateToAsync(string titleKey)
+    {
+        var item = Items.Append(SettingsItem).First(i => i.TitleKey == titleKey);
+        return NavigateAsync(item);
+    }
+
     private void RefreshTitles()
     {
         foreach (var item in Items.Append(SettingsItem))
         {
             item.Title = _localization.Get(item.TitleKey);
             item.Page.Title = _localization.Get(item.Page.TitleKey);
+            item.Page.Heading = _localization.Get(item.Page.HeadingKey);
         }
     }
 }

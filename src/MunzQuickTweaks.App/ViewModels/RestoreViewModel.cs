@@ -12,7 +12,8 @@ namespace MunzQuickTweaks.App.ViewModels;
 
 public sealed record RestorePointRow(string Date, string Description);
 
-public sealed record ActiveTweakRow(string Title, string Since);
+/// <summary>Aktiver Tweak mit eigenem Zurücksetzen-Button.</summary>
+public sealed record ActiveTweakRow(string Id, string Title, string Since, IAsyncRelayCommand<string> RevertCommand);
 
 public sealed record HistoryRow(string Time, string Text, bool Success);
 
@@ -47,7 +48,7 @@ public sealed partial class RestoreViewModel : PageViewModel
     private string _protectionText = string.Empty;
 
     [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(CreateRestorePointCommand), nameof(EnableProtectionCommand), nameof(RevertAllCommand))]
+    [NotifyCanExecuteChangedFor(nameof(CreateRestorePointCommand), nameof(EnableProtectionCommand), nameof(RevertAllCommand), nameof(RevertOneCommand))]
     private bool _isBusy;
 
     [ObservableProperty]
@@ -59,6 +60,15 @@ public sealed partial class RestoreViewModel : PageViewModel
 
     public bool HasActiveTweaks => ActiveTweaks.Count > 0;
 
+    [ObservableProperty]
+    private int _restorePointCount;
+
+    [ObservableProperty]
+    private string _lastPointText = string.Empty;
+
+    [ObservableProperty]
+    private int _backupCount;
+
     public override Task OnNavigatedToAsync() => RefreshAsync();
 
     private async Task RefreshAsync()
@@ -67,7 +77,14 @@ public sealed partial class RestoreViewModel : PageViewModel
             Protection: _restorePoints.GetProtectionState(),
             Points: _restorePoints.List(),
             Journal: _tweaks.Engine.Journal.All,
-            History: _history.Latest(50)));
+            History: _history.Latest(50),
+            Backups: Directory.Exists(AppPaths.BackupDirectory) ? Directory.GetFiles(AppPaths.BackupDirectory, "*.reg").Length : 0));
+
+        RestorePointCount = data.Points.Count;
+        BackupCount = data.Backups;
+        LastPointText = data.Points.Count == 0
+            ? _localization.Get("Dashboard.RestoreHint")
+            : string.Format(CultureInfo.CurrentCulture, _localization.Get("Restore.LastPoint"), data.Points[0].Created.ToString("g", CultureInfo.CurrentUICulture));
 
         Protection = data.Protection;
         ProtectionText = _localization.Get($"Protection.{data.Protection}");
@@ -83,7 +100,7 @@ public sealed partial class RestoreViewModel : PageViewModel
         foreach (var entry in data.Journal.OrderByDescending(e => e.AppliedAt))
         {
             var title = _tweaks.Find(entry.TweakId)?.Title.Get(lang) ?? entry.TweakId;
-            ActiveTweaks.Add(new ActiveTweakRow(title, entry.AppliedAt.ToLocalTime().ToString("g", CultureInfo.CurrentUICulture)));
+            ActiveTweaks.Add(new ActiveTweakRow(entry.TweakId, title, entry.AppliedAt.ToLocalTime().ToString("g", CultureInfo.CurrentUICulture), RevertOneCommand));
         }
 
         OnPropertyChanged(nameof(HasActiveTweaks));
@@ -161,6 +178,33 @@ public sealed partial class RestoreViewModel : PageViewModel
             IsBusy = false;
         }
     }
+
+    [RelayCommand(CanExecute = nameof(CanRunWithId))]
+    private async Task RevertOneAsync(string? tweakId)
+    {
+        var tweak = tweakId is null ? null : _tweaks.Find(tweakId);
+        if (tweak is null)
+        {
+            Status = _localization.Get("Restore.NotInCatalog");
+            return;
+        }
+
+        IsBusy = true;
+        try
+        {
+            var result = await _tweaks.RevertAsync(tweak);
+            Status = result.Success
+                ? $"{_localization.Get("Tweak.Reverted")} {tweak.Title.Get(_localization.CurrentLanguage)}"
+                : $"{_localization.Get("Tweak.Failed")} {result.Error}";
+            await RefreshAsync();
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private bool CanRunWithId(string? _) => !IsBusy;
 
     [RelayCommand]
     private static void OpenSystemRestore() => Start(Path.Combine(Environment.SystemDirectory, "rstrui.exe"));

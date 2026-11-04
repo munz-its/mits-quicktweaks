@@ -24,7 +24,7 @@
     <sys:String x:Key="Desc.Debloat">Vorinstallierte Apps mit Häkchen entfernen. Neuinstallation über den Microsoft Store bleibt möglich.</sys:String>
     <sys:String x:Key="Desc.Startup">Programme beim Windows-Start aktivieren oder deaktivieren, ohne sie zu löschen.</sys:String>
     <sys:String x:Key="Desc.Care">Temporäre Dateien und Caches aufräumen, Windows mit SFC und DISM reparieren.</sys:String>
-    <sys:String x:Key="Desc.Restore">Wiederherstellungspunkte, Änderungsprotokoll und Rückgängig für jeden Tweak.</sys:String>
+    <sys:String x:Key="Desc.Restore">Drei Sicherungsebenen: Windows-Wiederherstellungspunkt, Journal mit jedem alten Wert und Registry-Export als .reg-Datei.</sys:String>
 
     <sys:String x:Key="Placeholder.ComingIn">Kommt in Phase</sys:String>
 
@@ -193,4 +193,30 @@ Jeder alte Wert wird in jedem Fall zusätzlich von der App gesichert.</sys:Strin
     <sys:String x:Key="History.StartupDisabled">Autostart deaktiviert</sys:String>
     <sys:String x:Key="History.CleanupDone">Aufgeräumt</sys:String>
     <sys:String x:Key="History.ProfileApplied">Profil angewendet</sys:String>
+    <sys:String x:Key="Dashboard.Heading">Willkommen zurück</sys:String>
+    <sys:String x:Key="Dashboard.OfAvailable">von {0} verfügbaren</sys:String>
+    <sys:String x:Key="Dashboard.Protection.Enabled">Aktiv</sys:String>
+    <sys:String x:Key="Dashboard.Protection.Disabled">Aus</sys:String>
+    <sys:String x:Key="Dashboard.Protection.BlockedByPolicy">Gesperrt</sys:String>
+    <sys:String x:Key="Dashboard.Protection.Unknown">Unbekannt</sys:String>
+    <sys:String x:Key="Dashboard.Today">Heute</sys:String>
+    <sys:String x:Key="Dashboard.RestoreHint">Entsteht vor dem ersten Tweak</sys:String>
+    <sys:String x:Key="Dashboard.ActiveTweaksLabel">AKTIVE TWEAKS</sys:String>
+    <sys:String x:Key="Dashboard.RestoreLabel">WIEDERHERSTELLUNGSPUNKT</sys:String>
+    <sys:String x:Key="Dashboard.ProtectionLabel">SYSTEMSCHUTZ</sys:String>
+    <sys:String x:Key="Dashboard.ProtectionSub">Windows-Systemschutz für das Systemlaufwerk</sys:String>
+    <sys:String x:Key="Dashboard.Recent">Zuletzt geändert</sys:String>
+    <sys:String x:Key="Dashboard.FullHistory">Ganzes Protokoll ansehen</sys:String>
+    <sys:String x:Key="Dashboard.NoRecent">Noch keine Änderungen.</sys:String>
+    <sys:String x:Key="Profile.Count">Tweaks: {0}</sys:String>
+    <sys:String x:Key="Profile.CountMedium">Tweaks: {0} · mittel: {1}</sys:String>
+    <sys:String x:Key="Profile.ActiveCount">Aktiv: {0}</sys:String>
+    <sys:String x:Key="Filter.All">Alle</sys:String>
+    <sys:String x:Key="Filter.Active">Aktiv</sys:String>
+    <sys:String x:Key="Restore.PointsLabel">WIEDERHERSTELLUNGSPUNKTE</sys:String>
+    <sys:String x:Key="Restore.BackupsLabel">REGISTRY-SICHERUNGEN</sys:String>
+    <sys:String x:Key="Restore.BackupsSub">.reg-Dateien im Sicherungsordner</sys:String>
+    <sys:String x:Key="Restore.LastPoint">Letzter: {0}</sys:String>
+    <sys:String x:Key="Restore.RevertOne">Zurücksetzen</sys:String>
+    <sys:String x:Key="Restore.NotInCatalog">Dieser Tweak ist nicht mehr im Katalog.</sys:String>
 </ResourceDictionary>

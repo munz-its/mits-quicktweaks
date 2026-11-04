@@ -111,8 +111,15 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
-                    <TextBlock Text="{Binding CurrentPage.Title}" Style="{StaticResource Display}" Margin="0,0,0,24" />
-                    <ContentControl Grid.Row="1" Content="{Binding CurrentPage}" Focusable="False" />
+                    <StackPanel Margin="0,0,0,24">
+                        <TextBlock Text="{Binding CurrentPage.Label}" Style="{StaticResource Label}" Margin="0,0,0,6" />
+                        <TextBlock Text="{Binding CurrentPage.Heading}" Style="{StaticResource Display}" />
+                    </StackPanel>
+                    <ContentControl x:Name="PageHost" Grid.Row="1" Content="{Binding CurrentPage}" Focusable="False">
+                        <ContentControl.RenderTransform>
+                            <TranslateTransform />
+                        </ContentControl.RenderTransform>
+                    </ContentControl>
                 </Grid>
             </ScrollViewer>
 

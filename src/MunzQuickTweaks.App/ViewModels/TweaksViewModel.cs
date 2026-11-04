@@ -117,6 +117,20 @@ public partial class TweaksViewModel : PageViewModel
     [ObservableProperty]
     private string _summary = string.Empty;
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsFilterAll), nameof(IsFilterLow), nameof(IsFilterMedium), nameof(IsFilterActive))]
+    private TweakFilter _filter = TweakFilter.All;
+
+    public bool IsFilterAll { get => Filter == TweakFilter.All; set { if (value) Filter = TweakFilter.All; } }
+
+    public bool IsFilterLow { get => Filter == TweakFilter.Low; set { if (value) Filter = TweakFilter.Low; } }
+
+    public bool IsFilterMedium { get => Filter == TweakFilter.Medium; set { if (value) Filter = TweakFilter.Medium; } }
+
+    public bool IsFilterActive { get => Filter == TweakFilter.Active; set { if (value) Filter = TweakFilter.Active; } }
+
+    partial void OnFilterChanged(TweakFilter value) => ApplyFilter();
+
     partial void OnSearchTextChanged(string value) => ApplyFilter();
 
     public override async Task OnNavigatedToAsync()
@@ -136,7 +150,7 @@ public partial class TweaksViewModel : PageViewModel
     {
         foreach (var item in AllItems)
         {
-            item.ApplyFilter(SearchText);
+            item.ApplyFilter(SearchText, Filter);
         }
 
         UpdateSummary();

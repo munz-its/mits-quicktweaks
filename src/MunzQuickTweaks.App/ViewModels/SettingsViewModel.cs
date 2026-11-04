@@ -59,6 +59,7 @@ public sealed partial class SettingsViewModel : PageViewModel
 
     partial void OnAnimationsEnabledChanged(bool value)
     {
+        Controls.UiMotion.Enabled = value;
         _settings.Current.AnimationsEnabled = value;
         _settings.Save();
     }

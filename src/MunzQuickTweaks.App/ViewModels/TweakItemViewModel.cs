@@ -5,6 +5,14 @@ using MunzQuickTweaks.Core.Tweaks;
 
 namespace MunzQuickTweaks.App.ViewModels;
 
+public enum TweakFilter
+{
+    All,
+    Low,
+    Medium,
+    Active,
+}
+
 /// <summary>Eine Tweak-Karte: Titel, Erklärung, Risiko, Schalter und Rückmeldung.</summary>
 public sealed partial class TweakItemViewModel : ObservableObject
 {
@@ -12,6 +20,7 @@ public sealed partial class TweakItemViewModel : ObservableObject
     private readonly LocalizationService _localization;
     private readonly Func<TweakDefinition, bool> _confirm;
     private string _filter = string.Empty;
+    private TweakFilter _kind = TweakFilter.All;
 
     public TweakItemViewModel(TweakDefinition definition, TweakService service, LocalizationService localization, Func<TweakDefinition, bool> confirm)
     {
@@ -56,6 +65,10 @@ public sealed partial class TweakItemViewModel : ObservableObject
     [ObservableProperty]
     private bool _messageIsError;
 
+    /// <summary>Zählt erfolgreiche Anwendungen hoch und startet damit den Pixel-Wisch.</summary>
+    [ObservableProperty]
+    private int _wipeCount;
+
     public bool IsOn => Status == TweakStatus.Applied;
 
     public bool IsAvailable => Status != TweakStatus.NotAvailable;
@@ -68,9 +81,10 @@ public sealed partial class TweakItemViewModel : ObservableObject
     /// </summary>
     public bool IsVisible => (IsAvailable || IsBlockedByAccount) && MatchesFilter();
 
-    public void ApplyFilter(string filter)
+    public void ApplyFilter(string filter, TweakFilter kind)
     {
         _filter = filter.Trim();
+        _kind = kind;
         OnPropertyChanged(nameof(IsVisible));
     }
 
@@ -88,10 +102,21 @@ public sealed partial class TweakItemViewModel : ObservableObject
         }
     }
 
-    private bool MatchesFilter() =>
-        _filter.Length == 0
-        || Title.Contains(_filter, StringComparison.CurrentCultureIgnoreCase)
-        || Description.Contains(_filter, StringComparison.CurrentCultureIgnoreCase);
+    private bool MatchesFilter()
+    {
+        var kindMatches = _kind switch
+        {
+            TweakFilter.Low => Definition.Risk == TweakRisk.Low,
+            TweakFilter.Medium => Definition.Risk == TweakRisk.Medium,
+            TweakFilter.Active => IsOn,
+            _ => true,
+        };
+
+        return kindMatches
+            && (_filter.Length == 0
+                || Title.Contains(_filter, StringComparison.CurrentCultureIgnoreCase)
+                || Description.Contains(_filter, StringComparison.CurrentCultureIgnoreCase));
+    }
 
     private bool CanToggle() => !IsBusy && IsAvailable;
 
@@ -117,6 +142,10 @@ public sealed partial class TweakItemViewModel : ObservableObject
             Message = result.Success
                 ? _localization.Get(turnOn ? "Tweak.Applied" : "Tweak.Reverted")
                 : $"{_localization.Get("Tweak.Failed")} {result.Error}";
+            if (result.Success && turnOn)
+            {
+                WipeCount++;
+            }
         }
         finally
         {

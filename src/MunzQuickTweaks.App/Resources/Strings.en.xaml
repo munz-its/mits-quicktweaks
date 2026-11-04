@@ -24,7 +24,7 @@
     <sys:String x:Key="Desc.Debloat">Remove preinstalled apps with checkboxes. Reinstalling from the Microsoft Store stays possible.</sys:String>
     <sys:String x:Key="Desc.Startup">Enable or disable programs at Windows startup without deleting them.</sys:String>
     <sys:String x:Key="Desc.Care">Clean temporary files and caches, repair Windows with SFC and DISM.</sys:String>
-    <sys:String x:Key="Desc.Restore">Restore points, change log and undo for every tweak.</sys:String>
+    <sys:String x:Key="Desc.Restore">Three backup layers: Windows restore point, journal with every previous value and registry export as a .reg file.</sys:String>
 
     <sys:String x:Key="Placeholder.ComingIn">Coming in phase</sys:String>
 
@@ -193,4 +193,30 @@ Every previous value is saved by the app in any case.</sys:String>
     <sys:String x:Key="History.StartupDisabled">Startup disabled</sys:String>
     <sys:String x:Key="History.CleanupDone">Cleaned up</sys:String>
     <sys:String x:Key="History.ProfileApplied">Profile applied</sys:String>
+    <sys:String x:Key="Dashboard.Heading">Welcome back</sys:String>
+    <sys:String x:Key="Dashboard.OfAvailable">of {0} available</sys:String>
+    <sys:String x:Key="Dashboard.Protection.Enabled">On</sys:String>
+    <sys:String x:Key="Dashboard.Protection.Disabled">Off</sys:String>
+    <sys:String x:Key="Dashboard.Protection.BlockedByPolicy">Blocked</sys:String>
+    <sys:String x:Key="Dashboard.Protection.Unknown">Unknown</sys:String>
+    <sys:String x:Key="Dashboard.Today">Today</sys:String>
+    <sys:String x:Key="Dashboard.RestoreHint">Created before the first tweak</sys:String>
+    <sys:String x:Key="Dashboard.ActiveTweaksLabel">ACTIVE TWEAKS</sys:String>
+    <sys:String x:Key="Dashboard.RestoreLabel">RESTORE POINT</sys:String>
+    <sys:String x:Key="Dashboard.ProtectionLabel">SYSTEM PROTECTION</sys:String>
+    <sys:String x:Key="Dashboard.ProtectionSub">Windows System Protection for the system drive</sys:String>
+    <sys:String x:Key="Dashboard.Recent">Recently changed</sys:String>
+    <sys:String x:Key="Dashboard.FullHistory">View full log</sys:String>
+    <sys:String x:Key="Dashboard.NoRecent">No changes yet.</sys:String>
+    <sys:String x:Key="Profile.Count">Tweaks: {0}</sys:String>
+    <sys:String x:Key="Profile.CountMedium">Tweaks: {0} · medium: {1}</sys:String>
+    <sys:String x:Key="Profile.ActiveCount">Active: {0}</sys:String>
+    <sys:String x:Key="Filter.All">All</sys:String>
+    <sys:String x:Key="Filter.Active">Active</sys:String>
+    <sys:String x:Key="Restore.PointsLabel">RESTORE POINTS</sys:String>
+    <sys:String x:Key="Restore.BackupsLabel">REGISTRY BACKUPS</sys:String>
+    <sys:String x:Key="Restore.BackupsSub">.reg files in the backup folder</sys:String>
+    <sys:String x:Key="Restore.LastPoint">Latest: {0}</sys:String>
+    <sys:String x:Key="Restore.RevertOne">Revert</sys:String>
+    <sys:String x:Key="Restore.NotInCatalog">This tweak is no longer in the catalog.</sys:String>
 </ResourceDictionary>

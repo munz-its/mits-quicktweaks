@@ -102,6 +102,7 @@ public partial class App : Application
             .Build();
 
         var settings = _host.Services.GetRequiredService<SettingsService>();
+        Controls.UiMotion.Enabled = settings.Current.AnimationsEnabled;
         _host.Services.GetRequiredService<LocalizationService>().Apply(settings.Current.Language);
 
         var window = _host.Services.GetRequiredService<MainWindow>();

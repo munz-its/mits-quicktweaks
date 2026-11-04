@@ -22,6 +22,13 @@ public partial class MainWindow : Window
         DataContext = viewModel;
 
         Loaded += OnLoaded;
+        viewModel.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(MainViewModel.CurrentPage))
+            {
+                AnimatePageIn();
+            }
+        };
         StateChanged += (_, _) => UpdateMaximizedMargin();
     }
 
@@ -42,6 +49,21 @@ public partial class MainWindow : Window
         var fade = new DoubleAnimation(1, 0, TimeSpan.FromSeconds(0.25)) { EasingFunction = new CubicEase() };
         fade.Completed += (_, _) => Splash.Visibility = Visibility.Collapsed;
         Splash.BeginAnimation(OpacityProperty, fade);
+    }
+
+    // Sanfter Seitenwechsel: neue Seite blendet ein und rutscht 8 Pixel nach oben
+    private void AnimatePageIn()
+    {
+        if (!Controls.UiMotion.Enabled)
+        {
+            return;
+        }
+
+        var duration = TimeSpan.FromSeconds(0.22);
+        var ease = new CubicEase { EasingMode = EasingMode.EaseOut };
+        PageHost.BeginAnimation(OpacityProperty, new DoubleAnimation(0, 1, duration) { EasingFunction = ease });
+        ((System.Windows.Media.TranslateTransform)PageHost.RenderTransform)
+            .BeginAnimation(System.Windows.Media.TranslateTransform.YProperty, new DoubleAnimation(8, 0, duration) { EasingFunction = ease });
     }
 
     // Maximiert ragt ein randloses Fenster über den Bildschirm hinaus: Rand ausgleichen

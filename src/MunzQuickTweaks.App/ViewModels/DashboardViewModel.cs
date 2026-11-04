@@ -30,6 +30,42 @@ public sealed partial class DashboardViewModel : PageViewModel
         _history = history;
     }
 
+    public override string HeadingKey => "Dashboard.Heading";
+
+    /// <summary>Wird vom Hauptfenster gesetzt, damit Links auf andere Seiten führen können.</summary>
+    public Action<string>? NavigateRequested { get; set; }
+
+    public string Version { get; } = "Version " + (System.Reflection.Assembly.GetEntryAssembly()?.GetName().Version?.ToString(3) ?? "?");
+
+    public System.Collections.ObjectModel.ObservableCollection<HistoryRow> Recent { get; } = new();
+
+    [ObservableProperty]
+    private string _availableText = string.Empty;
+
+    [ObservableProperty]
+    private string _protectionText = string.Empty;
+
+    [ObservableProperty]
+    private bool _isProtectionOn;
+
+    [ObservableProperty]
+    private string _restoreSub = string.Empty;
+
+    [ObservableProperty]
+    private string _recommendedInfo = string.Empty;
+
+    [ObservableProperty]
+    private string _gamingInfo = string.Empty;
+
+    [ObservableProperty]
+    private string _privacyInfo = string.Empty;
+
+    [ObservableProperty]
+    private string _resetInfo = string.Empty;
+
+    [RelayCommand]
+    private void OpenHistory() => NavigateRequested?.Invoke("Nav.Restore");
+
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ApplyProfileCommand))]
     private bool _isApplyingProfile;
@@ -133,7 +169,69 @@ public sealed partial class DashboardViewModel : PageViewModel
         }
     }
 
-    private async Task RefreshCountsAsync() => ActiveTweaks = await Task.Run(_tweaks.CountApplied);
+    /// <summary>Kacheln, Profil-Zähler und "Zuletzt geändert" neu berechnen.</summary>
+    private async Task RefreshCountsAsync()
+    {
+        var data = await Task.Run(() =>
+        {
+            var statuses = _tweaks.Tweaks.ToDictionary(t => t.Id, t => _tweaks.GetStatus(t));
+            var points = _restorePoints.List();
+            return (
+                Statuses: statuses,
+                Protection: _restorePoints.GetProtectionState(),
+                Last: points.FirstOrDefault(),
+                History: _history.Latest(3));
+        });
+
+        var available = data.Statuses.Values.Count(s => s != TweakStatus.NotAvailable);
+        ActiveTweaks = data.Statuses.Values.Count(s => s == TweakStatus.Applied);
+        AvailableText = string.Format(CultureInfo.CurrentCulture, _localization.Get("Dashboard.OfAvailable"), available);
+
+        IsProtectionOn = data.Protection == ProtectionState.Enabled;
+        ProtectionText = _localization.Get($"Dashboard.Protection.{data.Protection}");
+
+        if (data.Last is null)
+        {
+            LastRestorePoint = string.Empty;
+            RestoreSub = _localization.Get("Dashboard.RestoreHint");
+        }
+        else
+        {
+            LastRestorePoint = data.Last.Created.Date == DateTime.Today
+                ? _localization.Get("Dashboard.Today")
+                : data.Last.Created.ToString("d", CultureInfo.CurrentUICulture);
+            RestoreSub = data.Last.Created.ToString("g", CultureInfo.CurrentUICulture);
+        }
+
+        string Info(ProfileKind kind)
+        {
+            var ids = ProfileCatalog.Get(kind, _tweaks.Tweaks).TweakIds
+                .Where(id => data.Statuses.TryGetValue(id, out var s) && s != TweakStatus.NotAvailable)
+                .ToList();
+            var medium = ids.Count(id => _tweaks.Find(id)?.Risk == TweakRisk.Medium);
+            return medium == 0
+                ? string.Format(CultureInfo.CurrentCulture, _localization.Get("Profile.Count"), ids.Count)
+                : string.Format(CultureInfo.CurrentCulture, _localization.Get("Profile.CountMedium"), ids.Count, medium);
+        }
+
+        RecommendedInfo = Info(ProfileKind.Recommended);
+        GamingInfo = Info(ProfileKind.Gaming);
+        PrivacyInfo = Info(ProfileKind.Privacy);
+        ResetInfo = string.Format(CultureInfo.CurrentCulture, _localization.Get("Profile.ActiveCount"), ActiveTweaks);
+
+        var lang = _localization.CurrentLanguage;
+        Recent.Clear();
+        foreach (var item in data.History)
+        {
+            var subject = item.TweakId is null ? string.Empty : ": " + (_tweaks.Find(item.TweakId)?.Title.Get(lang) ?? item.TweakId);
+            Recent.Add(new HistoryRow(item.Time.ToLocalTime().ToString("t", CultureInfo.CurrentUICulture),
+                _localization.Get($"History.{item.Action}") + subject, item.Success));
+        }
+
+        OnPropertyChanged(nameof(HasRecent));
+    }
+
+    public bool HasRecent => Recent.Count > 0;
 
     /// <summary>Datum des neuesten Wiederherstellungspunkts, leer = keiner vorhanden.</summary>
     [ObservableProperty]
@@ -169,9 +267,7 @@ public sealed partial class DashboardViewModel : PageViewModel
     public override async Task OnNavigatedToAsync()
     {
         // Zähler bei jedem Öffnen aktualisieren, Systemdaten nur einmal lesen
-        var (count, last) = await Task.Run(() => (_tweaks.CountApplied(), _restorePoints.List().FirstOrDefault()));
-        ActiveTweaks = count;
-        LastRestorePoint = last is null ? string.Empty : last.Created.ToString("g", CultureInfo.CurrentUICulture);
+        await RefreshCountsAsync();
 
         if (_loaded)
         {

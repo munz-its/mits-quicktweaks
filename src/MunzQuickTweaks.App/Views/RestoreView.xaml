@@ -22,6 +22,42 @@
             </TextBlock.Style>
         </TextBlock>
 
+        <!-- Kacheln -->
+        <UniformGrid Columns="3" Margin="0,0,0,16">
+            <Border Style="{StaticResource Card}" Padding="20,18" Margin="0,0,10,0">
+                <StackPanel>
+                    <TextBlock Text="{DynamicResource Dashboard.ProtectionLabel}" Style="{StaticResource Label}" Foreground="{StaticResource Muted}" />
+                    <TextBlock Text="{Binding ProtectionText}" TextWrapping="Wrap">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock" BasedOn="{StaticResource StatValue}">
+                                <Setter Property="FontSize" Value="20" />
+                                <Setter Property="Foreground" Value="{StaticResource Warn}" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsProtectionOn}" Value="True">
+                                        <Setter Property="Foreground" Value="{StaticResource Ok}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+            <Border Style="{StaticResource Card}" Padding="20,18" Margin="5,0,5,0">
+                <StackPanel>
+                    <TextBlock Text="{DynamicResource Restore.PointsLabel}" Style="{StaticResource Label}" Foreground="{StaticResource Muted}" />
+                    <TextBlock Text="{Binding RestorePointCount}" Style="{StaticResource StatValue}" Foreground="{StaticResource Text}" />
+                    <TextBlock Text="{Binding LastPointText}" Style="{StaticResource Body2}" FontSize="13" />
+                </StackPanel>
+            </Border>
+            <Border Style="{StaticResource Card}" Padding="20,18" Margin="10,0,0,0">
+                <StackPanel>
+                    <TextBlock Text="{DynamicResource Restore.BackupsLabel}" Style="{StaticResource Label}" Foreground="{StaticResource Muted}" />
+                    <TextBlock Text="{Binding BackupCount}" Style="{StaticResource StatValue}" Foreground="{StaticResource Text}" />
+                    <TextBlock Text="{DynamicResource Restore.BackupsSub}" Style="{StaticResource Body2}" FontSize="13" />
+                </StackPanel>
+            </Border>
+        </UniformGrid>
+
         <!-- Systemschutz und Wiederherstellungspunkte -->
         <Border Style="{StaticResource Card}" Margin="0,0,0,16">
             <StackPanel>
@@ -101,14 +137,19 @@
                 <ItemsControl ItemsSource="{Binding ActiveTweaks}" Focusable="False">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Grid Margin="0,0,0,8">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="150" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Text="{Binding Since}" Style="{StaticResource Label}" Foreground="{StaticResource Muted}" VerticalAlignment="Center" />
-                                <TextBlock Grid.Column="1" Text="{Binding Title}" Style="{StaticResource TextBase}" FontSize="13" />
-                            </Grid>
+                            <Border BorderBrush="{StaticResource Line}" BorderThickness="0,1,0,0" Padding="0,8">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding Title}" Style="{StaticResource TextBase}" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="1" Text="{Binding Since}" Style="{StaticResource Label}" Foreground="{StaticResource Muted}" VerticalAlignment="Center" Margin="12,0" />
+                                    <Button Grid.Column="2" Style="{StaticResource SecondaryButton}" Padding="10,6" FontSize="12"
+                                            Content="{DynamicResource Restore.RevertOne}" Command="{Binding RevertCommand}" CommandParameter="{Binding Id}" />
+                                </Grid>
+                            </Border>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
@@ -122,13 +163,26 @@
                 <ItemsControl ItemsSource="{Binding History}" Focusable="False">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Grid Margin="0,0,0,6">
+                            <Grid Margin="0,0,0,8">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="150" />
+                                    <ColumnDefinition Width="18" />
+                                    <ColumnDefinition Width="140" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="{Binding Time}" Style="{StaticResource Label}" Foreground="{StaticResource Muted}" />
-                                <TextBlock Grid.Column="1" Text="{Binding Text}" FontSize="13">
+                                <Rectangle Width="6" Height="6" VerticalAlignment="Center" HorizontalAlignment="Left">
+                                    <Rectangle.Style>
+                                        <Style TargetType="Rectangle">
+                                            <Setter Property="Fill" Value="{StaticResource Ok}" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Success}" Value="False">
+                                                    <Setter Property="Fill" Value="{StaticResource Danger}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Rectangle.Style>
+                                </Rectangle>
+                                <TextBlock Grid.Column="1" Text="{Binding Time}" Style="{StaticResource Label}" Foreground="{StaticResource Muted}" />
+                                <TextBlock Grid.Column="2" Text="{Binding Text}" FontSize="13">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock" BasedOn="{StaticResource TextBase}">
                                             <Style.Triggers>

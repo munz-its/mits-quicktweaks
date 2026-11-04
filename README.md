@@ -4,7 +4,7 @@ Kostenlose Windows-App von Munz IT Service. Macht Windows 10 22H2 und Windows 11
 
 ## Stand
 
-Version 0.5.0, Phase 5 (Module): eigene Seite Datenschutz, Debloat (nur für den angemeldeten Nutzer, Neuinstallation über den Store), Autostart (wie im Task-Manager, verlustfrei umkehrbar), System Care (Aufräumen, DNS, SFC, DISM, Windows-Update-Reset), Profile im Dashboard.
+Version 0.6.0, Phase 6 (Design): Umsetzung der freigegebenen Mockups. Kopfzeile mit Label, Kacheln auf Dashboard und Wiederherstellung, Profilkarten mit Pixel-Icons und Zählern, "Zuletzt geändert", Filter-Chips, Pixel-Wisch nach dem Anwenden, Einzel-Zurücksetzen, sanfter Seitenwechsel.
 
 ## Technik
 
