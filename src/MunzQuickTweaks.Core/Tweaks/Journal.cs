@@ -6,6 +6,7 @@ namespace MunzQuickTweaks.Core.Tweaks;
 /// <summary>Zustand vor der Änderung, pro Aktion. Grundlage für exaktes Rückgängig.</summary>
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
 [JsonDerivedType(typeof(RegistrySnapshot), "registry")]
+[JsonDerivedType(typeof(PowerPlanSnapshot), "powerPlan")]
 public abstract class ActionSnapshot
 {
 }
@@ -22,6 +23,14 @@ public sealed class RegistrySnapshot : ActionSnapshot
 
     /// <summary>Null = Wert existierte vorher nicht.</summary>
     public RegistryValue? Previous { get; set; }
+}
+
+public sealed class PowerPlanSnapshot : ActionSnapshot
+{
+    public Guid PreviousActive { get; set; }
+
+    /// <summary>Von der App erzeugter Plan, wird beim Rückgängig gelöscht. Null = Plan existierte schon.</summary>
+    public Guid? Created { get; set; }
 }
 
 public sealed class JournalEntry

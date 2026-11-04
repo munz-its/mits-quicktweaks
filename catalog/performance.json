@@ -1,0 +1,232 @@
+[
+  {
+    "id": "perf.animations.reduce",
+    "category": "Performance",
+    "risk": "Low",
+    "restart": "SignOut",
+    "minBuild": 19045,
+    "title": {
+      "de": "Animationen reduzieren",
+      "en": "Reduce animations"
+    },
+    "description": {
+      "de": "Schaltet die Animationen beim Minimieren und Maximieren, in der Taskleiste und die Desktop-Vorschau ab. Fenster reagieren spürbar direkter, vor allem auf schwächeren PCs.",
+      "en": "Turns off minimize and maximize animations, taskbar animations and desktop peek. Windows respond noticeably faster, especially on weaker PCs."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Control Panel\\Desktop\\WindowMetrics",
+        "name": "MinAnimate",
+        "kind": "String",
+        "value": "0",
+        "default": "1"
+      },
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+        "name": "TaskbarAnimations",
+        "kind": "DWord",
+        "value": "0",
+        "default": "1"
+      },
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Software\\Microsoft\\Windows\\DWM",
+        "name": "EnableAeroPeek",
+        "kind": "DWord",
+        "value": "0",
+        "default": "1"
+      }
+    ]
+  },
+  {
+    "id": "perf.transparency.off",
+    "category": "Performance",
+    "risk": "Low",
+    "restart": "None",
+    "minBuild": 19045,
+    "title": {
+      "de": "Transparenz-Effekte ausschalten",
+      "en": "Turn off transparency effects"
+    },
+    "description": {
+      "de": "Startmenü, Taskleiste und Fenster werden undurchsichtig. Spart Grafikleistung und verbessert die Lesbarkeit.",
+      "en": "Start menu, taskbar and windows become opaque. Saves graphics performance and improves readability."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
+        "name": "EnableTransparency",
+        "kind": "DWord",
+        "value": "0",
+        "default": "1"
+      }
+    ]
+  },
+  {
+    "id": "perf.menudelay.short",
+    "category": "Performance",
+    "risk": "Low",
+    "restart": "SignOut",
+    "minBuild": 19045,
+    "title": {
+      "de": "Menüs schneller öffnen",
+      "en": "Open menus faster"
+    },
+    "description": {
+      "de": "Verkürzt die Wartezeit, bis Untermenüs aufklappen, von 400 auf 100 Millisekunden.",
+      "en": "Shortens the delay before submenus open from 400 to 100 milliseconds."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Control Panel\\Desktop",
+        "name": "MenuShowDelay",
+        "kind": "String",
+        "value": "100",
+        "default": "400"
+      }
+    ]
+  },
+  {
+    "id": "perf.startupdelay.off",
+    "category": "Performance",
+    "risk": "Low",
+    "restart": "None",
+    "minBuild": 19045,
+    "title": {
+      "de": "Autostart-Verzögerung entfernen",
+      "en": "Remove startup delay"
+    },
+    "description": {
+      "de": "Windows wartet nach der Anmeldung einige Sekunden, bevor Autostart-Programme starten. Ohne Verzögerung sind sie schneller bereit.",
+      "en": "After sign-in, Windows waits a few seconds before starting startup programs. Without the delay they are ready sooner."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Serialize",
+        "name": "StartupDelayInMSec",
+        "kind": "DWord",
+        "value": "0"
+      }
+    ]
+  },
+  {
+    "id": "perf.faststartup.off",
+    "category": "Performance",
+    "risk": "Low",
+    "restart": "None",
+    "minBuild": 19045,
+    "title": {
+      "de": "Schnellstart ausschalten",
+      "en": "Turn off fast startup"
+    },
+    "description": {
+      "de": "Beim Herunterfahren speichert Windows sonst einen Teil des Systems und lädt ihn beim Start wieder. Ohne Schnellstart startet Windows bei jedem Einschalten frisch. Das behebt viele Treiber- und Update-Probleme, der Start dauert ein paar Sekunden länger. Wirkt ab dem nächsten Herunterfahren.",
+      "en": "When shutting down, Windows otherwise saves part of the system and reloads it at startup. Without fast startup, Windows starts fresh every time. This fixes many driver and update issues; startup takes a few seconds longer. Takes effect from the next shutdown."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "key": "SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Power",
+        "name": "HiberbootEnabled",
+        "kind": "DWord",
+        "value": "0",
+        "default": "1"
+      }
+    ]
+  },
+  {
+    "id": "perf.lastaccess.off",
+    "category": "Performance",
+    "risk": "Low",
+    "restart": "Reboot",
+    "minBuild": 19045,
+    "title": {
+      "de": "Zeitstempel für letzten Zugriff abschalten",
+      "en": "Turn off last access timestamps"
+    },
+    "description": {
+      "de": "NTFS speichert bei jedem Lesen einer Datei die Uhrzeit des Zugriffs. Abgeschaltet entfallen diese zusätzlichen Schreibvorgänge.",
+      "en": "NTFS stores the access time every time a file is read. Turned off, these extra write operations are skipped."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "key": "SYSTEM\\CurrentControlSet\\Control\\FileSystem",
+        "name": "NtfsDisableLastAccessUpdate",
+        "kind": "DWord",
+        "value": "2147483649",
+        "default": "2147483650"
+      }
+    ]
+  },
+  {
+    "id": "perf.bgapps.off",
+    "category": "Performance",
+    "risk": "Medium",
+    "restart": "None",
+    "minBuild": 19045,
+    "maxBuild": 19045,
+    "title": {
+      "de": "Hintergrund-Apps stoppen",
+      "en": "Stop background apps"
+    },
+    "description": {
+      "de": "Store-Apps dürfen nicht mehr im Hintergrund laufen. Spart Arbeitsspeicher und Akku. Benachrichtigungen dieser Apps (z. B. Mail oder Kalender) kommen erst, wenn du sie öffnest.",
+      "en": "Store apps are no longer allowed to run in the background. Saves memory and battery. Notifications from these apps (e.g. Mail or Calendar) only arrive when you open them."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Software\\Microsoft\\Windows\\CurrentVersion\\BackgroundAccessApplications",
+        "name": "GlobalUserDisabled",
+        "kind": "DWord",
+        "value": "1",
+        "default": "0"
+      },
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Software\\Microsoft\\Windows\\CurrentVersion\\Search",
+        "name": "BackgroundAppGlobalToggle",
+        "kind": "DWord",
+        "value": "0",
+        "default": "1"
+      }
+    ]
+  },
+  {
+    "id": "perf.powerplan.ultimate",
+    "category": "Performance",
+    "risk": "Medium",
+    "restart": "None",
+    "minBuild": 19045,
+    "title": {
+      "de": "Energieplan Ultimative Leistung",
+      "en": "Ultimate Performance power plan"
+    },
+    "description": {
+      "de": "Aktiviert den Energieplan \"Ultimative Leistung\": der Prozessor bleibt auf hohem Takt und wechselt nicht in Stromsparzustände. Weniger Mikroruckler, aber höherer Stromverbrauch und mehr Wärme. Auf Laptops nur am Netzteil sinnvoll.",
+      "en": "Activates the \"Ultimate Performance\" power plan: the processor stays at high clock speeds and skips power-saving states. Fewer micro-stutters, but higher power use and more heat. On laptops only useful when plugged in."
+    },
+    "actions": [
+      {
+        "type": "powerPlan",
+        "template": "e9a42b02-d5df-448d-aa00-03f14749eb61"
+      }
+    ]
+  }
+]

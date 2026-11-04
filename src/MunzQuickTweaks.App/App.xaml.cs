@@ -67,6 +67,7 @@ public partial class App : Application
                 services.AddSingleton<IRegistry, WindowsRegistry>();
                 services.AddSingleton<ISystemNotifier, WindowsNotifier>();
                 services.AddSingleton<IRestorePointService, WindowsRestorePoints>();
+                services.AddSingleton<IPowerPlans, WindowsPowerPlans>();
                 services.AddSingleton(new JournalStore(Path.Combine(AppPaths.MachineData, "state", "journal.json")));
                 services.AddSingleton(new HistoryStore(Path.Combine(AppPaths.MachineData, "state", "history.jsonl")));
                 services.AddSingleton<IRegistryBackup>(sp => new RegExeBackup(AppPaths.BackupDirectory, sp.GetRequiredService<IRegistry>()));
@@ -75,7 +76,12 @@ public partial class App : Application
                     sp.GetRequiredService<IRegistry>(),
                     sp.GetRequiredService<JournalStore>(),
                     sp.GetRequiredService<ISystemNotifier>(),
-                    sp.GetRequiredService<SystemInfoProvider>().ReadBuild()));
+                    sp.GetRequiredService<SystemInfoProvider>().ReadBuild(),
+                    sp.GetRequiredService<IPowerPlans>())
+                {
+                    // Fremdes Admin-Konto: Benutzer-Tweaks würden im falschen Konto landen
+                    UserHiveAllowed = !AccountInfo.IsForeignElevation(),
+                });
                 services.AddSingleton<TweakService>();
 
                 services.AddSingleton<DashboardViewModel>();

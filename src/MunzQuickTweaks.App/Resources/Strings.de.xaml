@@ -111,4 +111,9 @@ Jeder alte Wert wird in jedem Fall zusätzlich von der App gesichert.</sys:Strin
     <sys:String x:Key="History.RestorePointSkipped">Ohne Wiederherstellungspunkt fortgefahren</sys:String>
     <sys:String x:Key="History.ProtectionEnabled">Systemschutz eingeschaltet</sys:String>
     <sys:String x:Key="History.RegistryExported">Registry gesichert</sys:String>
+    <sys:String x:Key="Tweaks.Search">Tweaks durchsuchen …</sys:String>
+    <sys:String x:Key="Tweaks.Summary">Tweaks: {0} · aktiv: {1}</sys:String>
+    <sys:String x:Key="Tweaks.NoResults">Keine passenden Tweaks gefunden.</sys:String>
+    <sys:String x:Key="Tweaks.ForeignAccount">⚠️ Die App läuft unter einem anderen Konto als dem angemeldeten Nutzer (Start mit fremdem Admin-Passwort). Tweaks für den Benutzer würden im falschen Konto landen und sind deshalb gesperrt. Systemweite Tweaks funktionieren. Für alle Tweaks: mit einem Admin-Konto anmelden und die App dort starten.</sys:String>
+    <sys:String x:Key="Tweak.BlockedAccount">Gesperrt: betrifft den angemeldeten Nutzer, die App läuft aber unter einem anderen Konto.</sys:String>
 </ResourceDictionary>

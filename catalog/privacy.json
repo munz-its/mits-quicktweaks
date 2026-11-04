@@ -1,5 +1,30 @@
 [
   {
+    "id": "privacy.telemetry.min",
+    "category": "Privacy",
+    "risk": "Low",
+    "restart": "None",
+    "minBuild": 19045,
+    "title": {
+      "de": "Telemetrie auf Minimum",
+      "en": "Telemetry to minimum"
+    },
+    "description": {
+      "de": "Begrenzt die Diagnosedaten, die Windows an Microsoft sendet, auf das Minimum. In Home und Pro entspricht das der Stufe \"Erforderlich\", ganz abschalten lässt Microsoft dort nicht zu.",
+      "en": "Limits the diagnostic data Windows sends to Microsoft to the minimum. In Home and Pro this equals the \"Required\" level; Microsoft does not allow turning it off completely there."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "key": "SOFTWARE\\Policies\\Microsoft\\Windows\\DataCollection",
+        "name": "AllowTelemetry",
+        "kind": "DWord",
+        "value": "0"
+      }
+    ]
+  },
+  {
     "id": "privacy.adid.off",
     "category": "Privacy",
     "risk": "Low",
@@ -14,7 +39,150 @@
       "en": "Windows assigns you an advertising ID that apps use to link your behavior for personalized ads. Turned off, you still see ads, but without a profile."
     },
     "actions": [
-      { "type": "registry", "hive": "HKCU", "key": "Software\\Microsoft\\Windows\\CurrentVersion\\AdvertisingInfo", "name": "Enabled", "kind": "DWord", "value": "0", "default": "1" }
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Software\\Microsoft\\Windows\\CurrentVersion\\AdvertisingInfo",
+        "name": "Enabled",
+        "kind": "DWord",
+        "value": "0",
+        "default": "1"
+      }
+    ]
+  },
+  {
+    "id": "privacy.tailored.off",
+    "category": "Privacy",
+    "risk": "Low",
+    "restart": "None",
+    "minBuild": 19045,
+    "title": {
+      "de": "Maßgeschneiderte Erfahrungen ausschalten",
+      "en": "Turn off tailored experiences"
+    },
+    "description": {
+      "de": "Microsoft nutzt deine Diagnosedaten nicht mehr für persönliche Tipps, Werbung und Empfehlungen.",
+      "en": "Microsoft no longer uses your diagnostic data for personal tips, ads and recommendations."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Software\\Microsoft\\Windows\\CurrentVersion\\Privacy",
+        "name": "TailoredExperiencesWithDiagnosticDataEnabled",
+        "kind": "DWord",
+        "value": "0",
+        "default": "1"
+      }
+    ]
+  },
+  {
+    "id": "privacy.activity.off",
+    "category": "Privacy",
+    "risk": "Low",
+    "restart": "None",
+    "minBuild": 19045,
+    "title": {
+      "de": "Aktivitätsverlauf ausschalten",
+      "en": "Turn off activity history"
+    },
+    "description": {
+      "de": "Windows speichert nicht mehr, welche Apps, Dateien und Webseiten du nutzt, und lädt diesen Verlauf nicht hoch.",
+      "en": "Windows no longer stores which apps, files and websites you use and does not upload this history."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "key": "SOFTWARE\\Policies\\Microsoft\\Windows\\System",
+        "name": "EnableActivityFeed",
+        "kind": "DWord",
+        "value": "0"
+      },
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "key": "SOFTWARE\\Policies\\Microsoft\\Windows\\System",
+        "name": "PublishUserActivities",
+        "kind": "DWord",
+        "value": "0"
+      },
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "key": "SOFTWARE\\Policies\\Microsoft\\Windows\\System",
+        "name": "UploadUserActivities",
+        "kind": "DWord",
+        "value": "0"
+      }
+    ]
+  },
+  {
+    "id": "privacy.websearch.off",
+    "category": "Privacy",
+    "risk": "Low",
+    "restart": "SignOut",
+    "minBuild": 19045,
+    "title": {
+      "de": "Websuche im Startmenü ausschalten",
+      "en": "Turn off web search in Start"
+    },
+    "description": {
+      "de": "Die Windows-Suche zeigt nur noch Apps, Dateien und Einstellungen auf deinem PC. Deine Suchbegriffe gehen nicht mehr an Bing, und die Suche wird schneller.",
+      "en": "Windows search only shows apps, files and settings on your PC. Your search terms no longer go to Bing, and search gets faster."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Software\\Policies\\Microsoft\\Windows\\Explorer",
+        "name": "DisableSearchBoxSuggestions",
+        "kind": "DWord",
+        "value": "1"
+      },
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Software\\Microsoft\\Windows\\CurrentVersion\\Search",
+        "name": "BingSearchEnabled",
+        "kind": "DWord",
+        "value": "0"
+      }
+    ]
+  },
+  {
+    "id": "privacy.cloudsearch.off",
+    "category": "Privacy",
+    "risk": "Low",
+    "restart": "None",
+    "minBuild": 19045,
+    "title": {
+      "de": "Cloud-Inhalte in der Suche ausschalten",
+      "en": "Turn off cloud content in search"
+    },
+    "description": {
+      "de": "Die Windows-Suche durchsucht nicht mehr OneDrive, Outlook und andere Inhalte deines Microsoft-Kontos.",
+      "en": "Windows search no longer searches OneDrive, Outlook and other content of your Microsoft account."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Software\\Microsoft\\Windows\\CurrentVersion\\SearchSettings",
+        "name": "IsMSACloudSearchEnabled",
+        "kind": "DWord",
+        "value": "0",
+        "default": "1"
+      },
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Software\\Microsoft\\Windows\\CurrentVersion\\SearchSettings",
+        "name": "IsAADCloudSearchEnabled",
+        "kind": "DWord",
+        "value": "0",
+        "default": "1"
+      }
     ]
   },
   {
@@ -32,9 +200,359 @@
       "en": "Stops Windows tips, Start menu suggestions and promoted apps. Fewer distractions and no unasked app recommendations."
     },
     "actions": [
-      { "type": "registry", "hive": "HKCU", "key": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager", "name": "SubscribedContent-338389Enabled", "kind": "DWord", "value": "0", "default": "1" },
-      { "type": "registry", "hive": "HKCU", "key": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager", "name": "SoftLandingEnabled", "kind": "DWord", "value": "0", "default": "1" },
-      { "type": "registry", "hive": "HKCU", "key": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager", "name": "SystemPaneSuggestionsEnabled", "kind": "DWord", "value": "0", "default": "1" }
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+        "name": "SubscribedContent-338389Enabled",
+        "kind": "DWord",
+        "value": "0",
+        "default": "1"
+      },
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+        "name": "SoftLandingEnabled",
+        "kind": "DWord",
+        "value": "0",
+        "default": "1"
+      },
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+        "name": "SystemPaneSuggestionsEnabled",
+        "kind": "DWord",
+        "value": "0",
+        "default": "1"
+      }
+    ]
+  },
+  {
+    "id": "privacy.silentapps.off",
+    "category": "Privacy",
+    "risk": "Low",
+    "restart": "None",
+    "minBuild": 19045,
+    "title": {
+      "de": "Automatische App-Installation stoppen",
+      "en": "Stop automatic app installs"
+    },
+    "description": {
+      "de": "Verhindert, dass Windows ungefragt beworbene Apps und Spiele wie Candy Crush installiert.",
+      "en": "Prevents Windows from installing promoted apps and games like Candy Crush without asking."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+        "name": "SilentInstalledAppsEnabled",
+        "kind": "DWord",
+        "value": "0",
+        "default": "1"
+      },
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+        "name": "PreInstalledAppsEnabled",
+        "kind": "DWord",
+        "value": "0",
+        "default": "1"
+      },
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+        "name": "OemPreInstalledAppsEnabled",
+        "kind": "DWord",
+        "value": "0",
+        "default": "1"
+      }
+    ]
+  },
+  {
+    "id": "privacy.lockscreen.ads",
+    "category": "Privacy",
+    "risk": "Low",
+    "restart": "None",
+    "minBuild": 19045,
+    "title": {
+      "de": "Werbung auf dem Sperrbildschirm ausschalten",
+      "en": "Turn off lock screen ads"
+    },
+    "description": {
+      "de": "Entfernt Tipps, Hinweise und Werbung auf dem Sperrbildschirm. Dein Hintergrundbild bleibt.",
+      "en": "Removes tips, facts and ads on the lock screen. Your background picture stays."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+        "name": "RotatingLockScreenOverlayEnabled",
+        "kind": "DWord",
+        "value": "0",
+        "default": "1"
+      },
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+        "name": "SubscribedContent-338387Enabled",
+        "kind": "DWord",
+        "value": "0",
+        "default": "1"
+      }
+    ]
+  },
+  {
+    "id": "privacy.feedback.off",
+    "category": "Privacy",
+    "risk": "Low",
+    "restart": "None",
+    "minBuild": 19045,
+    "title": {
+      "de": "Feedback-Abfragen ausschalten",
+      "en": "Turn off feedback requests"
+    },
+    "description": {
+      "de": "Windows fragt nicht mehr per Benachrichtigung nach deiner Meinung.",
+      "en": "Windows no longer asks for your opinion through notifications."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Software\\Microsoft\\Siuf\\Rules",
+        "name": "NumberOfSIUFInPeriod",
+        "kind": "DWord",
+        "value": "0"
+      },
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "key": "SOFTWARE\\Policies\\Microsoft\\Windows\\DataCollection",
+        "name": "DoNotShowFeedbackNotifications",
+        "kind": "DWord",
+        "value": "1"
+      }
+    ]
+  },
+  {
+    "id": "privacy.inking.off",
+    "category": "Privacy",
+    "risk": "Low",
+    "restart": "None",
+    "minBuild": 19045,
+    "title": {
+      "de": "Eingabe-Personalisierung ausschalten",
+      "en": "Turn off input personalization"
+    },
+    "description": {
+      "de": "Windows sammelt keine getippten und handschriftlichen Texte und keine Kontakte mehr, um Vorschläge zu verbessern.",
+      "en": "Windows no longer collects typed and handwritten text or contacts to improve suggestions."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Software\\Microsoft\\InputPersonalization",
+        "name": "RestrictImplicitInkCollection",
+        "kind": "DWord",
+        "value": "1",
+        "default": "0"
+      },
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Software\\Microsoft\\InputPersonalization",
+        "name": "RestrictImplicitTextCollection",
+        "kind": "DWord",
+        "value": "1",
+        "default": "0"
+      },
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Software\\Microsoft\\InputPersonalization\\TrainedDataStore",
+        "name": "HarvestContacts",
+        "kind": "DWord",
+        "value": "0",
+        "default": "1"
+      }
+    ]
+  },
+  {
+    "id": "privacy.languagelist.off",
+    "category": "Privacy",
+    "risk": "Low",
+    "restart": "None",
+    "minBuild": 19045,
+    "title": {
+      "de": "Sprachliste nicht an Webseiten senden",
+      "en": "Do not share language list with websites"
+    },
+    "description": {
+      "de": "Webseiten erfahren nicht mehr, welche Sprachen du in Windows installiert hast. Das erschwert Fingerprinting.",
+      "en": "Websites no longer learn which languages you have installed in Windows. This makes fingerprinting harder."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Control Panel\\International\\User Profile",
+        "name": "HttpAcceptLanguageOptOut",
+        "kind": "DWord",
+        "value": "1"
+      }
+    ]
+  },
+  {
+    "id": "privacy.apptracking.off",
+    "category": "Privacy",
+    "risk": "Low",
+    "restart": "None",
+    "minBuild": 19045,
+    "title": {
+      "de": "App-Starts nicht verfolgen",
+      "en": "Do not track app launches"
+    },
+    "description": {
+      "de": "Windows merkt sich nicht mehr, welche Apps du oft startest. Die Liste \"Meistverwendet\" im Startmenü bleibt leer.",
+      "en": "Windows no longer tracks which apps you launch often. The \"Most used\" list in Start stays empty."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+        "name": "Start_TrackProgs",
+        "kind": "DWord",
+        "value": "0",
+        "default": "1"
+      }
+    ]
+  },
+  {
+    "id": "privacy.recentdocs.off",
+    "category": "Privacy",
+    "risk": "Low",
+    "restart": "None",
+    "minBuild": 19045,
+    "title": {
+      "de": "Zuletzt geöffnete Dateien nicht anzeigen",
+      "en": "Do not show recently opened files"
+    },
+    "description": {
+      "de": "Startmenü, Sprunglisten und Explorer zeigen keine zuletzt geöffneten Dateien mehr an.",
+      "en": "Start, jump lists and Explorer no longer show recently opened files."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+        "name": "Start_TrackDocs",
+        "kind": "DWord",
+        "value": "0",
+        "default": "1"
+      }
+    ]
+  },
+  {
+    "id": "privacy.location.off",
+    "category": "Privacy",
+    "risk": "Medium",
+    "restart": "None",
+    "minBuild": 19045,
+    "title": {
+      "de": "Ortung ausschalten",
+      "en": "Turn off location"
+    },
+    "description": {
+      "de": "Kein Programm kann mehr deinen Standort abfragen. Dadurch funktionieren auch Karten, lokales Wetter und \"Mein Gerät suchen\" nicht mehr.",
+      "en": "No program can query your location anymore. This also stops maps, local weather and \"Find my device\" from working."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "key": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\CapabilityAccessManager\\ConsentStore\\location",
+        "name": "Value",
+        "kind": "String",
+        "value": "Deny",
+        "default": "Allow"
+      }
+    ]
+  },
+  {
+    "id": "privacy.copilot.off",
+    "category": "Privacy",
+    "risk": "Medium",
+    "restart": "SignOut",
+    "minBuild": 22631,
+    "title": {
+      "de": "Copilot ausblenden",
+      "en": "Hide Copilot"
+    },
+    "description": {
+      "de": "Entfernt die Copilot-Schaltfläche aus der Taskleiste und sperrt die Copilot-Seitenleiste. Die eigenständige Copilot-App lässt sich ab Version 1.0 im Bereich Debloat entfernen.",
+      "en": "Removes the Copilot button from the taskbar and blocks the Copilot sidebar. The standalone Copilot app can be removed in the Debloat section from version 1.0."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Software\\Policies\\Microsoft\\Windows\\WindowsCopilot",
+        "name": "TurnOffWindowsCopilot",
+        "kind": "DWord",
+        "value": "1"
+      },
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+        "name": "ShowCopilotButton",
+        "kind": "DWord",
+        "value": "0",
+        "default": "1"
+      }
+    ]
+  },
+  {
+    "id": "privacy.recall.off",
+    "category": "Privacy",
+    "risk": "Medium",
+    "restart": "Reboot",
+    "minBuild": 26100,
+    "title": {
+      "de": "Recall ausschalten",
+      "en": "Turn off Recall"
+    },
+    "description": {
+      "de": "Recall macht auf Copilot+ PCs laufend Bildschirmfotos und durchsucht sie. Der Tweak verhindert die Aufnahmen und sperrt die Funktion.",
+      "en": "Recall continuously takes screenshots on Copilot+ PCs and makes them searchable. This tweak prevents the snapshots and blocks the feature."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "key": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsAI",
+        "name": "DisableAIDataAnalysis",
+        "kind": "DWord",
+        "value": "1"
+      },
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "key": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsAI",
+        "name": "AllowRecallEnablement",
+        "kind": "DWord",
+        "value": "0"
+      }
     ]
   }
 ]

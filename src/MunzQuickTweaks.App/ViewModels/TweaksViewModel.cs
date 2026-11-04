@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using MunzQuickTweaks.App.Services;
@@ -13,18 +14,33 @@ public sealed partial class TweakGroupViewModel : ObservableObject
     {
         Category = category;
         Items = new ObservableCollection<TweakItemViewModel>(items);
+        foreach (var item in Items)
+        {
+            item.PropertyChanged += OnItemChanged;
+        }
     }
 
     public TweakCategory Category { get; }
 
     public ObservableCollection<TweakItemViewModel> Items { get; }
 
+    /// <summary>Kategorie ausblenden, wenn kein Tweak darin sichtbar ist.</summary>
+    public bool HasVisibleItems => Items.Any(i => i.IsVisible);
+
     [ObservableProperty]
     private string _title = string.Empty;
+
+    private void OnItemChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(TweakItemViewModel.IsVisible))
+        {
+            OnPropertyChanged(nameof(HasVisibleItems));
+        }
+    }
 }
 
-/// <summary>Alle Tweaks, nach Kategorie gruppiert.</summary>
-public sealed class TweaksViewModel : PageViewModel
+/// <summary>Alle Tweaks, nach Kategorie gruppiert, mit Suche.</summary>
+public sealed partial class TweaksViewModel : PageViewModel
 {
     private readonly TweakService _service;
     private readonly LocalizationService _localization;
@@ -46,6 +62,17 @@ public sealed class TweaksViewModel : PageViewModel
         CatalogError = service.CatalogError;
         RefreshGroupTitles();
 
+        foreach (var item in AllItems)
+        {
+            item.PropertyChanged += (_, e) =>
+            {
+                if (e.PropertyName is nameof(TweakItemViewModel.IsOn) or nameof(TweakItemViewModel.IsVisible))
+                {
+                    UpdateSummary();
+                }
+            };
+        }
+
         localization.LanguageChanged += (_, _) =>
         {
             RefreshGroupTitles();
@@ -53,6 +80,8 @@ public sealed class TweaksViewModel : PageViewModel
             {
                 item.RefreshTexts();
             }
+
+            ApplyFilter();
         };
     }
 
@@ -64,6 +93,19 @@ public sealed class TweaksViewModel : PageViewModel
 
     public bool HasCatalogError => CatalogError is not null;
 
+    public bool IsForeignAccount => _service.IsForeignAccount;
+
+    [ObservableProperty]
+    private string _searchText = string.Empty;
+
+    [ObservableProperty]
+    private bool _hasNoResults;
+
+    [ObservableProperty]
+    private string _summary = string.Empty;
+
+    partial void OnSearchTextChanged(string value) => ApplyFilter();
+
     public override async Task OnNavigatedToAsync()
     {
         // Status bei jedem Öffnen neu lesen: Windows-Updates oder andere Tools können Werte ändern
@@ -73,6 +115,26 @@ public sealed class TweaksViewModel : PageViewModel
         {
             items[i].Status = statuses[i];
         }
+
+        ApplyFilter();
+    }
+
+    private void ApplyFilter()
+    {
+        foreach (var item in AllItems)
+        {
+            item.ApplyFilter(SearchText);
+        }
+
+        UpdateSummary();
+    }
+
+    private void UpdateSummary()
+    {
+        var visible = AllItems.Count(i => i.IsVisible);
+        var active = AllItems.Count(i => i.IsOn);
+        HasNoResults = visible == 0;
+        Summary = string.Format(System.Globalization.CultureInfo.CurrentCulture, _localization.Get("Tweaks.Summary"), visible, active);
     }
 
     private void RefreshGroupTitles()

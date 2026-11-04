@@ -160,6 +160,19 @@ public class StringResourceTests
         Assert.Empty(problems);
     }
 
+    // Ein Text, der mit "{" beginnt, wird von WPF als Markup-Erweiterung gelesen und bricht beim Laden ab
+    [Theory]
+    [InlineData("Strings.de.xaml")]
+    [InlineData("Strings.en.xaml")]
+    public void No_string_starts_with_a_brace(string fileName)
+    {
+        var path = Path.Combine(FindRepoRoot(), "src", "MunzQuickTweaks.App", "Resources", fileName);
+        var bad = XDocument.Load(path).Root!.Elements()
+            .Where(e => e.Value.TrimStart().StartsWith('{'))
+            .Select(e => (string?)e.Attribute(X + "Key"));
+        Assert.Empty(bad);
+    }
+
     private static HashSet<string> ReadKeys(string fileName)
     {
         var path = Path.Combine(FindRepoRoot(), "src", "MunzQuickTweaks.App", "Resources", fileName);

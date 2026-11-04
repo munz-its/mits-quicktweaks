@@ -14,8 +14,239 @@
       "en": "Windows can record the last minutes of gameplay in the background. This costs performance even if you never use it. Recording with the Xbox Game Bar is off until you undo the tweak."
     },
     "actions": [
-      { "type": "registry", "hive": "HKCU", "key": "System\\GameConfigStore", "name": "GameDVR_Enabled", "kind": "DWord", "value": "0", "default": "1" },
-      { "type": "registry", "hive": "HKCU", "key": "Software\\Microsoft\\Windows\\CurrentVersion\\GameDVR", "name": "AppCaptureEnabled", "kind": "DWord", "value": "0", "default": "1" }
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "System\\GameConfigStore",
+        "name": "GameDVR_Enabled",
+        "kind": "DWord",
+        "value": "0",
+        "default": "1"
+      },
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Software\\Microsoft\\Windows\\CurrentVersion\\GameDVR",
+        "name": "AppCaptureEnabled",
+        "kind": "DWord",
+        "value": "0",
+        "default": "1"
+      }
+    ]
+  },
+  {
+    "id": "gaming.mouseaccel.off",
+    "category": "Gaming",
+    "risk": "Low",
+    "restart": "SignOut",
+    "minBuild": 19045,
+    "title": {
+      "de": "Mausbeschleunigung ausschalten",
+      "en": "Turn off mouse acceleration"
+    },
+    "description": {
+      "de": "Schaltet \"Zeigerbeschleunigung verbessern\" ab. Der Mauszeiger bewegt sich dann immer gleich weit, egal wie schnell du die Maus bewegst. Wichtig für genaues Zielen in Shootern.",
+      "en": "Turns off \"Enhance pointer precision\". The pointer then always moves the same distance, no matter how fast you move the mouse. Important for precise aiming in shooters."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Control Panel\\Mouse",
+        "name": "MouseSpeed",
+        "kind": "String",
+        "value": "0",
+        "default": "1"
+      },
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Control Panel\\Mouse",
+        "name": "MouseThreshold1",
+        "kind": "String",
+        "value": "0",
+        "default": "6"
+      },
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Control Panel\\Mouse",
+        "name": "MouseThreshold2",
+        "kind": "String",
+        "value": "0",
+        "default": "10"
+      }
+    ]
+  },
+  {
+    "id": "gaming.stickykeys.off",
+    "category": "Gaming",
+    "risk": "Low",
+    "restart": "SignOut",
+    "minBuild": 19045,
+    "title": {
+      "de": "Einrastfunktion-Abfrage ausschalten",
+      "en": "Turn off Sticky Keys prompt"
+    },
+    "description": {
+      "de": "Verhindert, dass fünfmaliges Drücken der Umschalttaste mitten im Spiel das Fenster für die Einrastfunktion öffnet.",
+      "en": "Prevents pressing Shift five times in the middle of a game from opening the Sticky Keys window."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Control Panel\\Accessibility\\StickyKeys",
+        "name": "Flags",
+        "kind": "String",
+        "value": "506",
+        "default": "510"
+      }
+    ]
+  },
+  {
+    "id": "gaming.windowed.optimize",
+    "category": "Gaming",
+    "risk": "Low",
+    "restart": "None",
+    "minBuild": 22621,
+    "title": {
+      "de": "Optimierungen für Spiele im Fenster",
+      "en": "Optimizations for windowed games"
+    },
+    "description": {
+      "de": "Spiele im Fenster- oder randlosen Modus nutzen das moderne Präsentationsmodell von DirectX. Das senkt die Latenz und ermöglicht variable Bildwiederholraten.",
+      "en": "Games in windowed or borderless mode use the modern DirectX presentation model. This lowers latency and enables variable refresh rates."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Software\\Microsoft\\DirectX\\UserGpuPreferences",
+        "name": "DirectXUserGlobalSettings",
+        "kind": "String",
+        "value": "SwapEffectUpgradeEnable=1;"
+      }
+    ]
+  },
+  {
+    "id": "gaming.mmcss.games",
+    "category": "Gaming",
+    "risk": "Low",
+    "restart": "Reboot",
+    "minBuild": 19045,
+    "title": {
+      "de": "Höhere Priorität für Spiele",
+      "en": "Higher priority for games"
+    },
+    "description": {
+      "de": "Der Windows-Multimediadienst gibt Spielen mehr Prozessor- und Datenträger-Priorität gegenüber Hintergrundaufgaben.",
+      "en": "The Windows multimedia service gives games more processor and disk priority over background tasks."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "key": "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games",
+        "name": "Priority",
+        "kind": "DWord",
+        "value": "6",
+        "default": "2"
+      },
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "key": "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games",
+        "name": "Scheduling Category",
+        "kind": "String",
+        "value": "High",
+        "default": "Medium"
+      },
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "key": "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games",
+        "name": "SFIO Priority",
+        "kind": "String",
+        "value": "High",
+        "default": "Normal"
+      }
+    ]
+  },
+  {
+    "id": "gaming.responsiveness",
+    "category": "Gaming",
+    "risk": "Low",
+    "restart": "Reboot",
+    "minBuild": 19045,
+    "title": {
+      "de": "Weniger Prozessor für Hintergrundaufgaben",
+      "en": "Less processor for background tasks"
+    },
+    "description": {
+      "de": "Windows reserviert standardmäßig 20 Prozent der Rechenzeit für Hintergrundaufgaben, während Multimedia läuft. Der Tweak senkt das auf 10 Prozent.",
+      "en": "By default, Windows reserves 20 percent of processor time for background tasks while multimedia is running. This tweak lowers it to 10 percent."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "key": "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile",
+        "name": "SystemResponsiveness",
+        "kind": "DWord",
+        "value": "10",
+        "default": "20"
+      }
+    ]
+  },
+  {
+    "id": "gaming.hags.on",
+    "category": "Gaming",
+    "risk": "Medium",
+    "restart": "Reboot",
+    "minBuild": 19045,
+    "title": {
+      "de": "Hardwarebeschleunigte GPU-Planung",
+      "en": "Hardware-accelerated GPU scheduling"
+    },
+    "description": {
+      "de": "Die Grafikkarte verwaltet ihren Arbeitsspeicher selbst statt über Windows. Kann die Latenz senken und ist für DLSS Frame Generation nötig. Braucht eine aktuelle NVIDIA-, AMD- oder Intel-Grafikkarte mit aktuellem Treiber.",
+      "en": "The graphics card manages its own memory instead of Windows. Can lower latency and is required for DLSS Frame Generation. Needs a current NVIDIA, AMD or Intel graphics card with an up-to-date driver."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "key": "SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers",
+        "name": "HwSchMode",
+        "kind": "DWord",
+        "value": "2"
+      }
+    ]
+  },
+  {
+    "id": "gaming.powerthrottling.off",
+    "category": "Gaming",
+    "risk": "Medium",
+    "restart": "Reboot",
+    "minBuild": 19045,
+    "title": {
+      "de": "Leistungsdrosselung ausschalten",
+      "en": "Turn off power throttling"
+    },
+    "description": {
+      "de": "Windows bremst Programme im Hintergrund, um Strom zu sparen. Abgeschaltet laufen alle Programme mit voller Leistung. Kostet auf Laptops Akkulaufzeit.",
+      "en": "Windows slows down background programs to save power. Turned off, all programs run at full performance. Costs battery life on laptops."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "key": "SYSTEM\\CurrentControlSet\\Control\\Power\\PowerThrottling",
+        "name": "PowerThrottlingOff",
+        "kind": "DWord",
+        "value": "1"
+      }
     ]
   }
 ]

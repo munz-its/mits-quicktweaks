@@ -4,7 +4,7 @@ Kostenlose Windows-App von Munz IT Service. Macht Windows 10 22H2 und Windows 11
 
 ## Stand
 
-Version 0.3.0, Phase 3 (Sicherheit): Wiederherstellungspunkt vor dem ersten Tweak jeder Sitzung, Prüfung des Systemschutzes, .reg-Export vor dem ersten Anwenden, Logging mit Serilog, Seite Wiederherstellung mit Änderungsprotokoll und "Alle zurücksetzen".
+Version 0.4.0, Phase 4 (Katalog): 56 Tweaks in 6 Kategorien, Energieplan Ultimative Leistung, Suche, unpassende Tweaks werden ausgeblendet, Sperre der Benutzer-Tweaks bei fremdem Admin-Konto.
 
 ## Technik
 
@@ -20,7 +20,7 @@ Version 0.3.0, Phase 3 (Sicherheit): Wiederherstellungspunkt vor dem ersten Twea
 | src/MunzQuickTweaks.Core | Plattformunabhängige Logik, Einstellungen |
 | src/MunzQuickTweaks.Windows | Zugriff auf Registry und WMI |
 | tests/MunzQuickTweaks.Tests | Unit-Tests |
-| catalog | Tweak-Definitionen als JSON (ab Phase 2) |
+| catalog | Tweak-Definitionen als JSON, eine Datei pro Kategorie |
 
 ## Bauen
 

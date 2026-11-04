@@ -74,7 +74,8 @@ public static partial class CatalogLoader
             switch (action)
             {
                 case RegistryAction r:
-                    if (string.IsNullOrWhiteSpace(r.Key) || string.IsNullOrWhiteSpace(r.Name))
+                    // Leerer Name = Standardwert des Schlüssels (z. B. für das klassische Kontextmenü)
+                    if (string.IsNullOrWhiteSpace(r.Key) || r.Name is null)
                     {
                         Fail("Registry-Aktion braucht Key und Name");
                     }
@@ -87,6 +88,19 @@ public static partial class CatalogLoader
                     if (!IsValidData(r.Kind, r.Value) || (r.Default is not null && !IsValidData(r.Kind, r.Default)))
                     {
                         Fail($"Wert passt nicht zum Typ {r.Kind}");
+                    }
+
+                    break;
+
+                case PowerPlanAction p:
+                    if (!Guid.TryParse(p.Template, out _))
+                    {
+                        Fail("Energieplan braucht eine gültige GUID als Template");
+                    }
+
+                    if (t.Actions.Count != 1)
+                    {
+                        Fail("Energieplan muss die einzige Aktion sein");
                     }
 
                     break;

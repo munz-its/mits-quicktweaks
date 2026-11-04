@@ -27,6 +27,11 @@ public sealed class TweakService
         _history = history;
         _log = log;
         _catalog = new Lazy<(IReadOnlyList<TweakDefinition>, string?)>(LoadCatalog);
+
+        if (!engine.UserHiveAllowed)
+        {
+            _log.LogWarning("Fremdes Admin-Konto erkannt: Benutzer-Tweaks gesperrt");
+        }
     }
 
     public TweakEngine Engine { get; }
@@ -51,6 +56,9 @@ public sealed class TweakService
             return TweakStatus.NotAvailable;
         }
     }
+
+    /// <summary>App läuft unter einem anderen Konto als dem angemeldeten Nutzer.</summary>
+    public bool IsForeignAccount => !Engine.UserHiveAllowed;
 
     public TweakDefinition? Find(string id) => Tweaks.FirstOrDefault(t => t.Id == id);
 

@@ -327,7 +327,145 @@ public class CatalogTests
             .ToList();
 
         var tweaks = CatalogLoader.Load(files);
-        Assert.Equal(5, tweaks.Count);
-        Assert.All(tweaks, t => Assert.Equal(TweakRisk.Low, t.Risk));
+        Assert.InRange(tweaks.Count, 50, 80);
+
+        // Jede Kategorie ist vertreten, Dienst- und Energieplan-Tweaks sind nie "Niedrig" ohne Grund
+        Assert.Equal(Enum.GetValues<TweakCategory>().Length, tweaks.Select(t => t.Category).Distinct().Count());
+        Assert.All(tweaks.Where(t => t.Actions.OfType<PowerPlanAction>().Any()), t => Assert.Equal(TweakRisk.Medium, t.Risk));
+
+        // Policy-Werte ohne Standard werden beim Rückgängig gelöscht: nur unter Policies erlaubt oder bewusst gewählt
+        var allowedWithoutDefault = new[] { "Policies", "Serialize", "Siuf", "GraphicsDrivers", "PowerThrottling", "UserGpuPreferences", "International", "CLSID", "Advanced", @"CurrentVersion\Search" };
+        foreach (var action in tweaks.SelectMany(t => t.Actions).OfType<RegistryAction>().Where(a => a.Default is null))
+        {
+            Assert.Contains(allowedWithoutDefault, part => action.Key.Contains(part, StringComparison.OrdinalIgnoreCase));
+        }
+    }
+}
+
+internal sealed class FakePowerPlans : IPowerPlans
+{
+    public static readonly Guid Ultimate = new("e9a42b02-d5df-448d-aa00-03f14749eb61");
+
+    public HashSet<Guid> Schemes { get; } = new() { TweakEngine.BalancedScheme };
+
+    public Guid Active { get; set; } = TweakEngine.BalancedScheme;
+
+    public bool IsSupported { get; set; } = true;
+
+    public Guid GetActive() => Active;
+
+    public bool Exists(Guid scheme) => Schemes.Contains(scheme);
+
+    public Guid Duplicate(Guid template)
+    {
+        var created = Guid.NewGuid();
+        Schemes.Add(created);
+        return created;
+    }
+
+    public void SetActive(Guid scheme)
+    {
+        if (!Schemes.Contains(scheme))
+        {
+            throw new IOException("Plan fehlt");
+        }
+
+        Active = scheme;
+    }
+
+    public void Delete(Guid scheme) => Schemes.Remove(scheme);
+}
+
+public sealed class PowerPlanAndAccountTests : IDisposable
+{
+    private readonly string _dir = Path.Combine(Path.GetTempPath(), "mqt-power-" + Guid.NewGuid().ToString("N"));
+    private readonly FakeRegistry _reg = new();
+    private readonly FakePowerPlans _power = new();
+
+    private static TweakDefinition Ultimate() => new()
+    {
+        Id = "perf.powerplan.ultimate",
+        Title = new() { De = "x", En = "x" },
+        Description = new() { De = "x", En = "x" },
+        Actions = { new PowerPlanAction { Template = FakePowerPlans.Ultimate.ToString() } },
+    };
+
+    private TweakEngine CreateEngine() => new(_reg, new JournalStore(Path.Combine(_dir, "j.json")), new FakeNotifier(), 26100, _power);
+
+    [Fact]
+    public void Missing_plan_is_created_activated_and_removed_on_revert()
+    {
+        var engine = CreateEngine();
+
+        Assert.True(engine.Apply(Ultimate()).Success);
+        Assert.Equal(2, _power.Schemes.Count);
+        Assert.Equal(TweakStatus.Applied, engine.GetStatus(Ultimate()));
+
+        Assert.True(engine.Revert(Ultimate()).Success);
+        Assert.Equal(TweakEngine.BalancedScheme, _power.Active);
+        Assert.Single(_power.Schemes);
+    }
+
+    [Fact]
+    public void Existing_plan_is_used_and_kept_on_revert()
+    {
+        _power.Schemes.Add(FakePowerPlans.Ultimate);
+        var engine = CreateEngine();
+
+        engine.Apply(Ultimate());
+        Assert.Equal(FakePowerPlans.Ultimate, _power.Active);
+
+        engine.Revert(Ultimate());
+        Assert.Contains(FakePowerPlans.Ultimate, _power.Schemes);
+        Assert.Equal(TweakEngine.BalancedScheme, _power.Active);
+    }
+
+    [Fact]
+    public void Reapplying_does_not_create_a_second_plan()
+    {
+        var engine = CreateEngine();
+        engine.Apply(Ultimate());
+        engine.Apply(Ultimate());
+
+        Assert.Equal(2, _power.Schemes.Count);
+    }
+
+    [Fact]
+    public void Modern_standby_makes_power_tweak_unavailable()
+    {
+        _power.IsSupported = false;
+        Assert.Equal(TweakStatus.NotAvailable, CreateEngine().GetStatus(Ultimate()));
+    }
+
+    [Fact]
+    public void Foreign_account_blocks_only_user_tweaks()
+    {
+        var user = new TweakDefinition
+        {
+            Id = "ui.a.b",
+            Actions = { new RegistryAction { Hive = RegistryHive.HKCU, Key = @"Software\X", Name = "A", Kind = RegistryKind.DWord, Value = "1" } },
+        };
+        var machine = new TweakDefinition
+        {
+            Id = "net.a.b",
+            Actions = { new RegistryAction { Hive = RegistryHive.HKLM, Key = @"SOFTWARE\X", Name = "A", Kind = RegistryKind.DWord, Value = "1" } },
+        };
+
+        var engine = CreateEngine();
+        engine.UserHiveAllowed = false;
+
+        Assert.True(engine.IsBlockedByAccount(user));
+        Assert.Equal(TweakStatus.NotAvailable, engine.GetStatus(user));
+        Assert.False(engine.Apply(user).Success);
+        Assert.False(engine.IsBlockedByAccount(machine));
+        Assert.True(engine.Apply(machine).Success);
+    }
+
+    public void Dispose()
+    {
+        if (Directory.Exists(_dir))
+        {
+            Directory.Delete(_dir, recursive: true);
+        }
     }
 }

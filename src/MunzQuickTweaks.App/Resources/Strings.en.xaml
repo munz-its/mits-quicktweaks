@@ -111,4 +111,9 @@ Every previous value is saved by the app in any case.</sys:String>
     <sys:String x:Key="History.RestorePointSkipped">Continued without restore point</sys:String>
     <sys:String x:Key="History.ProtectionEnabled">System Protection turned on</sys:String>
     <sys:String x:Key="History.RegistryExported">Registry backed up</sys:String>
+    <sys:String x:Key="Tweaks.Search">Search tweaks …</sys:String>
+    <sys:String x:Key="Tweaks.Summary">Tweaks: {0} · active: {1}</sys:String>
+    <sys:String x:Key="Tweaks.NoResults">No matching tweaks found.</sys:String>
+    <sys:String x:Key="Tweaks.ForeignAccount">⚠️ The app runs under a different account than the signed-in user (started with another admin password). Tweaks for the user would land in the wrong account and are therefore blocked. System-wide tweaks work. For all tweaks: sign in with an admin account and start the app there.</sys:String>
+    <sys:String x:Key="Tweak.BlockedAccount">Blocked: affects the signed-in user, but the app runs under a different account.</sys:String>
 </ResourceDictionary>

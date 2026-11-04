@@ -14,7 +14,15 @@
       "en": "Shows extensions like .exe or .pdf in Explorer. You see at once whether a file is a program and are not fooled by disguised files like invoice.pdf.exe."
     },
     "actions": [
-      { "type": "registry", "hive": "HKCU", "key": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "name": "HideFileExt", "kind": "DWord", "value": "0", "default": "1" }
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+        "name": "HideFileExt",
+        "kind": "DWord",
+        "value": "0",
+        "default": "1"
+      }
     ]
   },
   {
@@ -32,7 +40,289 @@
       "en": "Shows hidden files and folders like AppData in Explorer. Useful for cleaning up and troubleshooting. Protected system files stay hidden."
     },
     "actions": [
-      { "type": "registry", "hive": "HKCU", "key": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "name": "Hidden", "kind": "DWord", "value": "1", "default": "2" }
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+        "name": "Hidden",
+        "kind": "DWord",
+        "value": "1",
+        "default": "2"
+      }
+    ]
+  },
+  {
+    "id": "ui.explorer.thispc",
+    "category": "Interface",
+    "risk": "Low",
+    "restart": "None",
+    "minBuild": 19045,
+    "title": {
+      "de": "Explorer startet mit \"Dieser PC\"",
+      "en": "Explorer opens to \"This PC\""
+    },
+    "description": {
+      "de": "Ein neues Explorer-Fenster zeigt direkt deine Laufwerke statt Schnellzugriff oder Start.",
+      "en": "A new Explorer window shows your drives right away instead of Quick access or Home."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+        "name": "LaunchTo",
+        "kind": "DWord",
+        "value": "1"
+      }
+    ]
+  },
+  {
+    "id": "ui.contextmenu.classic",
+    "category": "Interface",
+    "risk": "Low",
+    "restart": "SignOut",
+    "minBuild": 22000,
+    "title": {
+      "de": "Klassisches Kontextmenü",
+      "en": "Classic context menu"
+    },
+    "description": {
+      "de": "Ein Rechtsklick zeigt wieder sofort alle Optionen wie in Windows 10, ohne Umweg über \"Weitere Optionen anzeigen\".",
+      "en": "Right-click shows all options right away again, like in Windows 10, without going through \"Show more options\"."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Software\\Classes\\CLSID\\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\\InprocServer32",
+        "name": "",
+        "kind": "String",
+        "value": ""
+      }
+    ]
+  },
+  {
+    "id": "ui.taskbar.left",
+    "category": "Interface",
+    "risk": "Low",
+    "restart": "None",
+    "minBuild": 22000,
+    "title": {
+      "de": "Taskleiste links ausrichten",
+      "en": "Align taskbar left"
+    },
+    "description": {
+      "de": "Startmenü und App-Symbole sitzen wieder links wie bei Windows 10.",
+      "en": "Start menu and app icons sit on the left again, like in Windows 10."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+        "name": "TaskbarAl",
+        "kind": "DWord",
+        "value": "0",
+        "default": "1"
+      }
+    ]
+  },
+  {
+    "id": "ui.taskbar.searchicon",
+    "category": "Interface",
+    "risk": "Low",
+    "restart": "None",
+    "minBuild": 19045,
+    "title": {
+      "de": "Suche in der Taskleiste nur als Symbol",
+      "en": "Search on taskbar as icon only"
+    },
+    "description": {
+      "de": "Das breite Suchfeld in der Taskleiste wird zu einem kleinen Lupen-Symbol. Mehr Platz für deine Apps.",
+      "en": "The wide search box on the taskbar becomes a small magnifier icon. More room for your apps."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Software\\Microsoft\\Windows\\CurrentVersion\\Search",
+        "name": "SearchboxTaskbarMode",
+        "kind": "DWord",
+        "value": "1",
+        "default": "2"
+      }
+    ]
+  },
+  {
+    "id": "ui.taskview.off",
+    "category": "Interface",
+    "risk": "Low",
+    "restart": "None",
+    "minBuild": 19045,
+    "title": {
+      "de": "Taskansicht-Schaltfläche ausblenden",
+      "en": "Hide Task View button"
+    },
+    "description": {
+      "de": "Entfernt die Schaltfläche für die Taskansicht aus der Taskleiste. Win + Tab funktioniert weiterhin.",
+      "en": "Removes the Task View button from the taskbar. Win + Tab still works."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+        "name": "ShowTaskViewButton",
+        "kind": "DWord",
+        "value": "0",
+        "default": "1"
+      }
+    ]
+  },
+  {
+    "id": "ui.widgets.off",
+    "category": "Interface",
+    "risk": "Low",
+    "restart": "SignOut",
+    "minBuild": 19045,
+    "title": {
+      "de": "Widgets und News ausschalten",
+      "en": "Turn off widgets and news"
+    },
+    "description": {
+      "de": "Entfernt die Widgets mit Nachrichten und Wetter aus der Taskleiste und beendet ihre Hintergrundprozesse.",
+      "en": "Removes the widgets with news and weather from the taskbar and ends their background processes."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "key": "SOFTWARE\\Policies\\Microsoft\\Dsh",
+        "name": "AllowNewsAndInterests",
+        "kind": "DWord",
+        "value": "0"
+      },
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "key": "SOFTWARE\\Policies\\Microsoft\\Windows\\Windows Feeds",
+        "name": "EnableFeeds",
+        "kind": "DWord",
+        "value": "0"
+      }
+    ]
+  },
+  {
+    "id": "ui.endtask.on",
+    "category": "Interface",
+    "risk": "Low",
+    "restart": "None",
+    "minBuild": 22631,
+    "title": {
+      "de": "\"Task beenden\" in der Taskleiste",
+      "en": "\"End task\" on the taskbar"
+    },
+    "description": {
+      "de": "Ein Rechtsklick auf ein Taskleisten-Symbol bietet \"Task beenden\". Hängende Programme schließt du so ohne Task-Manager.",
+      "en": "Right-clicking a taskbar icon offers \"End task\". You close frozen programs without Task Manager."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced\\TaskbarDeveloperSettings",
+        "name": "TaskbarEndTask",
+        "kind": "DWord",
+        "value": "1",
+        "default": "0"
+      }
+    ]
+  },
+  {
+    "id": "ui.clock.seconds",
+    "category": "Interface",
+    "risk": "Low",
+    "restart": "None",
+    "minBuild": 22631,
+    "title": {
+      "de": "Sekunden in der Uhr anzeigen",
+      "en": "Show seconds in the clock"
+    },
+    "description": {
+      "de": "Die Uhr in der Taskleiste zeigt zusätzlich die Sekunden.",
+      "en": "The taskbar clock also shows seconds."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+        "name": "ShowSecondsInSystemClock",
+        "kind": "DWord",
+        "value": "1",
+        "default": "0"
+      }
+    ]
+  },
+  {
+    "id": "ui.darkmode.on",
+    "category": "Interface",
+    "risk": "Low",
+    "restart": "None",
+    "minBuild": 19045,
+    "title": {
+      "de": "Dunkelmodus für Windows und Apps",
+      "en": "Dark mode for Windows and apps"
+    },
+    "description": {
+      "de": "Schaltet Windows und Apps auf das dunkle Design um. Schont die Augen bei wenig Licht.",
+      "en": "Switches Windows and apps to the dark theme. Easier on the eyes in low light."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
+        "name": "AppsUseLightTheme",
+        "kind": "DWord",
+        "value": "0",
+        "default": "1"
+      },
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
+        "name": "SystemUsesLightTheme",
+        "kind": "DWord",
+        "value": "0",
+        "default": "1"
+      }
+    ]
+  },
+  {
+    "id": "ui.numlock.on",
+    "category": "Interface",
+    "risk": "Low",
+    "restart": "SignOut",
+    "minBuild": 19045,
+    "title": {
+      "de": "Num-Taste beim Start an",
+      "en": "Num Lock on at startup"
+    },
+    "description": {
+      "de": "Der Ziffernblock ist nach der Anmeldung sofort aktiv.",
+      "en": "The numeric keypad is active right after sign-in."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Control Panel\\Keyboard",
+        "name": "InitialKeyboardIndicators",
+        "kind": "String",
+        "value": "2",
+        "default": "0"
+      }
     ]
   }
 ]

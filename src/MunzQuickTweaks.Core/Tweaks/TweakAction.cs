@@ -31,6 +31,7 @@ public enum ServiceStartType
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
 [JsonDerivedType(typeof(RegistryAction), "registry")]
 [JsonDerivedType(typeof(ServiceAction), "service")]
+[JsonDerivedType(typeof(PowerPlanAction), "powerPlan")]
 public abstract class TweakAction
 {
 }
@@ -65,4 +66,14 @@ public sealed class ServiceAction : TweakAction
 
     /// <summary>Windows-Standard für Rückgängig ohne Journal-Eintrag.</summary>
     public ServiceStartType Default { get; set; } = ServiceStartType.Manual;
+}
+
+/// <summary>
+/// Aktiviert einen Energieplan. Fehlt der Plan (z. B. Ultimative Leistung), wird er aus der Vorlage erzeugt
+/// und beim Rückgängig wieder gelöscht. Muss die einzige Aktion des Tweaks sein.
+/// </summary>
+public sealed class PowerPlanAction : TweakAction
+{
+    /// <summary>GUID der Vorlage, z. B. e9a42b02-d5df-448d-aa00-03f14749eb61 für Ultimative Leistung.</summary>
+    public string Template { get; set; } = string.Empty;
 }

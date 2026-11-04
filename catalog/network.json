@@ -1,0 +1,78 @@
+[
+  {
+    "id": "net.deliveryopt.p2p.off",
+    "category": "Network",
+    "risk": "Low",
+    "restart": "None",
+    "minBuild": 19045,
+    "title": {
+      "de": "Update-Verteilung per P2P ausschalten",
+      "en": "Turn off peer-to-peer update delivery"
+    },
+    "description": {
+      "de": "Windows lädt Updates sonst auch von anderen PCs und verteilt sie selbst weiter, teils über das Internet. Ausgeschaltet kommen Updates nur noch von Microsoft und deine Upload-Bandbreite bleibt frei.",
+      "en": "Windows otherwise downloads updates from other PCs and shares them itself, partly over the internet. Turned off, updates only come from Microsoft and your upload bandwidth stays free."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "key": "SOFTWARE\\Policies\\Microsoft\\Windows\\DeliveryOptimization",
+        "name": "DODownloadMode",
+        "kind": "DWord",
+        "value": "0"
+      }
+    ]
+  },
+  {
+    "id": "net.throttling.off",
+    "category": "Network",
+    "risk": "Medium",
+    "restart": "Reboot",
+    "minBuild": 19045,
+    "title": {
+      "de": "Netzwerkdrosselung bei Multimedia aufheben",
+      "en": "Remove network throttling for multimedia"
+    },
+    "description": {
+      "de": "Windows begrenzt den Netzwerkdurchsatz, während Multimedia läuft. Ohne Begrenzung kann der Ping in Online-Spielen stabiler sein. Auf manchen Systemen ohne messbaren Effekt.",
+      "en": "Windows limits network throughput while multimedia is playing. Without the limit, ping in online games can be more stable. No measurable effect on some systems."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "key": "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile",
+        "name": "NetworkThrottlingIndex",
+        "kind": "DWord",
+        "value": "4294967295",
+        "default": "10"
+      }
+    ]
+  },
+  {
+    "id": "net.llmnr.off",
+    "category": "Network",
+    "risk": "Medium",
+    "restart": "None",
+    "minBuild": 19045,
+    "title": {
+      "de": "LLMNR ausschalten",
+      "en": "Turn off LLMNR"
+    },
+    "description": {
+      "de": "LLMNR löst Gerätenamen im lokalen Netz ohne DNS auf und ist ein bekanntes Einfallstor für Angriffe in öffentlichen Netzen. In Heimnetzen mit Router fällt meist nichts weg. Fehlt danach ein Gerät im Netzwerk, setze den Tweak zurück.",
+      "en": "LLMNR resolves device names on the local network without DNS and is a known attack vector on public networks. In home networks with a router, usually nothing is lost. If a device goes missing on the network afterwards, undo the tweak."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "key": "SOFTWARE\\Policies\\Microsoft\\Windows NT\\DNSClient",
+        "name": "EnableMulticast",
+        "kind": "DWord",
+        "value": "0"
+      }
+    ]
+  }
+]

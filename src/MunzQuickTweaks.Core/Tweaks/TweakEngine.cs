@@ -27,28 +27,51 @@ public sealed class TweakEngine
 {
     private const string ServicesKey = @"SYSTEM\CurrentControlSet\Services\";
 
+    /// <summary>Plan "Ausbalanciert", Rückfallebene wenn der vorherige Plan nicht mehr existiert.</summary>
+    public static readonly Guid BalancedScheme = new("381b4222-f694-41f0-9685-ff5bb260df2e");
+
     private readonly IRegistry _registry;
     private readonly JournalStore _journal;
     private readonly ISystemNotifier _notifier;
     private readonly int _build;
     private readonly TimeProvider _time;
+    private readonly IPowerPlans? _power;
 
-    public TweakEngine(IRegistry registry, JournalStore journal, ISystemNotifier notifier, int build, TimeProvider? time = null)
+    public TweakEngine(IRegistry registry, JournalStore journal, ISystemNotifier notifier, int build, IPowerPlans? power = null, TimeProvider? time = null)
     {
         _registry = registry;
         _journal = journal;
         _notifier = notifier;
         _build = build;
+        _power = power;
         _time = time ?? TimeProvider.System;
     }
 
     public JournalStore Journal => _journal;
+
+    /// <summary>
+    /// False, wenn die App unter einem fremden Admin-Konto läuft: Benutzer-Einstellungen (HKCU)
+    /// würden dann im falschen Konto landen und werden gesperrt.
+    /// </summary>
+    public bool UserHiveAllowed { get; set; } = true;
+
+    /// <summary>True, wenn der Tweak Benutzer-Einstellungen (HKCU) ändert.</summary>
+    public static bool UsesUserHive(TweakDefinition tweak) =>
+        tweak.Actions.OfType<RegistryAction>().Any(a => a.Hive == RegistryHive.HKCU);
+
+    /// <summary>True, wenn der Tweak nur wegen des fremden Kontos gesperrt ist.</summary>
+    public bool IsBlockedByAccount(TweakDefinition tweak) => !UserHiveAllowed && UsesUserHive(tweak);
 
     public TweakStatus GetStatus(TweakDefinition tweak)
     {
         if (!IsAvailable(tweak))
         {
             return TweakStatus.NotAvailable;
+        }
+
+        if (PowerAction(tweak) is { } plan)
+        {
+            return PowerStatus(tweak, plan);
         }
 
         var steps = Expand(tweak).ToList();
@@ -63,6 +86,11 @@ public sealed class TweakEngine
         if (!IsAvailable(tweak))
         {
             return TweakResult.Fail("Auf diesem System nicht verfügbar.");
+        }
+
+        if (PowerAction(tweak) is { } plan)
+        {
+            return ApplyPower(tweak, plan);
         }
 
         var steps = Expand(tweak).ToList();
@@ -114,6 +142,11 @@ public sealed class TweakEngine
 
     public TweakResult Revert(TweakDefinition tweak)
     {
+        if (PowerAction(tweak) is not null)
+        {
+            return RevertPower(tweak);
+        }
+
         var entry = _journal.Get(tweak.Id);
         var steps = Expand(tweak).ToList();
         List<RegistrySnapshot> beforeRevert;
@@ -165,11 +198,17 @@ public sealed class TweakEngine
         Expand(tweak).Select(s => (s.Hive, s.Key)).Distinct().ToList();
 
     private static bool IsExpected(Exception ex) =>
-        ex is UnauthorizedAccessException or IOException or System.Security.SecurityException or NotSupportedException;
+        ex is UnauthorizedAccessException or IOException or System.Security.SecurityException or NotSupportedException
+            or System.Runtime.InteropServices.ExternalException;
 
     private bool IsAvailable(TweakDefinition tweak)
     {
-        if (!tweak.SupportsBuild(_build))
+        if (!tweak.SupportsBuild(_build) || IsBlockedByAccount(tweak))
+        {
+            return false;
+        }
+
+        if (PowerAction(tweak) is not null && (_power is null || !_power.IsSupported))
         {
             return false;
         }
@@ -263,6 +302,10 @@ public sealed class TweakEngine
                         s.Default == ServiceStartType.AutomaticDelayed ? "1" : "0");
                     break;
 
+                case PowerPlanAction:
+                    // Kein Registry-Schritt, läuft über die Energie-API
+                    break;
+
                 default:
                     throw new NotSupportedException($"Unbekannte Aktion: {action.GetType().Name}");
             }
@@ -276,6 +319,119 @@ public sealed class TweakEngine
         ServiceStartType.Disabled => "4",
         _ => throw new ArgumentOutOfRangeException(nameof(type)),
     };
+
+    private static PowerPlanAction? PowerAction(TweakDefinition tweak) => tweak.Actions.OfType<PowerPlanAction>().FirstOrDefault();
+
+    private TweakStatus PowerStatus(TweakDefinition tweak, PowerPlanAction plan)
+    {
+        try
+        {
+            var active = _power!.GetActive();
+            var created = (_journal.Get(tweak.Id)?.Snapshots.OfType<PowerPlanSnapshot>().FirstOrDefault())?.Created;
+            return active == Guid.Parse(plan.Template) || (created is not null && active == created)
+                ? TweakStatus.Applied
+                : TweakStatus.NotApplied;
+        }
+        catch (Exception ex) when (IsExpected(ex))
+        {
+            return TweakStatus.NotAvailable;
+        }
+    }
+
+    private TweakResult ApplyPower(TweakDefinition tweak, PowerPlanAction plan)
+    {
+        var power = _power!;
+        var template = Guid.Parse(plan.Template);
+        var existing = _journal.Get(tweak.Id)?.Snapshots.OfType<PowerPlanSnapshot>().FirstOrDefault();
+        Guid? createdNow = null;
+
+        try
+        {
+            // Kopie, damit ein Fehler den Journal-Eintrag im Speicher nicht verändert
+            var snapshot = existing is null
+                ? new PowerPlanSnapshot { PreviousActive = power.GetActive() }
+                : new PowerPlanSnapshot { PreviousActive = existing.PreviousActive, Created = existing.Created };
+
+            Guid target;
+            if (snapshot.Created is { } created && power.Exists(created))
+            {
+                target = created;
+            }
+            else if (power.Exists(template))
+            {
+                target = template;
+                snapshot.Created = null;
+            }
+            else
+            {
+                target = power.Duplicate(template);
+                createdNow = target;
+                snapshot.Created = target;
+            }
+
+            power.SetActive(target);
+            if (power.GetActive() != target)
+            {
+                throw new IOException("Energieplan wurde nicht aktiv.");
+            }
+
+            _journal.Set(new JournalEntry
+            {
+                TweakId = tweak.Id,
+                AppliedAt = _journal.Get(tweak.Id)?.AppliedAt ?? _time.GetUtcNow(),
+                Snapshots = new List<ActionSnapshot> { snapshot },
+            });
+            return TweakResult.Ok;
+        }
+        catch (Exception ex) when (IsExpected(ex))
+        {
+            if (createdNow is { } orphan)
+            {
+                TryDelete(orphan);
+            }
+
+            return TweakResult.Fail(ex.Message);
+        }
+    }
+
+    private TweakResult RevertPower(TweakDefinition tweak)
+    {
+        var power = _power;
+        if (power is null)
+        {
+            return TweakResult.Fail("Energieverwaltung nicht verfügbar.");
+        }
+
+        var snapshot = _journal.Get(tweak.Id)?.Snapshots.OfType<PowerPlanSnapshot>().FirstOrDefault();
+        try
+        {
+            var previous = snapshot is not null && power.Exists(snapshot.PreviousActive) ? snapshot.PreviousActive : BalancedScheme;
+            power.SetActive(previous);
+            if (snapshot?.Created is { } created)
+            {
+                power.Delete(created);
+            }
+        }
+        catch (Exception ex) when (IsExpected(ex))
+        {
+            return TweakResult.Fail(ex.Message);
+        }
+
+        _journal.Remove(tweak.Id);
+        return TweakResult.Ok;
+    }
+
+    private void TryDelete(Guid scheme)
+    {
+        try
+        {
+            _power?.Delete(scheme);
+        }
+        catch (Exception ex) when (IsExpected(ex))
+        {
+            // Aufräumen nach Fehler ist Bestmühe
+        }
+    }
 
     private sealed record Step(RegistryHive Hive, string Key, string Name, RegistryKind Kind, string Value, string? Default);
 }

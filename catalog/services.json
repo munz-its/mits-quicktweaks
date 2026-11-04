@@ -1,0 +1,188 @@
+[
+  {
+    "id": "services.diagtrack.off",
+    "category": "Services",
+    "risk": "Low",
+    "restart": "Reboot",
+    "minBuild": 19045,
+    "title": {
+      "de": "Telemetrie-Dienst ausschalten",
+      "en": "Turn off telemetry service"
+    },
+    "description": {
+      "de": "Der Dienst \"Benutzererfahrung und Telemetrie im verbundenen Modus\" sammelt Diagnosedaten und sendet sie an Microsoft.",
+      "en": "The \"Connected User Experiences and Telemetry\" service collects diagnostic data and sends it to Microsoft."
+    },
+    "actions": [
+      {
+        "type": "service",
+        "name": "DiagTrack",
+        "startType": "Disabled",
+        "default": "Automatic"
+      }
+    ]
+  },
+  {
+    "id": "services.mapsbroker.off",
+    "category": "Services",
+    "risk": "Low",
+    "restart": "Reboot",
+    "minBuild": 19045,
+    "title": {
+      "de": "Dienst für Offline-Karten ausschalten",
+      "en": "Turn off offline maps service"
+    },
+    "description": {
+      "de": "Lädt keine Offline-Karten mehr automatisch im Hintergrund. Die Karten-App funktioniert online weiter.",
+      "en": "No longer downloads offline maps in the background. The Maps app keeps working online."
+    },
+    "actions": [
+      {
+        "type": "service",
+        "name": "MapsBroker",
+        "startType": "Disabled",
+        "default": "AutomaticDelayed"
+      }
+    ]
+  },
+  {
+    "id": "services.retaildemo.off",
+    "category": "Services",
+    "risk": "Low",
+    "restart": "Reboot",
+    "minBuild": 19045,
+    "title": {
+      "de": "Händler-Demo-Dienst ausschalten",
+      "en": "Turn off retail demo service"
+    },
+    "description": {
+      "de": "Dieser Dienst ist nur für Vorführgeräte im Laden gedacht.",
+      "en": "This service is only meant for demo devices in stores."
+    },
+    "actions": [
+      {
+        "type": "service",
+        "name": "RetailDemo",
+        "startType": "Disabled",
+        "default": "Manual"
+      }
+    ]
+  },
+  {
+    "id": "services.fax.off",
+    "category": "Services",
+    "risk": "Low",
+    "restart": "Reboot",
+    "minBuild": 19045,
+    "title": {
+      "de": "Fax-Dienst ausschalten",
+      "en": "Turn off fax service"
+    },
+    "description": {
+      "de": "Schaltet den Windows-Fax-Dienst ab. Nur relevant, wenn du über den PC Faxe sendest.",
+      "en": "Turns off the Windows fax service. Only relevant if you send faxes from your PC."
+    },
+    "actions": [
+      {
+        "type": "service",
+        "name": "Fax",
+        "startType": "Disabled",
+        "default": "Manual"
+      }
+    ]
+  },
+  {
+    "id": "services.wer.off",
+    "category": "Services",
+    "risk": "Medium",
+    "restart": "Reboot",
+    "minBuild": 19045,
+    "title": {
+      "de": "Fehlerberichterstattung ausschalten",
+      "en": "Turn off error reporting"
+    },
+    "description": {
+      "de": "Abgestürzte Programme senden keine Fehlerberichte mehr an Microsoft. Dadurch entfallen aber auch automatische Lösungsvorschläge.",
+      "en": "Crashed programs no longer send error reports to Microsoft. Automatic solution suggestions are lost as well."
+    },
+    "actions": [
+      {
+        "type": "service",
+        "name": "WerSvc",
+        "startType": "Disabled",
+        "default": "Manual"
+      }
+    ]
+  },
+  {
+    "id": "services.tablet.off",
+    "category": "Services",
+    "risk": "Medium",
+    "restart": "Reboot",
+    "minBuild": 19045,
+    "title": {
+      "de": "Touch-Tastatur-Dienst ausschalten",
+      "en": "Turn off touch keyboard service"
+    },
+    "description": {
+      "de": "Nur für PCs ohne Touchscreen und Stift. Die Bildschirmtastatur, Handschrift und unter Windows 10 auch das Emoji-Feld (Win + Punkt) funktionieren danach nicht mehr.",
+      "en": "Only for PCs without touchscreen and pen. The touch keyboard, handwriting and on Windows 10 also the emoji panel (Win + period) stop working."
+    },
+    "actions": [
+      {
+        "type": "service",
+        "name": "TabletInputService",
+        "startType": "Disabled",
+        "default": "Manual"
+      }
+    ]
+  },
+  {
+    "id": "services.search.off",
+    "category": "Services",
+    "risk": "Medium",
+    "restart": "Reboot",
+    "minBuild": 19045,
+    "title": {
+      "de": "Windows-Suchindex ausschalten",
+      "en": "Turn off Windows search index"
+    },
+    "description": {
+      "de": "Windows indiziert keine Dateien mehr im Hintergrund. Spart Datenträger- und Prozessorlast, aber die Suche im Startmenü, im Explorer und in Outlook wird deutlich langsamer.",
+      "en": "Windows no longer indexes files in the background. Saves disk and processor load, but search in Start, Explorer and Outlook becomes much slower."
+    },
+    "actions": [
+      {
+        "type": "service",
+        "name": "WSearch",
+        "startType": "Disabled",
+        "default": "AutomaticDelayed"
+      }
+    ]
+  },
+  {
+    "id": "services.wudrivers.off",
+    "category": "Services",
+    "risk": "Medium",
+    "restart": "None",
+    "minBuild": 19045,
+    "title": {
+      "de": "Keine Treiber über Windows Update",
+      "en": "No drivers via Windows Update"
+    },
+    "description": {
+      "de": "Windows Update installiert keine Treiber mehr automatisch. Sinnvoll, wenn Windows deinen Grafiktreiber ständig durch eine ältere Version ersetzt. Treiber installierst du dann selbst vom Hersteller.",
+      "en": "Windows Update no longer installs drivers automatically. Useful if Windows keeps replacing your graphics driver with an older version. You then install drivers yourself from the manufacturer."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "key": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate",
+        "name": "ExcludeWUDriversInQualityUpdate",
+        "kind": "DWord",
+        "value": "1"
+      }
+    ]
+  }
+]

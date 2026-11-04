@@ -27,3 +27,21 @@ public interface ISystemNotifier
 {
     void RefreshExplorer();
 }
+
+/// <summary>Energiepläne über die Windows-Energie-API.</summary>
+public interface IPowerPlans
+{
+    /// <summary>False auf Geräten mit Modern Standby: dort gibt es nur den Plan "Ausbalanciert".</summary>
+    bool IsSupported { get; }
+
+    Guid GetActive();
+
+    bool Exists(Guid scheme);
+
+    /// <summary>Erzeugt eine Kopie der Vorlage und gibt die neue GUID zurück.</summary>
+    Guid Duplicate(Guid template);
+
+    void SetActive(Guid scheme);
+
+    void Delete(Guid scheme);
+}
