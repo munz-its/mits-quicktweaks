@@ -1,0 +1,18 @@
+<Project>
+  <!-- Gemeinsame Einstellungen für alle Projekte von Munz Quick Tweaks -->
+  <PropertyGroup>
+    <Version>0.1.0</Version>
+    <Product>Munz Quick Tweaks</Product>
+    <Company>Munz IT Service</Company>
+    <Authors>Mert Munz</Authors>
+    <Copyright>© 2026 Munz IT Service</Copyright>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <!-- Erlaubt das Bauen der Windows-Projekte auch auf Linux (nur Kompilieren, kein Starten) -->
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <DebugType>embedded</DebugType>
+    <SatelliteResourceLanguages>de;en</SatelliteResourceLanguages>
+  </PropertyGroup>
+</Project>

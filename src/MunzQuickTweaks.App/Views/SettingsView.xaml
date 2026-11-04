@@ -1,0 +1,68 @@
+<UserControl x:Class="MunzQuickTweaks.App.Views.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <StackPanel MaxWidth="720" HorizontalAlignment="Left">
+
+        <!-- Sprache -->
+        <Border Style="{StaticResource Card}" Margin="0,0,0,16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Margin="0,0,24,0" VerticalAlignment="Center">
+                    <TextBlock Text="{DynamicResource Settings.Language}" Style="{StaticResource H2}" FontSize="16" />
+                    <TextBlock Text="{DynamicResource Settings.LanguageHint}" Style="{StaticResource Muted}" Margin="0,4,0,0" />
+                </StackPanel>
+                <Border Grid.Column="1" Background="{StaticResource Bg3}" CornerRadius="8" BorderBrush="{StaticResource Line}" BorderThickness="1" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton Style="{StaticResource Segment}" GroupName="Lang" Content="{DynamicResource Settings.Lang.System}" IsChecked="{Binding IsSystemLanguage}" />
+                        <RadioButton Style="{StaticResource Segment}" GroupName="Lang" Content="{DynamicResource Settings.Lang.German}" IsChecked="{Binding IsGerman}" />
+                        <RadioButton Style="{StaticResource Segment}" GroupName="Lang" Content="{DynamicResource Settings.Lang.English}" IsChecked="{Binding IsEnglish}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- Animationen -->
+        <Border Style="{StaticResource Card}" Margin="0,0,0,16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Margin="0,0,24,0">
+                    <TextBlock Text="{DynamicResource Settings.Animations}" Style="{StaticResource H2}" FontSize="16" />
+                    <TextBlock Text="{DynamicResource Settings.AnimationsHint}" Style="{StaticResource Muted}" Margin="0,4,0,0" />
+                </StackPanel>
+                <CheckBox Grid.Column="1" Style="{StaticResource Toggle}" IsChecked="{Binding AnimationsEnabled}" VerticalAlignment="Center"
+                          AutomationProperties.Name="{DynamicResource Settings.Animations}" />
+            </Grid>
+        </Border>
+
+        <!-- Info -->
+        <Border Style="{StaticResource Card}">
+            <StackPanel>
+                <TextBlock Text="{DynamicResource Settings.About}" Style="{StaticResource H2}" FontSize="16" Margin="0,0,0,14" />
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,18">
+                    <TextBlock Text="{DynamicResource Settings.Version}" Style="{StaticResource Label}" Foreground="{StaticResource Muted}" />
+                    <TextBlock Text="{Binding Version}" Style="{StaticResource Label}" Margin="8,0,0,0" />
+                </StackPanel>
+
+                <TextBlock Text="{DynamicResource Settings.Imprint}" Style="{StaticResource Label}" Foreground="{StaticResource Muted}" Margin="0,0,0,6" />
+                <TextBlock Style="{StaticResource Body2}" Margin="0,0,0,18">
+                    Mert Munz, Munz IT Service<LineBreak />
+                    c/o IP-Management #10553<LineBreak />
+                    Ludwig-Erhard-Str. 18<LineBreak />
+                    20459 Hamburg<LineBreak />
+                    support@munz-its.de · munz-its.de
+                </TextBlock>
+
+                <TextBlock Text="{DynamicResource Settings.Privacy}" Style="{StaticResource Label}" Foreground="{StaticResource Muted}" Margin="0,0,0,6" />
+                <TextBlock Text="{DynamicResource Settings.PrivacyText}" Style="{StaticResource Body2}" Margin="0,0,0,18" />
+
+                <TextBlock Text="{DynamicResource Settings.Licenses}" Style="{StaticResource Muted}" />
+            </StackPanel>
+        </Border>
+    </StackPanel>
+</UserControl>

@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Plattformunabhängige Logik: Modelle, Einstellungen, später Tweak-Engine und Journal -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>MunzQuickTweaks.Core</RootNamespace>
+  </PropertyGroup>
+</Project>

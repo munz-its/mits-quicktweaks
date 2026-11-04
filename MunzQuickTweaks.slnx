@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/MunzQuickTweaks.App/MunzQuickTweaks.App.csproj" />
+    <Project Path="src/MunzQuickTweaks.Core/MunzQuickTweaks.Core.csproj" />
+    <Project Path="src/MunzQuickTweaks.Windows/MunzQuickTweaks.Windows.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/MunzQuickTweaks.Tests/MunzQuickTweaks.Tests.csproj" />
+  </Folder>
+</Solution>
