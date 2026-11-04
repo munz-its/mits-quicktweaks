@@ -1,0 +1,21 @@
+[
+  {
+    "id": "gaming.gamedvr.off",
+    "category": "Gaming",
+    "risk": "Low",
+    "restart": "None",
+    "minBuild": 19045,
+    "title": {
+      "de": "Hintergrundaufnahme (Game DVR) ausschalten",
+      "en": "Turn off background recording (Game DVR)"
+    },
+    "description": {
+      "de": "Windows kann im Hintergrund die letzten Spielminuten mitschneiden. Das kostet Leistung, auch wenn du es nie nutzt. Aufnahmen über die Xbox Game Bar sind danach aus, bis du den Tweak zurücksetzt.",
+      "en": "Windows can record the last minutes of gameplay in the background. This costs performance even if you never use it. Recording with the Xbox Game Bar is off until you undo the tweak."
+    },
+    "actions": [
+      { "type": "registry", "hive": "HKCU", "key": "System\\GameConfigStore", "name": "GameDVR_Enabled", "kind": "DWord", "value": "0", "default": "1" },
+      { "type": "registry", "hive": "HKCU", "key": "Software\\Microsoft\\Windows\\CurrentVersion\\GameDVR", "name": "AppCaptureEnabled", "kind": "DWord", "value": "0", "default": "1" }
+    ]
+  }
+]

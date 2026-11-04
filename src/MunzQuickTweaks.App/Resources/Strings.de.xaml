@@ -58,4 +58,20 @@
     <sys:String x:Key="Settings.Privacy">Datenschutz</sys:String>
     <sys:String x:Key="Settings.PrivacyText">Munz Quick Tweaks sammelt keine Daten, braucht kein Konto und baut keine Internetverbindung auf. Einstellungen und Protokolle bleiben auf deinem PC.</sys:String>
     <sys:String x:Key="Settings.Licenses">Schriften: Archivo und IBM Plex, SIL Open Font License 1.1.</sys:String>
+    <sys:String x:Key="Cat.Performance">LEISTUNG</sys:String>
+    <sys:String x:Key="Cat.Gaming">GAMING</sys:String>
+    <sys:String x:Key="Cat.Privacy">DATENSCHUTZ</sys:String>
+    <sys:String x:Key="Cat.Interface">OBERFLÄCHE</sys:String>
+    <sys:String x:Key="Cat.Network">NETZWERK</sys:String>
+    <sys:String x:Key="Cat.Services">DIENSTE</sys:String>
+    <sys:String x:Key="Risk.Low">Risiko niedrig</sys:String>
+    <sys:String x:Key="Risk.Medium">Risiko mittel</sys:String>
+    <sys:String x:Key="Restart.Explorer">Explorer-Fenster neu öffnen</sys:String>
+    <sys:String x:Key="Restart.SignOut">Abmelden nötig</sys:String>
+    <sys:String x:Key="Restart.Reboot">Neustart nötig</sys:String>
+    <sys:String x:Key="Tweak.Applied">Angewendet ✓ Alter Zustand ist gesichert.</sys:String>
+    <sys:String x:Key="Tweak.Reverted">Zurückgesetzt ✓</sys:String>
+    <sys:String x:Key="Tweak.Failed">Fehlgeschlagen, nichts wurde geändert:</sys:String>
+    <sys:String x:Key="Tweak.Partial">⚠️ Nur teilweise aktiv, vermutlich durch ein Windows-Update zurückgesetzt. Einschalten stellt den Tweak wieder her.</sys:String>
+    <sys:String x:Key="Confirm.Medium">Dieser Tweak hat Risiko mittel: eine Windows-Funktion fällt weg oder ein Neustart ist nötig. Du kannst ihn jederzeit zurücksetzen. Fortfahren?</sys:String>
 </ResourceDictionary>

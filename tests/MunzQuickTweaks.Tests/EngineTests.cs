@@ -1,0 +1,333 @@
+using System.Text;
+using MunzQuickTweaks.Core.Tweaks;
+using Xunit;
+
+namespace MunzQuickTweaks.Tests;
+
+/// <summary>Registry im Speicher, verhält sich wie die echte (Schlüssel ohne Groß-/Kleinschreibung).</summary>
+internal sealed class FakeRegistry : IRegistry
+{
+    private readonly Dictionary<string, Dictionary<string, RegistryValue>> _keys = new(StringComparer.OrdinalIgnoreCase);
+
+    public int Writes { get; private set; }
+
+    /// <summary>Lässt das Schreiben dieses Werts scheitern (für Rollback-Tests).</summary>
+    public string? FailOnName { get; set; }
+
+    /// <summary>Schreibt einen anderen Wert als verlangt (für Kontroll-Tests).</summary>
+    public string? IgnoreWritesTo { get; set; }
+
+    private static string Path(RegistryHive hive, string key) => $"{hive}\\{key}";
+
+    public void Seed(RegistryHive hive, string key, string name, RegistryKind kind, string data) =>
+        Values(hive, key, create: true)![name] = new RegistryValue(kind, data);
+
+    public void SeedKey(RegistryHive hive, string key) => Values(hive, key, create: true);
+
+    public bool KeyExists(RegistryHive hive, string key) => _keys.ContainsKey(Path(hive, key));
+
+    public RegistryValue? Read(RegistryHive hive, string key, string name) =>
+        Values(hive, key, create: false)?.GetValueOrDefault(name);
+
+    public void Write(RegistryHive hive, string key, string name, RegistryKind kind, string data)
+    {
+        if (name == FailOnName)
+        {
+            throw new UnauthorizedAccessException("Zugriff verweigert (Test)");
+        }
+
+        Writes++;
+        if (name == IgnoreWritesTo)
+        {
+            return;
+        }
+
+        Values(hive, key, create: true)![name] = new RegistryValue(kind, data);
+    }
+
+    public void Delete(RegistryHive hive, string key, string name) => Values(hive, key, create: false)?.Remove(name);
+
+    public void DeleteKeyIfEmpty(RegistryHive hive, string key)
+    {
+        if (Values(hive, key, create: false) is { Count: 0 })
+        {
+            _keys.Remove(Path(hive, key));
+        }
+    }
+
+    private Dictionary<string, RegistryValue>? Values(RegistryHive hive, string key, bool create)
+    {
+        var path = Path(hive, key);
+        if (!_keys.TryGetValue(path, out var values) && create)
+        {
+            values = new Dictionary<string, RegistryValue>(StringComparer.OrdinalIgnoreCase);
+            _keys[path] = values;
+        }
+
+        return values;
+    }
+}
+
+internal sealed class FakeNotifier : ISystemNotifier
+{
+    public int Refreshes { get; private set; }
+
+    public void RefreshExplorer() => Refreshes++;
+}
+
+public sealed class EngineTests : IDisposable
+{
+    private const string AdvKey = @"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced";
+    private const string NewKey = @"Software\MunzTest\Neu";
+
+    private readonly string _dir = Path.Combine(Path.GetTempPath(), "mqt-engine-" + Guid.NewGuid().ToString("N"));
+    private readonly FakeRegistry _reg = new();
+    private readonly FakeNotifier _notifier = new();
+
+    private string JournalPath => Path.Combine(_dir, "journal.json");
+
+    private TweakEngine CreateEngine(int build = 26100) =>
+        new(_reg, new JournalStore(JournalPath), _notifier, build);
+
+    private static TweakDefinition FileExt() => new()
+    {
+        Id = "ui.fileext.show",
+        Restart = RestartHint.Explorer,
+        Title = new() { De = "x", En = "x" },
+        Description = new() { De = "x", En = "x" },
+        Actions =
+        {
+            new RegistryAction { Hive = RegistryHive.HKCU, Key = AdvKey, Name = "HideFileExt", Kind = RegistryKind.DWord, Value = "0", Default = "1" },
+        },
+    };
+
+    private static TweakDefinition TwoValues() => new()
+    {
+        Id = "test.two",
+        Title = new() { De = "x", En = "x" },
+        Description = new() { De = "x", En = "x" },
+        Actions =
+        {
+            new RegistryAction { Hive = RegistryHive.HKCU, Key = NewKey, Name = "A", Kind = RegistryKind.DWord, Value = "1" },
+            new RegistryAction { Hive = RegistryHive.HKCU, Key = NewKey, Name = "B", Kind = RegistryKind.String, Value = "an" },
+        },
+    };
+
+    [Fact]
+    public void Apply_sets_value_and_status_becomes_applied()
+    {
+        _reg.Seed(RegistryHive.HKCU, AdvKey, "HideFileExt", RegistryKind.DWord, "1");
+        var engine = CreateEngine();
+
+        Assert.Equal(TweakStatus.NotApplied, engine.GetStatus(FileExt()));
+        Assert.True(engine.Apply(FileExt()).Success);
+        Assert.Equal("0", _reg.Read(RegistryHive.HKCU, AdvKey, "HideFileExt")!.Data);
+        Assert.Equal(TweakStatus.Applied, engine.GetStatus(FileExt()));
+        Assert.Equal(1, _notifier.Refreshes);
+    }
+
+    [Fact]
+    public void Revert_restores_exact_previous_value_from_journal()
+    {
+        // Ungewöhnlicher Ausgangswert: Rückgängig muss genau diesen herstellen, nicht den Standard
+        _reg.Seed(RegistryHive.HKCU, AdvKey, "HideFileExt", RegistryKind.DWord, "7");
+        var engine = CreateEngine();
+
+        engine.Apply(FileExt());
+        Assert.True(engine.Revert(FileExt()).Success);
+
+        Assert.Equal("7", _reg.Read(RegistryHive.HKCU, AdvKey, "HideFileExt")!.Data);
+        Assert.Null(engine.Journal.Get("ui.fileext.show"));
+    }
+
+    [Fact]
+    public void Revert_deletes_values_and_keys_the_tweak_created()
+    {
+        var engine = CreateEngine();
+
+        engine.Apply(TwoValues());
+        Assert.True(_reg.KeyExists(RegistryHive.HKCU, NewKey));
+
+        engine.Revert(TwoValues());
+        Assert.False(_reg.KeyExists(RegistryHive.HKCU, NewKey));
+    }
+
+    [Fact]
+    public void Applying_twice_keeps_the_original_snapshot()
+    {
+        _reg.Seed(RegistryHive.HKCU, AdvKey, "HideFileExt", RegistryKind.DWord, "1");
+        var engine = CreateEngine();
+
+        engine.Apply(FileExt());
+        engine.Apply(FileExt());
+        engine.Revert(FileExt());
+
+        Assert.Equal("1", _reg.Read(RegistryHive.HKCU, AdvKey, "HideFileExt")!.Data);
+    }
+
+    [Fact]
+    public void Journal_survives_a_restart_of_the_app()
+    {
+        _reg.Seed(RegistryHive.HKCU, AdvKey, "HideFileExt", RegistryKind.DWord, "5");
+        CreateEngine().Apply(FileExt());
+
+        // Neue Engine mit neuem JournalStore liest die Datei frisch ein
+        Assert.True(CreateEngine().Revert(FileExt()).Success);
+        Assert.Equal("5", _reg.Read(RegistryHive.HKCU, AdvKey, "HideFileExt")!.Data);
+    }
+
+    [Fact]
+    public void Failed_write_rolls_back_everything_already_changed()
+    {
+        _reg.Seed(RegistryHive.HKCU, NewKey, "A", RegistryKind.DWord, "0");
+        _reg.FailOnName = "B";
+        var engine = CreateEngine();
+
+        var result = engine.Apply(TwoValues());
+
+        Assert.False(result.Success);
+        Assert.Equal("0", _reg.Read(RegistryHive.HKCU, NewKey, "A")!.Data);
+        Assert.Null(engine.Journal.Get("test.two"));
+    }
+
+    [Fact]
+    public void Failed_verification_rolls_back()
+    {
+        _reg.Seed(RegistryHive.HKCU, NewKey, "A", RegistryKind.DWord, "0");
+        _reg.IgnoreWritesTo = "B";
+        var engine = CreateEngine();
+
+        Assert.False(engine.Apply(TwoValues()).Success);
+        Assert.Equal("0", _reg.Read(RegistryHive.HKCU, NewKey, "A")!.Data);
+    }
+
+    [Fact]
+    public void Revert_without_journal_uses_windows_default()
+    {
+        // Tweak wurde außerhalb der App gesetzt
+        _reg.Seed(RegistryHive.HKCU, AdvKey, "HideFileExt", RegistryKind.DWord, "0");
+        var engine = CreateEngine();
+
+        Assert.Equal(TweakStatus.Applied, engine.GetStatus(FileExt()));
+        Assert.True(engine.Revert(FileExt()).Success);
+        Assert.Equal("1", _reg.Read(RegistryHive.HKCU, AdvKey, "HideFileExt")!.Data);
+    }
+
+    [Fact]
+    public void Partial_status_when_windows_reset_one_value()
+    {
+        var engine = CreateEngine();
+        engine.Apply(TwoValues());
+        _reg.Seed(RegistryHive.HKCU, NewKey, "B", RegistryKind.String, "aus");
+
+        Assert.Equal(TweakStatus.Partial, engine.GetStatus(TwoValues()));
+    }
+
+    [Fact]
+    public void Tweak_outside_build_range_is_not_available_and_changes_nothing()
+    {
+        var win11Only = FileExt();
+        win11Only.MinBuild = 22000;
+        var engine = CreateEngine(build: 19045);
+
+        Assert.Equal(TweakStatus.NotAvailable, engine.GetStatus(win11Only));
+        Assert.False(engine.Apply(win11Only).Success);
+        Assert.Equal(0, _reg.Writes);
+    }
+
+    [Fact]
+    public void Service_tweak_needs_existing_service_and_restores_start_type()
+    {
+        const string svc = @"SYSTEM\CurrentControlSet\Services\TabletInputService";
+        var tweak = new TweakDefinition
+        {
+            Id = "services.tablet.off",
+            Title = new() { De = "x", En = "x" },
+            Description = new() { De = "x", En = "x" },
+            Actions = { new ServiceAction { Name = "TabletInputService", StartType = ServiceStartType.Disabled } },
+        };
+
+        var engine = CreateEngine();
+        Assert.Equal(TweakStatus.NotAvailable, engine.GetStatus(tweak));
+
+        _reg.Seed(RegistryHive.HKLM, svc, "Start", RegistryKind.DWord, "3");
+        Assert.True(engine.Apply(tweak).Success);
+        Assert.Equal("4", _reg.Read(RegistryHive.HKLM, svc, "Start")!.Data);
+
+        engine.Revert(tweak);
+        Assert.Equal("3", _reg.Read(RegistryHive.HKLM, svc, "Start")!.Data);
+        Assert.Null(_reg.Read(RegistryHive.HKLM, svc, "DelayedAutostart"));
+    }
+
+    [Theory]
+    [InlineData(RegistryKind.DWord, RegistryKind.DWord, "0", "0", true)]
+    [InlineData(RegistryKind.DWord, RegistryKind.DWord, "4294967295", "4294967295", true)]
+    [InlineData(RegistryKind.DWord, RegistryKind.String, "0", "0", false)]
+    [InlineData(RegistryKind.String, RegistryKind.String, "An", "an", false)]
+    public void Values_are_compared_by_type(RegistryKind target, RegistryKind actual, string actualData, string targetData, bool expected)
+    {
+        Assert.Equal(expected, TweakEngine.ValuesEqual(target, new RegistryValue(actual, actualData), targetData));
+    }
+
+    public void Dispose()
+    {
+        if (Directory.Exists(_dir))
+        {
+            Directory.Delete(_dir, recursive: true);
+        }
+    }
+}
+
+public class CatalogTests
+{
+    private static Stream Json(string text) => new MemoryStream(Encoding.UTF8.GetBytes(text));
+
+    private const string Valid = """
+        [{ "id": "ui.test.one", "category": "Interface", "risk": "Low",
+           "title": { "de": "T", "en": "T" }, "description": { "de": "D", "en": "D" },
+           "actions": [ { "type": "registry", "hive": "HKCU", "key": "Software\\X", "name": "A", "kind": "DWord", "value": "1" } ] }]
+        """;
+
+    [Fact]
+    public void Valid_catalog_loads()
+    {
+        var tweaks = CatalogLoader.Load(new[] { ("a.json", Json(Valid)) });
+        var action = Assert.IsType<RegistryAction>(Assert.Single(Assert.Single(tweaks).Actions));
+        Assert.Equal("1", action.Value);
+    }
+
+    [Fact]
+    public void Duplicate_ids_are_rejected()
+    {
+        Assert.Throws<CatalogException>(() => CatalogLoader.Load(new[] { ("a.json", Json(Valid)), ("b.json", Json(Valid)) }));
+    }
+
+    [Theory]
+    [InlineData("\"value\": \"1\"", "\"value\": \"abc\"")]
+    [InlineData("\"en\": \"T\"", "\"en\": \"\"")]
+    [InlineData("\"key\": \"Software\\\\X\"", "\"key\": \"HKEY_CURRENT_USER\\\\X\"")]
+    [InlineData("\"id\": \"ui.test.one\"", "\"id\": \"Ohne Punkt\"")]
+    public void Invalid_entries_are_rejected(string from, string to)
+    {
+        Assert.Throws<CatalogException>(() => CatalogLoader.Load(new[] { ("a.json", Json(Valid.Replace(from, to))) }));
+    }
+
+    /// <summary>Der echte Katalog im Repo muss immer gültig sein, sonst schlägt der Build fehl.</summary>
+    [Fact]
+    public void Repository_catalog_is_valid()
+    {
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir is not null && !File.Exists(Path.Combine(dir.FullName, "Directory.Build.props")))
+        {
+            dir = dir.Parent;
+        }
+
+        var files = Directory.GetFiles(Path.Combine(dir!.FullName, "catalog"), "*.json")
+            .Select(f => (Path.GetFileName(f), (Stream)File.OpenRead(f)))
+            .ToList();
+
+        var tweaks = CatalogLoader.Load(files);
+        Assert.Equal(5, tweaks.Count);
+        Assert.All(tweaks, t => Assert.Equal(TweakRisk.Low, t.Risk));
+    }
+}

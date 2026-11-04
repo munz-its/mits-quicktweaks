@@ -133,6 +133,33 @@ public class StringResourceTests
         Assert.Empty(problems);
     }
 
+    // Eigenschaft als Attribut UND als Element (z. B. Style="..." plus <Border.Style>) lässt WPF abstürzen
+    [Fact]
+    public void No_xaml_property_is_set_twice()
+    {
+        var appDir = Path.Combine(FindRepoRoot(), "src", "MunzQuickTweaks.App");
+        var problems = new List<string>();
+
+        foreach (var file in Directory.EnumerateFiles(appDir, "*.xaml", SearchOption.AllDirectories)
+                     .Where(f => !f.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}")
+                              && !f.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}")))
+        {
+            foreach (var element in XDocument.Load(file).Descendants())
+            {
+                foreach (var attribute in element.Attributes().Where(a => !a.IsNamespaceDeclaration))
+                {
+                    var propertyElement = $"{element.Name.LocalName}.{attribute.Name.LocalName}";
+                    if (element.Elements().Any(c => c.Name.LocalName == propertyElement))
+                    {
+                        problems.Add($"{Path.GetFileName(file)}: {propertyElement}");
+                    }
+                }
+            }
+        }
+
+        Assert.Empty(problems);
+    }
+
     private static HashSet<string> ReadKeys(string fileName)
     {
         var path = Path.Combine(FindRepoRoot(), "src", "MunzQuickTweaks.App", "Resources", fileName);

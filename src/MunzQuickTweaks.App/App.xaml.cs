@@ -53,8 +53,10 @@ public partial class App : Application
                 services.AddSingleton<SettingsService>();
                 services.AddSingleton<LocalizationService>();
                 services.AddSingleton<SystemInfoProvider>();
+                services.AddSingleton<TweakService>();
 
                 services.AddSingleton<DashboardViewModel>();
+                services.AddSingleton<TweaksViewModel>();
                 services.AddSingleton<SettingsViewModel>();
                 services.AddSingleton<MainViewModel>();
                 services.AddSingleton<MainWindow>();

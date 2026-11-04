@@ -4,7 +4,7 @@ Kostenlose Windows-App von Munz IT Service. Macht Windows 10 22H2 und Windows 11
 
 ## Stand
 
-Version 0.1.0, Phase 1 (Grundgerüst): Fenster, Navigation, Theme, Sprachumschaltung Deutsch/Englisch, Dashboard mit Systemdaten, Einstellungen mit Impressum.
+Version 0.2.0, Phase 2 (Engine): Tweaks prüfen, sichern, anwenden, kontrollieren und rückgängig machen. 5 Test-Tweaks auf der Tweaks-Seite. Journal unter `%ProgramData%\MunzQuickTweaks\state\journal.json`.
 
 ## Technik
 

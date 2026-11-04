@@ -1,0 +1,38 @@
+[
+  {
+    "id": "ui.fileext.show",
+    "category": "Interface",
+    "risk": "Low",
+    "restart": "Explorer",
+    "minBuild": 19045,
+    "title": {
+      "de": "Dateiendungen anzeigen",
+      "en": "Show file extensions"
+    },
+    "description": {
+      "de": "Zeigt Endungen wie .exe oder .pdf im Explorer. Du erkennst sofort, ob eine Datei ein Programm ist, und fällst nicht auf getarnte Dateien wie Rechnung.pdf.exe herein.",
+      "en": "Shows extensions like .exe or .pdf in Explorer. You see at once whether a file is a program and are not fooled by disguised files like invoice.pdf.exe."
+    },
+    "actions": [
+      { "type": "registry", "hive": "HKCU", "key": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "name": "HideFileExt", "kind": "DWord", "value": "0", "default": "1" }
+    ]
+  },
+  {
+    "id": "ui.hiddenfiles.show",
+    "category": "Interface",
+    "risk": "Low",
+    "restart": "Explorer",
+    "minBuild": 19045,
+    "title": {
+      "de": "Versteckte Dateien anzeigen",
+      "en": "Show hidden files"
+    },
+    "description": {
+      "de": "Zeigt versteckte Dateien und Ordner wie AppData im Explorer. Praktisch beim Aufräumen und bei der Fehlersuche. Systemdateien bleiben weiterhin geschützt ausgeblendet.",
+      "en": "Shows hidden files and folders like AppData in Explorer. Useful for cleaning up and troubleshooting. Protected system files stay hidden."
+    },
+    "actions": [
+      { "type": "registry", "hive": "HKCU", "key": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "name": "Hidden", "kind": "DWord", "value": "1", "default": "2" }
+    ]
+  }
+]

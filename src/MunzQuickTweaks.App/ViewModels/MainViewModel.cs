@@ -13,6 +13,7 @@ public sealed partial class MainViewModel : ObservableObject
     public MainViewModel(
         LocalizationService localization,
         DashboardViewModel dashboard,
+        TweaksViewModel tweaks,
         SettingsViewModel settings)
     {
         _localization = localization;
@@ -21,7 +22,7 @@ public sealed partial class MainViewModel : ObservableObject
         Items = new ObservableCollection<NavItem>
         {
             new("Nav.Dashboard", "11011/11011/00000/11011/11011", dashboard),
-            new("Nav.Tweaks", "01000/11111/00000/00010/11111", new PlaceholderViewModel("Nav.Tweaks", "Desc.Tweaks", 4)),
+            new("Nav.Tweaks", "01000/11111/00000/00010/11111", tweaks),
             new("Nav.Privacy", "01110/10001/11111/11011/11111", new PlaceholderViewModel("Nav.Privacy", "Desc.Privacy", 5)),
             new("Nav.Debloat", "11111/01110/01010/01010/01110", new PlaceholderViewModel("Nav.Debloat", "Desc.Debloat", 5)),
             new("Nav.Startup", "00100/10101/10101/10001/01110", new PlaceholderViewModel("Nav.Startup", "Desc.Startup", 5)),

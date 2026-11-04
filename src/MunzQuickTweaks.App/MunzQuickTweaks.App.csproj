@@ -36,6 +36,8 @@
   <ItemGroup>
     <Resource Include="Assets\Fonts\*.ttf" />
     <Resource Include="Assets\app.ico" />
+    <!-- Tweak-Katalog steckt in der .exe -->
+    <EmbeddedResource Include="..\..\catalog\*.json" LogicalName="catalog.%(Filename).json" />
     <!-- Lizenztexte stecken in der .exe, damit die portable Datei allein reicht -->
     <Resource Include="Assets\Fonts\*.txt" />
   </ItemGroup>

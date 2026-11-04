@@ -95,7 +95,7 @@
                 <StackPanel>
                     <TextBlock Text="{DynamicResource Dashboard.Status}" Style="{StaticResource H2}" Margin="0,0,0,18" />
                     <TextBlock Text="{DynamicResource Dashboard.ActiveTweaks}" Style="{StaticResource Label}" Foreground="{StaticResource Muted}" />
-                    <TextBlock Text="0" Style="{StaticResource Display}" FontSize="34" Foreground="{StaticResource BlueL}" Margin="0,2,0,18" />
+                    <TextBlock Text="{Binding ActiveTweaks}" Style="{StaticResource Display}" FontSize="34" Foreground="{StaticResource BlueL}" Margin="0,2,0,18" />
                     <TextBlock Text="{DynamicResource Dashboard.LastRestore}" Style="{StaticResource Label}" Foreground="{StaticResource Muted}" />
                     <TextBlock Text="{DynamicResource Dashboard.NotYet}" Style="{StaticResource TextBase}" Margin="0,4,0,0" />
                 </StackPanel>

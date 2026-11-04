@@ -1,0 +1,40 @@
+[
+  {
+    "id": "privacy.adid.off",
+    "category": "Privacy",
+    "risk": "Low",
+    "restart": "None",
+    "minBuild": 19045,
+    "title": {
+      "de": "Werbe-ID ausschalten",
+      "en": "Turn off advertising ID"
+    },
+    "description": {
+      "de": "Windows vergibt dir eine Werbe-ID, über die Apps dein Verhalten für personalisierte Werbung verknüpfen. Ausgeschaltet bekommst du weiter Werbung, aber ohne Profil.",
+      "en": "Windows assigns you an advertising ID that apps use to link your behavior for personalized ads. Turned off, you still see ads, but without a profile."
+    },
+    "actions": [
+      { "type": "registry", "hive": "HKCU", "key": "Software\\Microsoft\\Windows\\CurrentVersion\\AdvertisingInfo", "name": "Enabled", "kind": "DWord", "value": "0", "default": "1" }
+    ]
+  },
+  {
+    "id": "privacy.tips.off",
+    "category": "Privacy",
+    "risk": "Low",
+    "restart": "None",
+    "minBuild": 19045,
+    "title": {
+      "de": "Tipps und App-Vorschläge ausschalten",
+      "en": "Turn off tips and app suggestions"
+    },
+    "description": {
+      "de": "Stoppt Windows-Tipps, Vorschläge im Startmenü und automatisch beworbene Apps. Weniger Ablenkung und keine ungefragten App-Empfehlungen.",
+      "en": "Stops Windows tips, Start menu suggestions and promoted apps. Fewer distractions and no unasked app recommendations."
+    },
+    "actions": [
+      { "type": "registry", "hive": "HKCU", "key": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager", "name": "SubscribedContent-338389Enabled", "kind": "DWord", "value": "0", "default": "1" },
+      { "type": "registry", "hive": "HKCU", "key": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager", "name": "SoftLandingEnabled", "kind": "DWord", "value": "0", "default": "1" },
+      { "type": "registry", "hive": "HKCU", "key": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager", "name": "SystemPaneSuggestionsEnabled", "kind": "DWord", "value": "0", "default": "1" }
+    ]
+  }
+]

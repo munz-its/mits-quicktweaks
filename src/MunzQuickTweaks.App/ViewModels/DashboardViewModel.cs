@@ -9,13 +9,18 @@ namespace MunzQuickTweaks.App.ViewModels;
 public sealed partial class DashboardViewModel : PageViewModel
 {
     private readonly SystemInfoProvider _provider;
+    private readonly TweakService _tweaks;
     private bool _loaded;
 
-    public DashboardViewModel(SystemInfoProvider provider)
+    public DashboardViewModel(SystemInfoProvider provider, TweakService tweaks)
         : base("Nav.Dashboard")
     {
         _provider = provider;
+        _tweaks = tweaks;
     }
+
+    [ObservableProperty]
+    private int _activeTweaks;
 
     [ObservableProperty]
     private bool _isLoading = true;
@@ -40,6 +45,9 @@ public sealed partial class DashboardViewModel : PageViewModel
 
     public override async Task OnNavigatedToAsync()
     {
+        // Zähler bei jedem Öffnen aktualisieren, Systemdaten nur einmal lesen
+        ActiveTweaks = await Task.Run(_tweaks.CountApplied);
+
         if (_loaded)
         {
             return;

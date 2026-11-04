@@ -4,4 +4,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>MunzQuickTweaks.Core</RootNamespace>
   </PropertyGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="MunzQuickTweaks.Tests" />
+  </ItemGroup>
 </Project>

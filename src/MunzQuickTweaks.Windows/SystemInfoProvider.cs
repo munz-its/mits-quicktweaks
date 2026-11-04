@@ -35,6 +35,14 @@ public sealed class SystemInfoProvider
             IsAdministrator: IsAdministrator());
     }
 
+    /// <summary>Nur die Build-Nummer, schnell und ohne WMI.</summary>
+    public int ReadBuild()
+    {
+        using var hklm = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64);
+        using var versionKey = hklm.OpenSubKey(CurrentVersionKey);
+        return ParseInt(versionKey?.GetValue("CurrentBuildNumber") as string);
+    }
+
     private static IReadOnlyList<string> ReadGraphicsCards()
     {
         var cards = new List<string>();

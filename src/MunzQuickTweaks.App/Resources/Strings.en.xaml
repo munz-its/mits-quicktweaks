@@ -58,4 +58,20 @@
     <sys:String x:Key="Settings.Privacy">Privacy</sys:String>
     <sys:String x:Key="Settings.PrivacyText">Munz Quick Tweaks collects no data, needs no account and makes no internet connection. Settings and logs stay on your PC.</sys:String>
     <sys:String x:Key="Settings.Licenses">Fonts: Archivo and IBM Plex, SIL Open Font License 1.1.</sys:String>
+    <sys:String x:Key="Cat.Performance">PERFORMANCE</sys:String>
+    <sys:String x:Key="Cat.Gaming">GAMING</sys:String>
+    <sys:String x:Key="Cat.Privacy">PRIVACY</sys:String>
+    <sys:String x:Key="Cat.Interface">INTERFACE</sys:String>
+    <sys:String x:Key="Cat.Network">NETWORK</sys:String>
+    <sys:String x:Key="Cat.Services">SERVICES</sys:String>
+    <sys:String x:Key="Risk.Low">Low risk</sys:String>
+    <sys:String x:Key="Risk.Medium">Medium risk</sys:String>
+    <sys:String x:Key="Restart.Explorer">Reopen Explorer windows</sys:String>
+    <sys:String x:Key="Restart.SignOut">Sign-out required</sys:String>
+    <sys:String x:Key="Restart.Reboot">Restart required</sys:String>
+    <sys:String x:Key="Tweak.Applied">Applied ✓ Previous state is saved.</sys:String>
+    <sys:String x:Key="Tweak.Reverted">Reverted ✓</sys:String>
+    <sys:String x:Key="Tweak.Failed">Failed, nothing was changed:</sys:String>
+    <sys:String x:Key="Tweak.Partial">⚠️ Only partly active, probably reset by a Windows update. Turning it on restores the tweak.</sys:String>
+    <sys:String x:Key="Confirm.Medium">This tweak has medium risk: a Windows feature goes away or a restart is required. You can undo it at any time. Continue?</sys:String>
 </ResourceDictionary>
