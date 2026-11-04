@@ -534,3 +534,40 @@ public sealed class SelfTestRunnerTests : IDisposable
         }
     }
 }
+
+internal sealed class ThrowingRegistry : IRegistry
+{
+    public bool KeyExists(RegistryHive hive, string key) => throw new InvalidOperationException("kaputt");
+
+    public RegistryValue? Read(RegistryHive hive, string key, string name) => null;
+
+    public void Write(RegistryHive hive, string key, string name, RegistryKind kind, string data) { }
+
+    public void Delete(RegistryHive hive, string key, string name) { }
+
+    public void DeleteKeyIfEmpty(RegistryHive hive, string key) { }
+}
+
+public sealed class SelfTestRobustnessTests : IDisposable
+{
+    private readonly string _dir = Path.Combine(Path.GetTempPath(), "mqt-robust-" + Guid.NewGuid().ToString("N"));
+
+    [Fact]
+    public void Unexpected_exception_in_one_tweak_is_reported_not_fatal()
+    {
+        var engine = new TweakEngine(new ThrowingRegistry(), new JournalStore(Path.Combine(_dir, "t.json")), new FakeNotifier(), 26100);
+        var tweak = new TweakDefinition { Id = "services.x.off", Actions = { new ServiceAction { Name = "X" } } };
+
+        var result = Assert.Single(new SelfTestRunner(engine, new JournalStore(Path.Combine(_dir, "u.json"))).Run(new[] { tweak }));
+        Assert.Equal(SelfTestOutcome.Failed, result.Outcome);
+        Assert.Contains("InvalidOperationException", result.Note);
+    }
+
+    public void Dispose()
+    {
+        if (Directory.Exists(_dir))
+        {
+            Directory.Delete(_dir, recursive: true);
+        }
+    }
+}

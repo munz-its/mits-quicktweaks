@@ -44,7 +44,16 @@ public sealed class SelfTestRunner
         {
             var tweak = tweaks[i];
             progress?.Report((i, tweaks.Count, tweak.Id));
-            results.Add(RunOne(tweak));
+            try
+            {
+                results.Add(RunOne(tweak));
+            }
+            catch (Exception ex)
+            {
+                // Ein einzelner Tweak darf den Test nie abbrechen: Fehler mit Typ und Text in den Bericht
+                results.Add(new SelfTestResult(tweak.Id, SelfTestOutcome.Failed, TweakStatus.NotAvailable, TweakStatus.NotAvailable,
+                    TweakStatus.NotAvailable, false, $"Ausnahme {ex.GetType().Name}: {ex.Message}"));
+            }
         }
 
         progress?.Report((tweaks.Count, tweaks.Count, string.Empty));

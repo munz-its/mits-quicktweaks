@@ -85,8 +85,18 @@ public sealed class SelfTestWindow : Window
         try
         {
             _status.Text = "Wiederherstellungspunkt wird erstellt …";
-            var point = await Task.Run(() => _restorePoints.Create("Munz Quick Tweaks: vor Selbsttest"));
-            var pointNote = point.Success ? "Wiederherstellungspunkt: erstellt" : $"Wiederherstellungspunkt: fehlgeschlagen ({point.Error})";
+            string pointNote;
+            try
+            {
+                var point = await Task.Run(() => _restorePoints.Create("Munz Quick Tweaks: vor Selbsttest"));
+                pointNote = point.Success ? "Wiederherstellungspunkt: erstellt" : $"Wiederherstellungspunkt: fehlgeschlagen ({point.Error})";
+            }
+            catch (Exception ex)
+            {
+                // In frischen VMs ist der Systemschutz oft aus: Test läuft trotzdem weiter
+                _log.LogWarning(ex, "Selbsttest: Wiederherstellungspunkt nicht möglich");
+                pointNote = $"Wiederherstellungspunkt: nicht möglich ({ex.GetType().Name}: {ex.Message})";
+            }
 
             // Eigenes Journal: der Test berührt das Journal des Nutzers nie
             var testJournal = new JournalStore(Path.Combine(AppPaths.MachineData, "selftest", $"journal-{DateTime.Now:yyyyMMdd-HHmmss}.json"));
@@ -106,13 +116,22 @@ public sealed class SelfTestWindow : Window
 
             var results = await Task.Run(() => runner.Run(_tweaks.Tweaks, progress));
 
-            var info = await Task.Run(_systemInfo.Read);
-            var system = $"{info.OperatingSystem} · {info.Processor} · {(info.IsAdministrator ? "Administrator" : "kein Administrator")}\n{pointNote}";
+            string system;
+            var build = _systemInfo.ReadBuild();
+            try
+            {
+                var info = await Task.Run(_systemInfo.Read);
+                system = $"{info.OperatingSystem} · {info.Processor} · {(info.IsAdministrator ? "Administrator" : "kein Administrator")}\n{pointNote}";
+            }
+            catch (Exception ex)
+            {
+                system = $"Windows-Build {build} (Systemdaten nicht lesbar: {ex.Message})\n{pointNote}";
+            }
             var version = Assembly.GetEntryAssembly()?.GetName().Version?.ToString(3) ?? "?";
             var report = SelfTestRunner.FormatReport(results, system, version, DateTime.Now);
 
             var desktop = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
-            var file = Path.Combine(desktop, $"MunzQuickTweaks-Selbsttest-Build{info.Build}-{DateTime.Now:yyyyMMdd-HHmm}.txt");
+            var file = Path.Combine(desktop, $"MunzQuickTweaks-Selbsttest-Build{build}-{DateTime.Now:yyyyMMdd-HHmm}.txt");
             await File.WriteAllTextAsync(file, report);
             _log.LogInformation("Selbsttest fertig: {File}", file);
 
@@ -127,7 +146,20 @@ public sealed class SelfTestWindow : Window
         {
             _log.LogError(ex, "Selbsttest abgebrochen");
             _status.Text = "Selbsttest abgebrochen.";
-            _detail.Text = ex.Message;
+            _detail.Text = $"{ex.GetType().Name}: {ex.Message}";
+            _detail.TextWrapping = TextWrapping.Wrap;
+            Height = 320;
+
+            // Fehler zusätzlich als Datei auf den Desktop, damit er sich kopieren lässt
+            try
+            {
+                var desktop = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+                File.WriteAllText(Path.Combine(desktop, "MunzQuickTweaks-Selbsttest-Fehler.txt"), ex.ToString());
+            }
+            catch (Exception writeError) when (writeError is IOException or UnauthorizedAccessException)
+            {
+                // Ohne Desktop-Zugriff bleibt der Fehler im Protokoll
+            }
         }
     }
 }
