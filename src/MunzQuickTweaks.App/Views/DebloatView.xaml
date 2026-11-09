@@ -4,38 +4,6 @@
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
         <!-- Kontrollkästchen im Pixel-Stil -->
-        <Style x:Key="PixelCheck" TargetType="CheckBox">
-            <Setter Property="Cursor" Value="Hand" />
-            <Setter Property="Foreground" Value="{StaticResource Text}" />
-            <Setter Property="FontFamily" Value="{StaticResource FontSans}" />
-            <Setter Property="FontSize" Value="14" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="CheckBox">
-                        <StackPanel Orientation="Horizontal" Background="Transparent">
-                            <Border x:Name="Box" Width="18" Height="18" CornerRadius="4" BorderThickness="1"
-                                    BorderBrush="{StaticResource Line}" Background="{StaticResource Bg3}" VerticalAlignment="Center">
-                                <Rectangle x:Name="Mark" Width="8" Height="8" Fill="White" Visibility="Collapsed" />
-                            </Border>
-                            <ContentPresenter Margin="10,0,0,0" VerticalAlignment="Center" />
-                        </StackPanel>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="Box" Property="Background" Value="{StaticResource Blue}" />
-                                <Setter TargetName="Box" Property="BorderBrush" Value="{StaticResource Blue}" />
-                                <Setter TargetName="Mark" Property="Visibility" Value="Visible" />
-                            </Trigger>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Box" Property="BorderBrush" Value="{StaticResource BlueL}" />
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="Opacity" Value="0.5" />
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
     </UserControl.Resources>
 
     <StackPanel MaxWidth="820" HorizontalAlignment="Left">

@@ -35,6 +35,9 @@
         <DataTemplate DataType="{x:Type vm:PowerViewModel}">
             <views:PowerView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:PresetsViewModel}">
+            <views:PresetsView />
+        </DataTemplate>
         <DataTemplate DataType="{x:Type vm:BenchmarkViewModel}">
             <views:BenchmarkView />
         </DataTemplate>

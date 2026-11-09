@@ -100,6 +100,9 @@ public partial class App : Application
                 services.AddSingleton<ProcessRulesViewModel>();
                 services.AddSingleton<PowerViewModel>();
                 services.AddSingleton<BenchmarkViewModel>();
+                services.AddSingleton<PresetsViewModel>();
+                services.AddSingleton<ProfileService>();
+                services.AddSingleton(new ChangeLedger(Path.Combine(AppPaths.StateDirectory, "ledger.json")));
                 services.AddSingleton<DiskViewModel>();
                 services.AddSingleton<DriversViewModel>();
                 services.AddSingleton<GameModeViewModel>();

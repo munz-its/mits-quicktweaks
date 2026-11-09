@@ -68,10 +68,11 @@ public sealed partial class DebloatViewModel : PageViewModel
     private readonly TweakService _tweaks;
     private readonly ILogger<DebloatViewModel> _log;
 
-    public DebloatViewModel(IAppxManager appx, RestorePointGate gate, HistoryStore history, LocalizationService localization, TweakService tweaks, ILogger<DebloatViewModel> log)
+    public DebloatViewModel(IAppxManager appx, RestorePointGate gate, HistoryStore history, LocalizationService localization, TweakService tweaks, ChangeLedger ledger, ILogger<DebloatViewModel> log)
         : base("Nav.Debloat")
     {
         _appx = appx;
+        _ledger = ledger;
         _gate = gate;
         _history = history;
         _localization = localization;
@@ -79,6 +80,8 @@ public sealed partial class DebloatViewModel : PageViewModel
         _log = log;
         localization.LanguageChanged += (_, _) => RefreshTitles();
     }
+
+    private readonly ChangeLedger _ledger;
 
     public ObservableCollection<DebloatGroupViewModel> Groups { get; } = new();
 
@@ -219,6 +222,11 @@ public sealed partial class DebloatViewModel : PageViewModel
                 }
 
                 _history.Add(HistoryAction.AppRemoved, item.App.Package, allRemoved, error);
+                if (allRemoved)
+                {
+                    _ledger.RecordAppRemoved(item.App.Package);
+                }
+
                 _log.LogInformation("App {Package} entfernt: {Success} {Error}", item.App.Package, allRemoved, error);
                 if (allRemoved)
                 {
@@ -269,6 +277,11 @@ public sealed partial class DebloatViewModel : PageViewModel
             Status = string.Format(CultureInfo.CurrentCulture, _localization.Get("Debloat.Reinstalling"), row.Name);
             var result = await _appx.ReinstallAsync(row.FamilyName);
             _history.Add(HistoryAction.AppReinstalled, row.FamilyName, result.Success, result.Error);
+            if (result.Success)
+            {
+                _ledger.RecordAppReinstalled(row.FamilyName.Split('_')[0]);
+            }
+
             _log.LogInformation("App {Family} neu eingerichtet: {Success} {Error}", row.FamilyName, result.Success, result.Error);
             Status = result.Success
                 ? string.Format(CultureInfo.CurrentCulture, _localization.Get("Debloat.Reinstalled"), row.Name)

@@ -58,15 +58,18 @@ public sealed partial class StartupViewModel : PageViewModel
     private readonly TweakService _tweaks;
     private readonly ILogger<StartupViewModel> _log;
 
-    public StartupViewModel(IStartupManager startup, HistoryStore history, LocalizationService localization, TweakService tweaks, ILogger<StartupViewModel> log)
+    public StartupViewModel(IStartupManager startup, HistoryStore history, LocalizationService localization, TweakService tweaks, ChangeLedger ledger, ILogger<StartupViewModel> log)
         : base("Nav.Startup")
     {
         _startup = startup;
+        _ledger = ledger;
         _history = history;
         _localization = localization;
         _tweaks = tweaks;
         _log = log;
     }
+
+    private readonly ChangeLedger _ledger;
 
     public ObservableCollection<StartupItemViewModel> Items { get; } = new();
 
@@ -109,6 +112,11 @@ public sealed partial class StartupViewModel : PageViewModel
         // Der Schalter hat IsEnabled schon umgestellt: das ist der gewünschte neue Zustand
         var enable = item.IsEnabled;
         var result = _startup.SetEnabled(item.Entry, enable);
+        if (result.Success)
+        {
+            _ledger.RecordStartup(item.Entry.Id, item.Entry.Enabled);
+        }
+
         _history.Add(enable ? HistoryAction.StartupEnabled : HistoryAction.StartupDisabled, null, result.Success,
             result.Success ? item.Name : $"{item.Name}: {result.Error}");
 

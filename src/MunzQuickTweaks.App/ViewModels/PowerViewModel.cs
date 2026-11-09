@@ -33,11 +33,13 @@ public sealed partial class PowerViewModel : PageViewModel
     private readonly LocalizationService _localization;
     private readonly ILogger<PowerViewModel> _log;
     private bool _loading;
+    private readonly ProfileService _profiles;
 
-    public PowerViewModel(IPowerModes power, HistoryStore history, LocalizationService localization, ILogger<PowerViewModel> log)
+    public PowerViewModel(IPowerModes power, HistoryStore history, LocalizationService localization, ProfileService profiles, ILogger<PowerViewModel> log)
         : base("Nav.Power")
     {
         _power = power;
+        _profiles = profiles;
         _history = history;
         _localization = localization;
         _log = log;
@@ -116,6 +118,7 @@ public sealed partial class PowerViewModel : PageViewModel
 
         try
         {
+            _profiles.RememberPower();
             _power.SetMode(mode);
             Mode = _power.GetMode() ?? mode;
             _history.Add(HistoryAction.PowerModeChanged, $"mode.{mode}", true, null);
@@ -139,6 +142,7 @@ public sealed partial class PowerViewModel : PageViewModel
     {
         try
         {
+            _profiles.RememberPower();
             _power.ActivatePlan(plan.Info.Id);
             _history.Add(HistoryAction.PowerModeChanged, $"plan.{plan.Info.Id}", true, plan.Name);
             _log.LogInformation("Energieplan {Plan}", plan.Name);

@@ -81,11 +81,12 @@ public sealed partial class AppsViewModel : PageViewModel
     private readonly ILogger<AppsViewModel> _log;
 
     public AppsViewModel(TweakService service, IStartupManager startup, IAppEnvironment environment, HistoryStore history,
-        LocalizationService localization, ILogger<AppsViewModel> log)
+        LocalizationService localization, ChangeLedger ledger, ILogger<AppsViewModel> log)
         : base("Nav.Apps")
     {
         _service = service;
         _startup = startup;
+        _ledger = ledger;
         _environment = environment;
         _history = history;
         _localization = localization;
@@ -111,6 +112,7 @@ public sealed partial class AppsViewModel : PageViewModel
     }
 
     private readonly List<AppSectionViewModel> _all = new();
+    private readonly ChangeLedger _ledger;
 
     /// <summary>Installierte Programme. OneDrive bleibt auch deinstalliert sichtbar, für die Neuinstallation.</summary>
     public ObservableCollection<AppSectionViewModel> Sections { get; } = new();
@@ -192,6 +194,11 @@ public sealed partial class AppsViewModel : PageViewModel
         foreach (var entry in section.StartupEntries)
         {
             var result = _startup.SetEnabled(entry, enable);
+            if (result.Success)
+            {
+                _ledger.RecordStartup(entry.Id, entry.Enabled);
+            }
+
             _history.Add(enable ? HistoryAction.StartupEnabled : HistoryAction.StartupDisabled, null, result.Success,
                 result.Success ? entry.Name : $"{entry.Name}: {result.Error}");
             if (!result.Success)
@@ -223,6 +230,11 @@ public sealed partial class AppsViewModel : PageViewModel
         {
             var result = await Windows.OneDriveActions.UninstallAsync();
             _history.Add(HistoryAction.AppAction, "onedrive.uninstall", result.Success, result.Error);
+            if (result.Success)
+            {
+                _ledger.RecordOneDrive(true);
+            }
+
             _log.LogInformation("OneDrive deinstalliert: {Success} {Error}", result.Success, result.Error);
             section.MessageIsError = !result.Success;
             section.Message = result.Success ? _localization.Get("Apps.OneDrive.Uninstalled") : $"{_localization.Get("Tweak.Failed")} {result.Error}";
@@ -242,6 +254,7 @@ public sealed partial class AppsViewModel : PageViewModel
     internal void InstallOneDrive(AppSectionViewModel section)
     {
         var started = Windows.OneDriveActions.StartInstall();
+        _ledger.RecordOneDrive(false);
         _history.Add(HistoryAction.AppAction, "onedrive.install", true, started ? "Setup gestartet" : "Download-Seite geöffnet");
         section.MessageIsError = false;
         section.Message = _localization.Get(started ? "Apps.OneDrive.InstallStarted" : "Apps.OneDrive.DownloadOpened");

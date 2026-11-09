@@ -7,11 +7,25 @@ public enum ProfileKind
     Recommended,
     Gaming,
     Privacy,
+    Telemetry,
+    Battery,
+    Office,
+    MaxPerformance,
     ResetAll,
 }
 
-/// <summary>Ein Klick für mehrere Tweaks. Inhalte am 04.11.2026 mit Mert abgestimmt.</summary>
-public sealed record TweakProfile(ProfileKind Kind, IReadOnlyList<string> TweakIds);
+/// <summary>
+/// Ein Klick für mehrere Tweaks. Inhalte am 04.11.2026 mit Mert abgestimmt, neue Profile am 10.11.2026.
+/// Zusätze außerhalb der Tweaks: Energiemodus, Autostart von Programmen (Kennungen aus AppCatalog) und Debloat-Gruppen.
+/// </summary>
+public sealed record TweakProfile(ProfileKind Kind, IReadOnlyList<string> TweakIds)
+{
+    public PowerMode? Mode { get; init; }
+
+    public IReadOnlyList<string> StartupApps { get; init; } = Array.Empty<string>();
+
+    public IReadOnlyList<DebloatGroup> Debloat { get; init; } = Array.Empty<DebloatGroup>();
+}
 
 public static class ProfileCatalog
 {
@@ -37,11 +51,55 @@ public static class ProfileCatalog
             .Distinct()
             .ToList());
 
+    public static readonly TweakProfile Telemetry = new(ProfileKind.Telemetry, new[]
+    {
+        "privacy.telemetry.min", "services.diagtrack.off", "services.wer.off", "privacy.feedback.off", "privacy.apptracking.off",
+        "privacy.inking.off", "privacy.tailored.off", "apps.chrome.metrics.off", "apps.edge.personalization.off",
+    });
+
+    public static readonly TweakProfile Battery = new(ProfileKind.Battery, new[]
+    {
+        "perf.bgapps.off", "perf.animations.reduce", "perf.transparency.off",
+        "apps.edge.startupboost.off", "apps.edge.background.off", "apps.chrome.memorysaver.on",
+    })
+    {
+        Mode = PowerMode.Efficiency,
+        StartupApps = new[] { "steam", "epic", "discord", "edge" },
+        Debloat = new[] { DebloatGroup.Ads },
+    };
+
+    public static readonly TweakProfile Office = new(ProfileKind.Office, new[]
+    {
+        "ui.fileext.show", "ui.explorer.thispc", "ui.widgets.off", "privacy.tips.off", "privacy.lockscreen.ads",
+        "privacy.websearch.off", "perf.startupdelay.off", "ui.endtask.on",
+    })
+    {
+        StartupApps = new[] { "steam", "epic", "discord" },
+        Debloat = new[] { DebloatGroup.Ads, DebloatGroup.Xbox },
+    };
+
+    /// <summary>Gaming plus mehr. Xbox-Apps bleiben bewusst, Game Bar und Xbox-App brauchen viele Spiele.</summary>
+    public static readonly TweakProfile MaxPerformance = new(ProfileKind.MaxPerformance,
+        Gaming.TweakIds.Concat(new[]
+        {
+            "gaming.timerres.global", "gaming.powerthrottling.off", "perf.bgapps.off", "perf.animations.reduce",
+            "perf.transparency.off", "net.throttling.off",
+        }).Distinct().ToList())
+    {
+        Mode = PowerMode.Performance,
+        StartupApps = new[] { "edge", "chrome", "discord", "steam", "epic" },
+        Debloat = new[] { DebloatGroup.Ads, DebloatGroup.MicrosoftExtras },
+    };
+
     public static TweakProfile Get(ProfileKind kind, IEnumerable<TweakDefinition> catalog) => kind switch
     {
         ProfileKind.Recommended => Recommended,
         ProfileKind.Gaming => Gaming,
         ProfileKind.Privacy => Privacy(catalog),
+        ProfileKind.Telemetry => Telemetry,
+        ProfileKind.Battery => Battery,
+        ProfileKind.Office => Office,
+        ProfileKind.MaxPerformance => MaxPerformance,
         _ => new TweakProfile(ProfileKind.ResetAll, Array.Empty<string>()),
     };
 }

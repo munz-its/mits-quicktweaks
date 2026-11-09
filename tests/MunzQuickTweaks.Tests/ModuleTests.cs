@@ -22,6 +22,10 @@ public class ProfileTests
     [Theory]
     [InlineData(ProfileKind.Recommended)]
     [InlineData(ProfileKind.Gaming)]
+    [InlineData(ProfileKind.Telemetry)]
+    [InlineData(ProfileKind.Battery)]
+    [InlineData(ProfileKind.Office)]
+    [InlineData(ProfileKind.MaxPerformance)]
     [InlineData(ProfileKind.Privacy)]
     public void Every_profile_tweak_exists_in_the_catalog(ProfileKind kind)
     {

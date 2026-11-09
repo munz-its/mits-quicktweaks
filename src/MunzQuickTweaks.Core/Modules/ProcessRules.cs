@@ -82,6 +82,9 @@ public sealed partial class ProcessRules
         return rules.OrderBy(r => r.Exe, StringComparer.OrdinalIgnoreCase).ToList();
     }
 
+    public ProcessRule? Get(string exe) =>
+        List().FirstOrDefault(r => string.Equals(r.Exe, exe, StringComparison.OrdinalIgnoreCase));
+
     public void Set(ProcessRule rule)
     {
         if (Validate(rule.Exe) is { } error)

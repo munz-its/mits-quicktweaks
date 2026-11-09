@@ -16,6 +16,7 @@ public sealed partial class MainViewModel : ObservableObject
         LocalizationService localization,
         TweakService tweakService,
         DashboardViewModel dashboard,
+        PresetsViewModel presets,
         TweaksViewModel tweaks,
         PrivacyViewModel privacy,
         AppsViewModel apps,
@@ -64,6 +65,7 @@ public sealed partial class MainViewModel : ObservableObject
         Items = new ObservableCollection<NavItem>
         {
             new("Nav.Dashboard", "11011/11011/00000/11011/11011", dashboard, "NavGroup.Start"),
+            new("Nav.Presets", "00100/01110/11111/01110/01010", presets, "NavGroup.Optimize"),
             new("Nav.Tweaks", "01000/11111/00000/00010/11111", tweaks, "NavGroup.Optimize"),
             new("Nav.Privacy", "01110/10001/11111/11011/11111", privacy, "NavGroup.Optimize"),
             new("Nav.Apps", "11111/10101/11111/10101/11111", apps, "NavGroup.Optimize"),

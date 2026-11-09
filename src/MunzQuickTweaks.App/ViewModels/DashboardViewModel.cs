@@ -22,16 +22,19 @@ public sealed partial class DashboardViewModel : PageViewModel
 
     private readonly BatchApplyService _batch;
 
-    public DashboardViewModel(SystemInfoProvider provider, TweakService tweaks, IRestorePointService restorePoints, LocalizationService localization, HistoryStore history, BatchApplyService batch)
+    public DashboardViewModel(SystemInfoProvider provider, TweakService tweaks, IRestorePointService restorePoints, LocalizationService localization, HistoryStore history, BatchApplyService batch, ProfileService profiles)
         : base("Nav.Dashboard")
     {
         _batch = batch;
+        _profiles = profiles;
         _provider = provider;
         _tweaks = tweaks;
         _restorePoints = restorePoints;
         _localization = localization;
         _history = history;
     }
+
+    private readonly ProfileService _profiles;
 
     public override string HeadingKey => "Dashboard.Heading";
 
@@ -78,54 +81,14 @@ public sealed partial class DashboardViewModel : PageViewModel
 
     private bool CanApplyProfile() => !IsApplyingProfile;
 
-    /// <summary>Wendet ein Profil an. Eine Rückfrage zeigt vorher alle Tweaks, Risiko mittel ist markiert.</summary>
+    /// <summary>Wendet ein Profil nach Vorschau an, auch "Alles zurücksetzen".</summary>
     [RelayCommand(CanExecute = nameof(CanApplyProfile))]
     private async Task ApplyProfileAsync(string kindName)
     {
-        var kind = Enum.Parse<ProfileKind>(kindName);
-        var appName = _localization.Get("App.Name");
-        var profileName = _localization.Get($"Profile.{kind}");
-
-        if (kind == ProfileKind.ResetAll)
-        {
-            if (MessageBox.Show(_localization.Get("Restore.ConfirmRevertAll"), appName, MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
-            {
-                return;
-            }
-
-            IsApplyingProfile = true;
-            try
-            {
-                ProfileStatus = _localization.Get("Profile.Resetting");
-                var errors = await _tweaks.RevertAllAsync();
-                ProfileStatus = errors == 0 ? _localization.Get("Restore.AllReverted")
-                    : string.Format(CultureInfo.CurrentCulture, _localization.Get("Restore.RevertErrors"), errors);
-                await RefreshCountsAsync();
-            }
-            finally
-            {
-                IsApplyingProfile = false;
-            }
-
-            return;
-        }
-
-        var profile = ProfileCatalog.Get(kind, _tweaks.Tweaks);
-        var todo = await _batch.FilterTodoAsync(profile.TweakIds);
-        if (todo.Count == 0)
-        {
-            ProfileStatus = string.Format(CultureInfo.CurrentCulture, _localization.Get("Profile.AllActive"), profileName);
-            return;
-        }
-
         IsApplyingProfile = true;
         try
         {
-            var heading = string.Format(CultureInfo.CurrentCulture, _localization.Get("Profile.Confirm"), profileName, todo.Count);
-            var result = await _batch.ConfirmAndApplyAsync(todo, heading, text => ProfileStatus = text, kind.ToString());
-            ProfileStatus = result.Cancelled
-                ? string.Empty
-                : string.Format(CultureInfo.CurrentCulture, _localization.Get("Profile.Done"), profileName, result.Applied, result.Failed);
+            ProfileStatus = await _profiles.RunProfileAsync(Enum.Parse<ProfileKind>(kindName), text => ProfileStatus = text);
             await RefreshCountsAsync();
         }
         finally
@@ -133,6 +96,9 @@ public sealed partial class DashboardViewModel : PageViewModel
             IsApplyingProfile = false;
         }
     }
+
+    [RelayCommand]
+    private void OpenPresets() => NavigateRequested?.Invoke("Nav.Presets");
 
     /// <summary>Tweaks, die ein Windows-Update zurückgesetzt hat, wieder anwenden.</summary>
     [RelayCommand(CanExecute = nameof(CanApplyProfile))]

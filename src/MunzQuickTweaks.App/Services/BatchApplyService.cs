@@ -57,6 +57,13 @@ public sealed class BatchApplyService
             return new BatchResult(0, 0, true);
         }
 
+        return await ApplyAsync(todo, progress, historyNote);
+    }
+
+    /// <summary>Ohne eigene Rückfrage, z. B. nach der Vorschau eines Profils.</summary>
+    public async Task<BatchResult> ApplyAsync(IReadOnlyList<TweakDefinition> todo, Action<string> progress, string historyNote)
+    {
+        var lang = _localization.CurrentLanguage;
         int ok = 0, failed = 0;
         for (var i = 0; i < todo.Count; i++)
         {

@@ -277,3 +277,83 @@ public sealed class GameModeTests : IDisposable
         }
     }
 }
+
+public sealed class ChangeLedgerTests : IDisposable
+{
+    private readonly string _dir = Path.Combine(Path.GetTempPath(), "mqt-ledger-" + Guid.NewGuid().ToString("N"));
+
+    private string File => Path.Combine(_dir, "ledger.json");
+
+    [Fact]
+    public void Only_the_first_original_state_counts()
+    {
+        var ledger = new MunzQuickTweaks.Core.Safety.ChangeLedger(File);
+        var first = Guid.NewGuid();
+        ledger.RecordPower(first, Guid.Empty);
+        ledger.RecordPower(Guid.NewGuid(), PowerModeIds.Performance);
+        ledger.RecordStartup("Run|Steam", true);
+        ledger.RecordStartup("Run|Steam", false);
+        ledger.RecordProcess("spiel.exe", new MunzQuickTweaks.Core.Safety.ProcessOriginal(null, null));
+        ledger.RecordProcess("SPIEL.exe", new MunzQuickTweaks.Core.Safety.ProcessOriginal(3, null));
+
+        var data = new MunzQuickTweaks.Core.Safety.ChangeLedger(File).Data;
+        Assert.Equal(first, data.OriginalPlan);
+        Assert.Equal(Guid.Empty, data.OriginalOverlay);
+        Assert.True(data.Startup["Run|Steam"]);
+        Assert.Null(data.Processes["spiel.exe"].Cpu);
+    }
+
+    [Fact]
+    public void Apps_are_tracked_and_cleared()
+    {
+        var ledger = new MunzQuickTweaks.Core.Safety.ChangeLedger(File);
+        ledger.RecordAppRemoved("Microsoft.BingNews");
+        ledger.RecordAppRemoved("microsoft.bingnews");
+        Assert.Single(ledger.Data.RemovedApps);
+        ledger.RecordAppReinstalled("MICROSOFT.BINGNEWS");
+        Assert.Empty(ledger.Data.RemovedApps);
+
+        ledger.RecordOneDrive(true);
+        ledger.RecordStartup("x", true);
+        ledger.Clear(power: false, startup: true, apps: false, processes: false, oneDrive: true);
+        Assert.True(ledger.Data.IsEmpty);
+    }
+
+    public void Dispose()
+    {
+        if (Directory.Exists(_dir))
+        {
+            Directory.Delete(_dir, recursive: true);
+        }
+    }
+}
+
+public sealed class NewProfileTests
+{
+    [Fact]
+    public void Max_performance_contains_gaming_and_keeps_xbox()
+    {
+        Assert.All(ProfileCatalog.Gaming.TweakIds, id => Assert.Contains(id, ProfileCatalog.MaxPerformance.TweakIds));
+        Assert.DoesNotContain(DebloatGroup.Xbox, ProfileCatalog.MaxPerformance.Debloat);
+        Assert.DoesNotContain("onedrive", ProfileCatalog.MaxPerformance.StartupApps);
+        Assert.Equal(PowerMode.Performance, ProfileCatalog.MaxPerformance.Mode);
+    }
+
+    [Fact]
+    public void Profile_startup_apps_exist_in_app_catalog()
+    {
+        var known = AppCatalog.All.Select(a => a.Id).ToHashSet();
+        foreach (var profile in new[] { ProfileCatalog.Battery, ProfileCatalog.Office, ProfileCatalog.MaxPerformance })
+        {
+            Assert.All(profile.StartupApps, id => Assert.Contains(id, known));
+        }
+    }
+
+    [Fact]
+    public void Telemetry_has_no_extras()
+    {
+        Assert.Null(ProfileCatalog.Telemetry.Mode);
+        Assert.Empty(ProfileCatalog.Telemetry.StartupApps);
+        Assert.Empty(ProfileCatalog.Telemetry.Debloat);
+    }
+}

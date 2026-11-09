@@ -25,9 +25,12 @@ public sealed partial class RestoreViewModel : PageViewModel
     private readonly HistoryStore _history;
     private readonly LocalizationService _localization;
 
-    public RestoreViewModel(IRestorePointService restorePoints, TweakService tweaks, HistoryStore history, LocalizationService localization)
+    private readonly ProfileService _profiles;
+
+    public RestoreViewModel(IRestorePointService restorePoints, TweakService tweaks, HistoryStore history, LocalizationService localization, ProfileService profiles)
         : base("Nav.Restore")
     {
+        _profiles = profiles;
         _restorePoints = restorePoints;
         _tweaks = tweaks;
         _history = history;
@@ -160,17 +163,10 @@ public sealed partial class RestoreViewModel : PageViewModel
     [RelayCommand(CanExecute = nameof(CanRun))]
     private async Task RevertAllAsync()
     {
-        if (MessageBox.Show(_localization.Get("Restore.ConfirmRevertAll"), _localization.Get("App.Name"),
-                MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
-        {
-            return;
-        }
-
         IsBusy = true;
         try
         {
-            var errors = await _tweaks.RevertAllAsync();
-            Status = errors == 0 ? _localization.Get("Restore.AllReverted") : string.Format(CultureInfo.CurrentCulture, _localization.Get("Restore.RevertErrors"), errors);
+            Status = await _profiles.ResetAllAsync(text => Status = text);
             await RefreshAsync();
         }
         finally

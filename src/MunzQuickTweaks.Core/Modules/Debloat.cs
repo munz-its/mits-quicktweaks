@@ -20,6 +20,9 @@ public sealed record DebloatApp(string Package, DebloatGroup Group, string Name)
 
 public sealed record InstalledPackage(string Name, string FullName);
 
+/// <summary>App aus der Debloat-Liste mit ihren installierten Paketen.</summary>
+public sealed record DebloatMatch(DebloatApp App, IReadOnlyList<InstalledPackage> Packages);
+
 /// <summary>Paket, das noch auf dem PC liegt (vorinstalliert oder bei einem anderen Konto), aber beim Nutzer fehlt.</summary>
 public sealed record RestorablePackage(string Name, string FamilyName);
 

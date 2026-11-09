@@ -21,15 +21,18 @@ public sealed partial class ProcessRulesViewModel : PageViewModel
     private readonly LocalizationService _localization;
     private readonly ILogger<ProcessRulesViewModel> _log;
 
-    public ProcessRulesViewModel(IRegistry registry, IRegistryBackup backup, HistoryStore history, LocalizationService localization, ILogger<ProcessRulesViewModel> log)
+    public ProcessRulesViewModel(IRegistry registry, IRegistryBackup backup, HistoryStore history, LocalizationService localization, ChangeLedger ledger, ILogger<ProcessRulesViewModel> log)
         : base("Nav.Processes")
     {
         _rules = new ProcessRules(registry);
+        _ledger = ledger;
         _backup = backup;
         _history = history;
         _localization = localization;
         _log = log;
     }
+
+    private readonly ChangeLedger _ledger;
 
     public ObservableCollection<ProcessRuleRow> Rules { get; } = new();
 
@@ -159,6 +162,9 @@ public sealed partial class ProcessRulesViewModel : PageViewModel
     /// <summary>Vorhandenen Schlüssel des Programms vorher als .reg sichern.</summary>
     private void Backup(string exe)
     {
+        var original = _rules.Get(exe);
+        _ledger.RecordProcess(exe, new ProcessOriginal((int?)original?.Cpu, (int?)original?.Io));
+
         var path = _backup.Export("process." + exe, new[] { (RegistryHive.HKLM, $@"{ProcessRules.BaseKey}\{exe}") });
         if (path is not null)
         {
