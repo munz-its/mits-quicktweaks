@@ -47,7 +47,7 @@ public partial class TweaksViewModel : PageViewModel
     private readonly string _descriptionKey;
 
     public TweaksViewModel(TweakService service, LocalizationService localization)
-        : this(service, localization, "Nav.Tweaks", "Desc.Tweaks", c => c != TweakCategory.Privacy)
+        : this(service, localization, "Nav.Tweaks", "Desc.Tweaks", c => c is not (TweakCategory.Privacy or TweakCategory.Apps))
     {
     }
 

@@ -7,6 +7,7 @@ namespace MunzQuickTweaks.Core.Tweaks;
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
 [JsonDerivedType(typeof(RegistrySnapshot), "registry")]
 [JsonDerivedType(typeof(PowerPlanSnapshot), "powerPlan")]
+[JsonDerivedType(typeof(JsonSettingSnapshot), "jsonSetting")]
 public abstract class ActionSnapshot
 {
 }
@@ -31,6 +32,16 @@ public sealed class PowerPlanSnapshot : ActionSnapshot
 
     /// <summary>Von der App erzeugter Plan, wird beim Rückgängig gelöscht. Null = Plan existierte schon.</summary>
     public Guid? Created { get; set; }
+}
+
+public sealed class JsonSettingSnapshot : ActionSnapshot
+{
+    public string File { get; set; } = string.Empty;
+
+    public string Property { get; set; } = string.Empty;
+
+    /// <summary>Vorheriger Wert als JSON-Text. Null = Einstellung existierte nicht.</summary>
+    public string? Previous { get; set; }
 }
 
 public sealed class JournalEntry

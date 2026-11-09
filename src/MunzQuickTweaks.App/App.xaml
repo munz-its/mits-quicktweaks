@@ -6,6 +6,7 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Themes/Theme.xaml" />
+                <ResourceDictionary Source="Themes/TweakItem.xaml" />
                 <!-- Die Sprache wird beim Start vom LocalizationService ergänzt -->
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>

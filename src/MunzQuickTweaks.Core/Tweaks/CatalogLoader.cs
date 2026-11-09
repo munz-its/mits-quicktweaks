@@ -69,6 +69,22 @@ public static partial class CatalogLoader
             Fail("Mindestens eine Aktion nötig");
         }
 
+        if (t.Category == TweakCategory.Apps && string.IsNullOrWhiteSpace(t.App))
+        {
+            Fail("App-Tweaks brauchen eine App-Kennung");
+        }
+
+        if (t.Requires.Any(r => string.IsNullOrWhiteSpace(r) || r.Contains("..", StringComparison.Ordinal)))
+        {
+            Fail("Ungültiger Pfad in requires");
+        }
+
+        var jsonCount = t.Actions.OfType<JsonSettingAction>().Count();
+        if (jsonCount > 0 && jsonCount != t.Actions.Count)
+        {
+            Fail("JSON-Einstellungen dürfen nicht mit anderen Aktionen gemischt werden");
+        }
+
         foreach (var action in t.Actions)
         {
             switch (action)
@@ -101,6 +117,21 @@ public static partial class CatalogLoader
                     if (t.Actions.Count != 1)
                     {
                         Fail("Energieplan muss die einzige Aktion sein");
+                    }
+
+                    break;
+
+                case JsonSettingAction j:
+                    // Nur Benutzer-Ordner: Einstellungsdateien von Programmen, nie Systemdateien
+                    if (!(j.File.StartsWith("%APPDATA%\\", StringComparison.OrdinalIgnoreCase) || j.File.StartsWith("%LOCALAPPDATA%\\", StringComparison.OrdinalIgnoreCase))
+                        || !j.File.EndsWith(".json", StringComparison.OrdinalIgnoreCase) || j.File.Contains("..", StringComparison.Ordinal))
+                    {
+                        Fail("JSON-Datei muss unter %APPDATA% oder %LOCALAPPDATA% liegen und auf .json enden");
+                    }
+
+                    if (string.IsNullOrWhiteSpace(j.Property) || j.Value.ValueKind == JsonValueKind.Undefined)
+                    {
+                        Fail("JSON-Einstellung braucht Property und Value");
                     }
 
                     break;

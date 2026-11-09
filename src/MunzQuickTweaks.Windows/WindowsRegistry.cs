@@ -82,6 +82,13 @@ public sealed class WindowsRegistry : IRegistry
         root.DeleteSubKey(key, throwOnMissingSubKey: false);
     }
 
+    public IReadOnlyList<string> SubKeys(CoreHive hive, string key)
+    {
+        using var root = OpenRoot(hive);
+        using var sub = root.OpenSubKey(key);
+        return sub?.GetSubKeyNames() ?? Array.Empty<string>();
+    }
+
     private static RegistryKey OpenRoot(CoreHive hive) => RegistryKey.OpenBaseKey(
         hive == CoreHive.HKLM ? WinHive.LocalMachine : WinHive.CurrentUser,
         RegistryView.Registry64);

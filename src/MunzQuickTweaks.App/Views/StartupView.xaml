@@ -43,7 +43,13 @@
                                     <Border CornerRadius="4" Padding="7,1" Background="{StaticResource Bg3}" VerticalAlignment="Center">
                                         <TextBlock Text="{Binding SourceText}" Style="{StaticResource Label}" FontSize="11" Foreground="{StaticResource Text2}" />
                                     </Border>
+                                    <Border CornerRadius="4" Padding="7,1" Background="#1AFF5C5C" VerticalAlignment="Center" Margin="8,0,0,0"
+                                            Visibility="{Binding FileMissing, Converter={StaticResource BoolToVis}}">
+                                        <TextBlock Text="{DynamicResource Startup.Missing}" Style="{StaticResource Label}" FontSize="11" Foreground="{StaticResource Danger}" />
+                                    </Border>
                                 </WrapPanel>
+                                <TextBlock Text="{Binding Publisher}" Style="{StaticResource TextBase}" FontSize="12" Foreground="{StaticResource Text2}" Margin="0,4,0,0"
+                                           Visibility="{Binding HasPublisher, Converter={StaticResource BoolToVis}}" />
                                 <TextBlock Text="{Binding Path}" Style="{StaticResource MutedText}" FontSize="12" Margin="0,4,0,0" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"
                                            ToolTip="{Binding Entry.Command}" />
                                 <TextBlock Text="{Binding Message}" FontSize="12" Margin="0,4,0,0">
@@ -59,9 +65,14 @@
                                     </TextBlock.Style>
                                 </TextBlock>
                             </StackPanel>
-                            <CheckBox Grid.Column="1" Style="{StaticResource Toggle}" VerticalAlignment="Center"
-                                      IsChecked="{Binding IsEnabled}" Command="{Binding ToggleCommand}"
-                                      AutomationProperties.Name="{Binding Name}" />
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                <Button Style="{StaticResource SecondaryButton}" Padding="12,6" FontSize="12" Margin="0,0,14,0"
+                                        Content="{DynamicResource Startup.Remove}" Command="{Binding RemoveCommand}"
+                                        Visibility="{Binding CanRemove, Converter={StaticResource BoolToVis}}" />
+                                <CheckBox Style="{StaticResource Toggle}" VerticalAlignment="Center"
+                                          IsChecked="{Binding IsEnabled}" Command="{Binding ToggleCommand}"
+                                          AutomationProperties.Name="{Binding Name}" />
+                            </StackPanel>
                         </Grid>
                     </Border>
                 </DataTemplate>

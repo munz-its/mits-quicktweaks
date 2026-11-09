@@ -21,7 +21,7 @@
 
     <sys:String x:Key="Desc.Tweaks">Windows settings for performance, gaming, interface and network. Every tweak with an explanation, a risk level and undo.</sys:String>
     <sys:String x:Key="Desc.Privacy">Telemetry, advertising ID, activity history, web search in Start, Copilot and Recall.</sys:String>
-    <sys:String x:Key="Desc.Debloat">Remove preinstalled apps with checkboxes. Reinstalling from the Microsoft Store stays possible.</sys:String>
+    <sys:String x:Key="Desc.Debloat">Remove preinstalled apps with checkboxes. Each app shows how much storage it uses. Removed apps can be restored with one click.</sys:String>
     <sys:String x:Key="Desc.Startup">Enable or disable programs at Windows startup without deleting them.</sys:String>
     <sys:String x:Key="Desc.Care">Clean temporary files and caches, repair Windows with SFC and DISM.</sys:String>
     <sys:String x:Key="Desc.Restore">Three backup layers: Windows restore point, journal with every previous value and registry export as a .reg file.</sys:String>
@@ -130,7 +130,7 @@ Every previous value is saved by the app in any case.</sys:String>
     <sys:String x:Key="Debloat.XboxHint">Note: you need Xbox and Game Bar for Game Pass, Xbox achievements and recordings. Signing in to games keeps working.</sys:String>
     <sys:String x:Key="Debloat.Remove">Remove selected</sys:String>
     <sys:String x:Key="Debloat.Removed">Removed apps</sys:String>
-    <sys:String x:Key="Debloat.RemovedHint">If you need an app again, reinstall it from the Microsoft Store.</sys:String>
+    <sys:String x:Key="Debloat.RemovedHint">If the app is still stored in Windows, "Reinstall" restores it without a download. Otherwise use the Microsoft Store.</sys:String>
     <sys:String x:Key="Debloat.OpenStore">Search in Store</sys:String>
     <sys:String x:Key="Startup.Source.UserRegistry">User</sys:String>
     <sys:String x:Key="Startup.Source.MachineRegistry">All users</sys:String>
@@ -260,4 +260,74 @@ Every previous value is saved by the app in any case.</sys:String>
     <sys:String x:Key="Transfer.Exported">Saved ✓ Tweaks in the file: {0}.</sys:String>
     <sys:String x:Key="Transfer.AllActive">All tweaks from the file are already active on this PC ✓</sys:String>
     <sys:String x:Key="Transfer.Confirm">From the file: apply these {0} tweaks?</sys:String>
+    <sys:String x:Key="Nav.Apps">Apps</sys:String>
+    <sys:String x:Key="Nav.Processes">Process rules</sys:String>
+    <sys:String x:Key="Nav.Power">Power</sys:String>
+    <sys:String x:Key="Desc.Apps">Fine-tune Edge, Chrome, Discord, OneDrive, Steam and Epic Games. Only programs installed on this PC are shown.</sys:String>
+    <sys:String x:Key="Desc.Processes">A fixed priority for a program every time it starts. For example a game higher, an updater or cloud sync lower. Windows keeps the rule even when this app is not running.</sys:String>
+    <sys:String x:Key="Desc.Power">Power mode and power plan. On laptops this decides performance, fan noise and battery life.</sys:String>
+    <sys:String x:Key="Cat.Apps">APPS</sys:String>
+    <sys:String x:Key="Apps.PolicyHint">Edge and Chrome are configured through policies. The browser therefore shows "Managed by your organization". This is normal and disappears when you undo the tweaks.</sys:String>
+    <sys:String x:Key="Apps.NotInstalled">Not installed:</sys:String>
+    <sys:String x:Key="Apps.NotInstalledSelf">Not installed</sys:String>
+    <sys:String x:Key="Apps.Autostart">Autostart</sys:String>
+    <sys:String x:Key="Apps.AutostartOn">Starts with Windows again.</sys:String>
+    <sys:String x:Key="Apps.AutostartOff">No longer starts with Windows.</sys:String>
+    <sys:String x:Key="Apps.OneDrive.Uninstall">Uninstall</sys:String>
+    <sys:String x:Key="Apps.OneDrive.Install">Install</sys:String>
+    <sys:String x:Key="Apps.OneDrive.ConfirmUninstall" xml:space="preserve">Really uninstall OneDrive?
+
+Files already stored on this PC stay in the OneDrive folder. Files that only exist in the cloud are visible here again after reinstalling. Nothing is lost in the cloud.</sys:String>
+    <sys:String x:Key="Apps.OneDrive.Uninstalling">Uninstalling OneDrive, this takes up to a minute.</sys:String>
+    <sys:String x:Key="Apps.OneDrive.Uninstalled">OneDrive is uninstalled.</sys:String>
+    <sys:String x:Key="Apps.OneDrive.InstallStarted">The OneDrive setup is running. Sign in to OneDrive afterwards.</sys:String>
+    <sys:String x:Key="Apps.OneDrive.DownloadOpened">No setup found on this PC. The Microsoft download page is open in your browser.</sys:String>
+    <sys:String x:Key="Power.Mode">Power mode</sys:String>
+    <sys:String x:Key="Power.ModeText">The same slider as in Settings &gt; System &gt; Power and battery. Best performance makes the PC faster, laptops get warmer and the battery runs out sooner.</sys:String>
+    <sys:String x:Key="Power.Efficiency">Best power efficiency</sys:String>
+    <sys:String x:Key="Power.Balanced">Balanced</sys:String>
+    <sys:String x:Key="Power.Performance">Best performance</sys:String>
+    <sys:String x:Key="Power.ModeSource">Applies to the current power source. Windows keeps a separate mode for plugged in and on battery.</sys:String>
+    <sys:String x:Key="Power.ModeNeedsBalanced">The power mode only works with the Balanced power plan. Another plan is active right now.</sys:String>
+    <sys:String x:Key="Power.UseBalanced">Activate Balanced plan</sys:String>
+    <sys:String x:Key="Power.Plans">Power plan</sys:String>
+    <sys:String x:Key="Power.PlansText">All power plans on this PC. The green dot marks the active plan.</sys:String>
+    <sys:String x:Key="Power.Activate">Activate</sys:String>
+    <sys:String x:Key="Power.ModeSet">Power mode saved.</sys:String>
+    <sys:String x:Key="Power.PlanSet">Power plan {0} is active.</sys:String>
+    <sys:String x:Key="Process.New">New rule</sys:String>
+    <sys:String x:Key="Process.ExeHint">Program, e.g. game.exe</sys:String>
+    <sys:String x:Key="Process.Browse">Choose file</sys:String>
+    <sys:String x:Key="Process.CpuLabel">CPU PRIORITY</sys:String>
+    <sys:String x:Key="Process.Cpu.Idle">Low</sys:String>
+    <sys:String x:Key="Process.Cpu.BelowNormal">Below normal</sys:String>
+    <sys:String x:Key="Process.Cpu.Normal">Normal</sys:String>
+    <sys:String x:Key="Process.Cpu.AboveNormal">Above normal</sys:String>
+    <sys:String x:Key="Process.Cpu.High">High</sys:String>
+    <sys:String x:Key="Process.IoLabel">Low disk access (for background programs)</sys:String>
+    <sys:String x:Key="Process.IoLow">Disk low</sys:String>
+    <sys:String x:Key="Process.Add">Save rule</sys:String>
+    <sys:String x:Key="Process.Hint">The rule applies the next time the program starts. The app backs up the registry key as a .reg file first.</sys:String>
+    <sys:String x:Key="Process.Existing">Active rules</sys:String>
+    <sys:String x:Key="Process.None">No rules yet.</sys:String>
+    <sys:String x:Key="Process.Remove">Remove</sys:String>
+    <sys:String x:Key="Process.ConfirmHigh" xml:space="preserve">High priority can slow down other programs when this program uses a lot of power. Usually fine for games, not for background programs.
+
+Save the rule anyway?</sys:String>
+    <sys:String x:Key="Process.Saved">Rule for {0} saved.</sys:String>
+    <sys:String x:Key="Process.Removed">Rule for {0} removed.</sys:String>
+    <sys:String x:Key="Debloat.Reinstall">Reinstall</sys:String>
+    <sys:String x:Key="Debloat.Reinstalling">Reinstalling {0} ...</sys:String>
+    <sys:String x:Key="Debloat.Reinstalled">Done, {0} is installed again.</sys:String>
+    <sys:String x:Key="Startup.Missing">FILE MISSING</sys:String>
+    <sys:String x:Key="Startup.Remove">Delete</sys:String>
+    <sys:String x:Key="Startup.ConfirmRemove" xml:space="preserve">Delete entry "{0}"?
+
+The program file no longer exists. The entry is saved to the app's backup folder first.</sys:String>
+    <sys:String x:Key="History.AppReinstalled">App reinstalled</sys:String>
+    <sys:String x:Key="History.StartupRemoved">Startup entry deleted</sys:String>
+    <sys:String x:Key="History.ProcessRuleSet">Process rule saved</sys:String>
+    <sys:String x:Key="History.ProcessRuleRemoved">Process rule removed</sys:String>
+    <sys:String x:Key="History.PowerModeChanged">Power changed</sys:String>
+    <sys:String x:Key="History.AppAction">App action</sys:String>
 </ResourceDictionary>

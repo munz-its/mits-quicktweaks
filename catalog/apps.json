@@ -1,0 +1,396 @@
+[
+  {
+    "id": "apps.edge.startupboost.off",
+    "category": "Apps",
+    "app": "edge",
+    "requires": [
+      "%ProgramFiles(x86)%\\Microsoft\\Edge\\Application\\msedge.exe",
+      "%ProgramFiles%\\Microsoft\\Edge\\Application\\msedge.exe"
+    ],
+    "risk": "Low",
+    "restart": "None",
+    "minBuild": 19045,
+    "title": {
+      "de": "Edge nicht vorab starten",
+      "en": "Do not preload Edge"
+    },
+    "description": {
+      "de": "Edge startet sonst schon beim Anmelden im Hintergrund, damit es später schneller öffnet. Das kostet Arbeitsspeicher und verlängert den Windows-Start, auch wenn du Edge nie nutzt.",
+      "en": "Otherwise Edge starts in the background when you sign in so it opens faster later. This costs memory and slows down Windows startup, even if you never use Edge."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "key": "SOFTWARE\\Policies\\Microsoft\\Edge",
+        "name": "StartupBoostEnabled",
+        "kind": "DWord",
+        "value": "0"
+      }
+    ]
+  },
+  {
+    "id": "apps.edge.background.off",
+    "category": "Apps",
+    "app": "edge",
+    "requires": [
+      "%ProgramFiles(x86)%\\Microsoft\\Edge\\Application\\msedge.exe",
+      "%ProgramFiles%\\Microsoft\\Edge\\Application\\msedge.exe"
+    ],
+    "risk": "Low",
+    "restart": "None",
+    "minBuild": 19045,
+    "title": {
+      "de": "Edge im Hintergrund beenden",
+      "en": "Stop Edge in the background"
+    },
+    "description": {
+      "de": "Edge läuft nach dem Schließen weiter, damit Erweiterungen und Benachrichtigungen aktiv bleiben. Danach ist Edge nach dem Schließen wirklich beendet.",
+      "en": "Edge keeps running after you close it so extensions and notifications stay active. Afterwards Edge really quits when you close it."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "key": "SOFTWARE\\Policies\\Microsoft\\Edge",
+        "name": "BackgroundModeEnabled",
+        "kind": "DWord",
+        "value": "0"
+      }
+    ]
+  },
+  {
+    "id": "apps.edge.sidebar.off",
+    "category": "Apps",
+    "app": "edge",
+    "requires": [
+      "%ProgramFiles(x86)%\\Microsoft\\Edge\\Application\\msedge.exe",
+      "%ProgramFiles%\\Microsoft\\Edge\\Application\\msedge.exe"
+    ],
+    "risk": "Low",
+    "restart": "None",
+    "minBuild": 19045,
+    "title": {
+      "de": "Edge-Seitenleiste ausblenden",
+      "en": "Hide the Edge sidebar"
+    },
+    "description": {
+      "de": "Blendet die Seitenleiste mit Copilot, Spielen und Werkzeugen rechts im Browser aus.",
+      "en": "Hides the sidebar with Copilot, games and tools on the right side of the browser."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "key": "SOFTWARE\\Policies\\Microsoft\\Edge",
+        "name": "HubsSidebarEnabled",
+        "kind": "DWord",
+        "value": "0"
+      }
+    ]
+  },
+  {
+    "id": "apps.edge.shopping.off",
+    "category": "Apps",
+    "app": "edge",
+    "requires": [
+      "%ProgramFiles(x86)%\\Microsoft\\Edge\\Application\\msedge.exe",
+      "%ProgramFiles%\\Microsoft\\Edge\\Application\\msedge.exe"
+    ],
+    "risk": "Low",
+    "restart": "None",
+    "minBuild": 19045,
+    "title": {
+      "de": "Edge-Einkaufshilfe ausschalten",
+      "en": "Turn off the Edge shopping assistant"
+    },
+    "description": {
+      "de": "Edge vergleicht sonst beim Einkaufen Preise und blendet Gutscheine ein. Dafür schickt Edge die besuchten Shop-Seiten an Microsoft.",
+      "en": "Otherwise Edge compares prices and shows coupons while you shop. For this Edge sends the shop pages you visit to Microsoft."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "key": "SOFTWARE\\Policies\\Microsoft\\Edge",
+        "name": "EdgeShoppingAssistantEnabled",
+        "kind": "DWord",
+        "value": "0"
+      }
+    ]
+  },
+  {
+    "id": "apps.edge.recommendations.off",
+    "category": "Apps",
+    "app": "edge",
+    "requires": [
+      "%ProgramFiles(x86)%\\Microsoft\\Edge\\Application\\msedge.exe",
+      "%ProgramFiles%\\Microsoft\\Edge\\Application\\msedge.exe"
+    ],
+    "risk": "Low",
+    "restart": "None",
+    "minBuild": 19045,
+    "title": {
+      "de": "Edge-Tipps und Empfehlungen aus",
+      "en": "Turn off Edge tips and recommendations"
+    },
+    "description": {
+      "de": "Keine Hinweise mehr auf Edge-Funktionen und keine Empfehlungen im Browser.",
+      "en": "No more hints about Edge features and no recommendations in the browser."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "key": "SOFTWARE\\Policies\\Microsoft\\Edge",
+        "name": "ShowRecommendationsEnabled",
+        "kind": "DWord",
+        "value": "0"
+      }
+    ]
+  },
+  {
+    "id": "apps.edge.personalization.off",
+    "category": "Apps",
+    "app": "edge",
+    "requires": [
+      "%ProgramFiles(x86)%\\Microsoft\\Edge\\Application\\msedge.exe",
+      "%ProgramFiles%\\Microsoft\\Edge\\Application\\msedge.exe"
+    ],
+    "risk": "Low",
+    "restart": "None",
+    "minBuild": 19045,
+    "title": {
+      "de": "Edge-Verlauf nicht für Werbung nutzen",
+      "en": "Do not use Edge history for ads"
+    },
+    "description": {
+      "de": "Edge nutzt deinen Browserverlauf sonst, um Werbung, Microsoft News und Microsoft-Dienste zu personalisieren.",
+      "en": "Otherwise Edge uses your browsing history to personalize ads, Microsoft News and Microsoft services."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "key": "SOFTWARE\\Policies\\Microsoft\\Edge",
+        "name": "PersonalizationReportingEnabled",
+        "kind": "DWord",
+        "value": "0"
+      }
+    ]
+  },
+  {
+    "id": "apps.chrome.background.off",
+    "category": "Apps",
+    "app": "chrome",
+    "requires": [
+      "%ProgramFiles%\\Google\\Chrome\\Application\\chrome.exe",
+      "%ProgramFiles(x86)%\\Google\\Chrome\\Application\\chrome.exe",
+      "%LOCALAPPDATA%\\Google\\Chrome\\Application\\chrome.exe"
+    ],
+    "risk": "Low",
+    "restart": "None",
+    "minBuild": 19045,
+    "title": {
+      "de": "Chrome im Hintergrund beenden",
+      "en": "Stop Chrome in the background"
+    },
+    "description": {
+      "de": "Chrome läuft nach dem Schließen weiter, wenn Erweiterungen das verlangen. Danach ist Chrome nach dem Schließen wirklich beendet.",
+      "en": "Chrome keeps running after you close it if extensions ask for it. Afterwards Chrome really quits when you close it."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "key": "SOFTWARE\\Policies\\Google\\Chrome",
+        "name": "BackgroundModeEnabled",
+        "kind": "DWord",
+        "value": "0"
+      }
+    ]
+  },
+  {
+    "id": "apps.chrome.memorysaver.on",
+    "category": "Apps",
+    "app": "chrome",
+    "requires": [
+      "%ProgramFiles%\\Google\\Chrome\\Application\\chrome.exe",
+      "%ProgramFiles(x86)%\\Google\\Chrome\\Application\\chrome.exe",
+      "%LOCALAPPDATA%\\Google\\Chrome\\Application\\chrome.exe"
+    ],
+    "risk": "Low",
+    "restart": "None",
+    "minBuild": 19045,
+    "title": {
+      "de": "Chrome-Speichersparmodus an",
+      "en": "Turn on Chrome Memory Saver"
+    },
+    "description": {
+      "de": "Chrome gibt den Arbeitsspeicher von Tabs frei, die du länger nicht benutzt. Beim Zurückwechseln lädt der Tab neu.",
+      "en": "Chrome frees the memory of tabs you have not used for a while. The tab reloads when you switch back."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "key": "SOFTWARE\\Policies\\Google\\Chrome",
+        "name": "HighEfficiencyModeEnabled",
+        "kind": "DWord",
+        "value": "1"
+      }
+    ]
+  },
+  {
+    "id": "apps.chrome.metrics.off",
+    "category": "Apps",
+    "app": "chrome",
+    "requires": [
+      "%ProgramFiles%\\Google\\Chrome\\Application\\chrome.exe",
+      "%ProgramFiles(x86)%\\Google\\Chrome\\Application\\chrome.exe",
+      "%LOCALAPPDATA%\\Google\\Chrome\\Application\\chrome.exe"
+    ],
+    "risk": "Low",
+    "restart": "None",
+    "minBuild": 19045,
+    "title": {
+      "de": "Chrome-Nutzungsstatistik aus",
+      "en": "Turn off Chrome usage statistics"
+    },
+    "description": {
+      "de": "Chrome schickt sonst Nutzungsdaten und Absturzberichte an Google.",
+      "en": "Otherwise Chrome sends usage data and crash reports to Google."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "key": "SOFTWARE\\Policies\\Google\\Chrome",
+        "name": "MetricsReportingEnabled",
+        "kind": "DWord",
+        "value": "0"
+      }
+    ]
+  },
+  {
+    "id": "apps.chrome.feedback.off",
+    "category": "Apps",
+    "app": "chrome",
+    "requires": [
+      "%ProgramFiles%\\Google\\Chrome\\Application\\chrome.exe",
+      "%ProgramFiles(x86)%\\Google\\Chrome\\Application\\chrome.exe",
+      "%LOCALAPPDATA%\\Google\\Chrome\\Application\\chrome.exe"
+    ],
+    "risk": "Low",
+    "restart": "None",
+    "minBuild": 19045,
+    "title": {
+      "de": "Chrome-Feedback-Funktion aus",
+      "en": "Turn off Chrome feedback"
+    },
+    "description": {
+      "de": "Entfernt die Möglichkeit, Feedback mit Screenshots und Systemdaten an Google zu senden.",
+      "en": "Removes the option to send feedback with screenshots and system data to Google."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "key": "SOFTWARE\\Policies\\Google\\Chrome",
+        "name": "UserFeedbackAllowed",
+        "kind": "DWord",
+        "value": "0"
+      }
+    ]
+  },
+  {
+    "id": "apps.discord.hwaccel.off",
+    "category": "Apps",
+    "app": "discord",
+    "requires": [
+      "%LOCALAPPDATA%\\Discord\\Update.exe"
+    ],
+    "risk": "Low",
+    "restart": "None",
+    "minBuild": 19045,
+    "title": {
+      "de": "Discord-Hardwarebeschleunigung aus",
+      "en": "Turn off Discord hardware acceleration"
+    },
+    "description": {
+      "de": "Discord nutzt dann nicht mehr die Grafikkarte. Das gibt in Spielen Grafikleistung frei und hilft gegen Ruckler und Bildfehler beim Streamen. Discord braucht dafür etwas mehr Prozessorleistung. Discord muss dafür geschlossen sein.",
+      "en": "Discord then no longer uses the graphics card. This frees graphics power in games and helps against stutter and glitches while streaming. Discord uses a bit more CPU instead. Discord has to be closed for this."
+    },
+    "actions": [
+      {
+        "type": "jsonSetting",
+        "file": "%APPDATA%\\discord\\settings.json",
+        "property": "enableHardwareAcceleration",
+        "value": false,
+        "default": true,
+        "process": "Discord"
+      }
+    ]
+  },
+  {
+    "id": "apps.discord.minimized.on",
+    "category": "Apps",
+    "app": "discord",
+    "requires": [
+      "%LOCALAPPDATA%\\Discord\\Update.exe"
+    ],
+    "risk": "Low",
+    "restart": "None",
+    "minBuild": 19045,
+    "title": {
+      "de": "Discord minimiert starten",
+      "en": "Start Discord minimized"
+    },
+    "description": {
+      "de": "Startet Discord beim Anmelden direkt im Infobereich statt mit offenem Fenster. Discord muss dafür geschlossen sein.",
+      "en": "Starts Discord straight in the notification area at sign-in instead of with an open window. Discord has to be closed for this."
+    },
+    "actions": [
+      {
+        "type": "jsonSetting",
+        "file": "%APPDATA%\\discord\\settings.json",
+        "property": "START_MINIMIZED",
+        "value": true,
+        "default": false,
+        "process": "Discord"
+      }
+    ]
+  },
+  {
+    "id": "apps.onedrive.explorer.hide",
+    "category": "Apps",
+    "app": "onedrive",
+    "requires": [
+      "%LOCALAPPDATA%\\Microsoft\\OneDrive\\OneDrive.exe",
+      "%ProgramFiles%\\Microsoft OneDrive\\OneDrive.exe",
+      "%ProgramFiles(x86)%\\Microsoft OneDrive\\OneDrive.exe"
+    ],
+    "risk": "Low",
+    "restart": "Explorer",
+    "minBuild": 19045,
+    "title": {
+      "de": "OneDrive im Explorer ausblenden",
+      "en": "Hide OneDrive in File Explorer"
+    },
+    "description": {
+      "de": "Entfernt den OneDrive-Eintrag aus der linken Leiste im Explorer. OneDrive selbst und deine Dateien bleiben unverändert.",
+      "en": "Removes the OneDrive entry from the left pane in File Explorer. OneDrive itself and your files stay unchanged."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKCU",
+        "key": "Software\\Classes\\CLSID\\{018D5C66-4533-4307-9B53-224DE2ED1FE6}",
+        "name": "System.IsPinnedToNameSpaceTree",
+        "kind": "DWord",
+        "value": "0",
+        "default": "1"
+      }
+    ]
+  }
+]

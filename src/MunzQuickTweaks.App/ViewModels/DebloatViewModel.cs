@@ -28,6 +28,10 @@ public sealed partial class DebloatItemViewModel : ObservableObject
 
     [ObservableProperty]
     private bool _isSelected;
+
+    /// <summary>Belegter Speicher, z. B. "120 MB". Leer, solange unbekannt.</summary>
+    [ObservableProperty]
+    private string _sizeText = string.Empty;
 }
 
 public sealed partial class DebloatGroupViewModel : ObservableObject
@@ -48,7 +52,11 @@ public sealed partial class DebloatGroupViewModel : ObservableObject
     private string _title = string.Empty;
 }
 
-public sealed record RemovedAppRow(string Name, string Time, string StoreUri);
+/// <summary>Entfernte App. FamilyName gesetzt = Ein-Klick-Neuinstallation möglich, sonst über den Store.</summary>
+public sealed record RemovedAppRow(string Name, string Time, string StoreUri, string? FamilyName)
+{
+    public bool CanReinstall => FamilyName is not null;
+}
 
 /// <summary>Vorinstallierte Apps entfernen, nur für den angemeldeten Nutzer, über den Store neu installierbar.</summary>
 public sealed partial class DebloatViewModel : PageViewModel
@@ -108,6 +116,7 @@ public sealed partial class DebloatViewModel : PageViewModel
             }
 
             RefreshTitles();
+            _ = LoadSizesAsync(Groups.SelectMany(g => g.Items).ToList());
         }
         catch (Exception ex)
         {
@@ -119,13 +128,36 @@ public sealed partial class DebloatViewModel : PageViewModel
             IsLoading = false;
         }
 
+        IReadOnlyList<RestorablePackage> restorable;
+        try
+        {
+            restorable = await Task.Run(_appx.ListRestorable);
+        }
+        catch (Exception ex)
+        {
+            _log.LogWarning(ex, "Wiederherstellbare Apps nicht lesbar");
+            restorable = Array.Empty<RestorablePackage>();
+        }
+
+        var installedNames = Groups.SelectMany(g => g.Items).Select(i => i.App.Package).ToHashSet(StringComparer.OrdinalIgnoreCase);
         Removed.Clear();
         foreach (var entry in _history.Latest(200).Where(h => h.Action == HistoryAction.AppRemoved && h.Success))
         {
             var app = DebloatCatalog.All.FirstOrDefault(a => a.Package == entry.TweakId);
+            if (app is not null && !installedNames.Contains(app.Package) && Removed.All(r => r.Name != app.Name))
+            {
+                var family = restorable.FirstOrDefault(r => string.Equals(r.Name, app.Package, StringComparison.OrdinalIgnoreCase))?.FamilyName;
+                Removed.Add(new RemovedAppRow(app.Name, entry.Time.ToLocalTime().ToString("g", CultureInfo.CurrentUICulture), app.StoreSearchUri, family));
+            }
+        }
+
+        // Auch Apps, die außerhalb der App entfernt wurden, lassen sich so zurückholen
+        foreach (var package in restorable)
+        {
+            var app = DebloatCatalog.All.FirstOrDefault(a => string.Equals(a.Package, package.Name, StringComparison.OrdinalIgnoreCase));
             if (app is not null && Removed.All(r => r.Name != app.Name))
             {
-                Removed.Add(new RemovedAppRow(app.Name, entry.Time.ToLocalTime().ToString("g", CultureInfo.CurrentUICulture), app.StoreSearchUri));
+                Removed.Add(new RemovedAppRow(app.Name, string.Empty, app.StoreSearchUri, package.FamilyName));
             }
         }
 
@@ -199,6 +231,48 @@ public sealed partial class DebloatViewModel : PageViewModel
             }
 
             Status = string.Format(CultureInfo.CurrentCulture, _localization.Get("Debloat.Done"), ok, failed);
+            await LoadAsync();
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private async Task LoadSizesAsync(IReadOnlyList<DebloatItemViewModel> items)
+    {
+        foreach (var item in items)
+        {
+            var bytes = await Task.Run(() => item.Packages.Sum(p => _appx.GetSize(p.FullName) ?? 0));
+            item.SizeText = bytes > 0 ? FormatSize(bytes) : string.Empty;
+        }
+    }
+
+    internal static string FormatSize(long bytes) => bytes switch
+    {
+        >= 1L << 30 => (bytes / (double)(1L << 30)).ToString("0.0", CultureInfo.CurrentCulture) + " GB",
+        >= 1L << 20 => (bytes / (double)(1L << 20)).ToString("0", CultureInfo.CurrentCulture) + " MB",
+        _ => Math.Max(1, bytes / 1024).ToString(CultureInfo.CurrentCulture) + " KB",
+    };
+
+    [RelayCommand]
+    private async Task ReinstallAsync(RemovedAppRow row)
+    {
+        if (row.FamilyName is null || IsBusy)
+        {
+            return;
+        }
+
+        IsBusy = true;
+        try
+        {
+            Status = string.Format(CultureInfo.CurrentCulture, _localization.Get("Debloat.Reinstalling"), row.Name);
+            var result = await _appx.ReinstallAsync(row.FamilyName);
+            _history.Add(HistoryAction.AppReinstalled, row.FamilyName, result.Success, result.Error);
+            _log.LogInformation("App {Family} neu eingerichtet: {Success} {Error}", row.FamilyName, result.Success, result.Error);
+            Status = result.Success
+                ? string.Format(CultureInfo.CurrentCulture, _localization.Get("Debloat.Reinstalled"), row.Name)
+                : $"{_localization.Get("Tweak.Failed")} {result.Error}";
             await LoadAsync();
         }
         finally

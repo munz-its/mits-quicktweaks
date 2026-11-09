@@ -36,10 +36,27 @@ public static class TweakDetails
                         : $"Activate power plan {p.Template}, created from the template if missing");
                     break;
 
+                case JsonSettingAction j:
+                    var jsonDefault = j.Default is { } d
+                        ? (de ? $"Standard: {d.GetRawText()}" : $"Default: {d.GetRawText()}")
+                        : (de ? "Standard: Einstellung fehlt" : "Default: setting absent");
+                    lines.Add($"{j.File} \u2192 \"{j.Property}\": {j.Value.GetRawText()} · {jsonDefault}");
+                    if (!string.IsNullOrEmpty(j.Process))
+                    {
+                        lines.Add(de ? $"{j.Process} muss dafür geschlossen sein" : $"{j.Process} must be closed for this");
+                    }
+
+                    break;
+
                 default:
                     lines.Add(action.GetType().Name);
                     break;
             }
+        }
+
+        if (tweak.Requires.Count > 0)
+        {
+            lines.Add((de ? "Nur wenn vorhanden: " : "Only if present: ") + string.Join(" | ", tweak.Requires));
         }
 
         var build = tweak.MaxBuild == 0

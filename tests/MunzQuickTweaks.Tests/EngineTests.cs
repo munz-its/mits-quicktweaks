@@ -55,6 +55,15 @@ internal sealed class FakeRegistry : IRegistry
         }
     }
 
+    public IReadOnlyList<string> SubKeys(RegistryHive hive, string key)
+    {
+        var prefix = Path(hive, key) + "\\";
+        return _keys.Keys.Where(k => k.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            .Select(k => k[prefix.Length..].Split('\\')[0])
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
     private Dictionary<string, RegistryValue>? Values(RegistryHive hive, string key, bool create)
     {
         var path = Path(hive, key);
@@ -334,7 +343,7 @@ public class CatalogTests
         Assert.All(tweaks.Where(t => t.Actions.OfType<PowerPlanAction>().Any()), t => Assert.Equal(TweakRisk.Medium, t.Risk));
 
         // Policy-Werte ohne Standard werden beim Rückgängig gelöscht: nur unter Policies erlaubt oder bewusst gewählt
-        var allowedWithoutDefault = new[] { "Policies", "Serialize", "Siuf", "GraphicsDrivers", "PowerThrottling", "UserGpuPreferences", "International", "CLSID", "Advanced", @"CurrentVersion\Search" };
+        var allowedWithoutDefault = new[] { "Policies", "Serialize", "Siuf", "GraphicsDrivers", "PowerThrottling", "UserGpuPreferences", "International", "CLSID", "Advanced", @"CurrentVersion\Search", @"Session Manager\kernel" };
         foreach (var action in tweaks.SelectMany(t => t.Actions).OfType<RegistryAction>().Where(a => a.Default is null))
         {
             Assert.Contains(allowedWithoutDefault, part => action.Key.Contains(part, StringComparison.OrdinalIgnoreCase));
@@ -546,6 +555,8 @@ internal sealed class ThrowingRegistry : IRegistry
     public void Delete(RegistryHive hive, string key, string name) { }
 
     public void DeleteKeyIfEmpty(RegistryHive hive, string key) { }
+
+    public IReadOnlyList<string> SubKeys(RegistryHive hive, string key) => Array.Empty<string>();
 }
 
 public sealed class SelfTestRobustnessTests : IDisposable

@@ -1,4 +1,6 @@
 using System.Globalization;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace MunzQuickTweaks.Core.Tweaks;
 
@@ -36,9 +38,13 @@ public sealed class TweakEngine
     private readonly int _build;
     private readonly TimeProvider _time;
     private readonly IPowerPlans? _power;
+    private readonly IAppEnvironment _apps;
 
-    public TweakEngine(IRegistry registry, JournalStore journal, ISystemNotifier notifier, int build, IPowerPlans? power = null, TimeProvider? time = null)
+    private static readonly JsonSerializerOptions JsonWriteOptions = new() { WriteIndented = true };
+
+    public TweakEngine(IRegistry registry, JournalStore journal, ISystemNotifier notifier, int build, IPowerPlans? power = null, TimeProvider? time = null, IAppEnvironment? apps = null)
     {
+        _apps = apps ?? new LocalAppEnvironment();
         _registry = registry;
         _journal = journal;
         _notifier = notifier;
@@ -57,7 +63,8 @@ public sealed class TweakEngine
 
     /// <summary>True, wenn der Tweak Benutzer-Einstellungen (HKCU) ändert.</summary>
     public static bool UsesUserHive(TweakDefinition tweak) =>
-        tweak.Actions.OfType<RegistryAction>().Any(a => a.Hive == RegistryHive.HKCU);
+        tweak.Actions.OfType<RegistryAction>().Any(a => a.Hive == RegistryHive.HKCU)
+        || tweak.Actions.OfType<JsonSettingAction>().Any();
 
     /// <summary>True, wenn der Tweak nur wegen des fremden Kontos gesperrt ist.</summary>
     public bool IsBlockedByAccount(TweakDefinition tweak) => !UserHiveAllowed && UsesUserHive(tweak);
@@ -72,6 +79,11 @@ public sealed class TweakEngine
         if (PowerAction(tweak) is { } plan)
         {
             return PowerStatus(tweak, plan);
+        }
+
+        if (IsJsonTweak(tweak))
+        {
+            return JsonStatus(tweak);
         }
 
         var steps = Expand(tweak).ToList();
@@ -91,6 +103,11 @@ public sealed class TweakEngine
         if (PowerAction(tweak) is { } plan)
         {
             return ApplyPower(tweak, plan);
+        }
+
+        if (IsJsonTweak(tweak))
+        {
+            return ApplyJson(tweak);
         }
 
         var steps = Expand(tweak).ToList();
@@ -145,6 +162,11 @@ public sealed class TweakEngine
         if (PowerAction(tweak) is not null)
         {
             return RevertPower(tweak);
+        }
+
+        if (IsJsonTweak(tweak))
+        {
+            return RevertJson(tweak);
         }
 
         var entry = _journal.Get(tweak.Id);
@@ -221,6 +243,22 @@ public sealed class TweakEngine
             state.Add($"Energieplan aktiv = {_power.GetActive()}");
         }
 
+        foreach (var json in tweak.Actions.OfType<JsonSettingAction>())
+        {
+            string value;
+            try
+            {
+                var obj = ReadJsonObject(json.File);
+                value = obj is null ? "(Datei fehlt)" : obj.TryGetPropertyValue(json.Property, out var node) ? node?.ToJsonString() ?? "null" : "(fehlt)";
+            }
+            catch (Exception ex) when (IsExpected(ex))
+            {
+                value = $"(Fehler: {ex.GetType().Name})";
+            }
+
+            state.Add($"{json.File} \u2192 {json.Property} = {value}");
+        }
+
         return state;
     }
 
@@ -242,6 +280,11 @@ public sealed class TweakEngine
             return "Modern Standby, keine eigenen Energiepläne";
         }
 
+        if (!RequirementsMet(tweak))
+        {
+            return "Programm nicht installiert";
+        }
+
         var missing = tweak.Actions.OfType<ServiceAction>().FirstOrDefault(s => !_registry.KeyExists(RegistryHive.HKLM, ServicesKey + s.Name));
         return missing is null ? "unbekannt" : $"Dienst {missing.Name} fehlt";
     }
@@ -252,7 +295,7 @@ public sealed class TweakEngine
 
     private static bool IsExpected(Exception ex) =>
         ex is UnauthorizedAccessException or IOException or System.Security.SecurityException or NotSupportedException
-            or System.Runtime.InteropServices.ExternalException;
+            or System.Runtime.InteropServices.ExternalException or JsonException or InvalidDataException;
 
     private bool IsAvailable(TweakDefinition tweak)
     {
@@ -262,6 +305,11 @@ public sealed class TweakEngine
         }
 
         if (PowerAction(tweak) is not null && (_power is null || !_power.IsSupported))
+        {
+            return false;
+        }
+
+        if (!RequirementsMet(tweak))
         {
             return false;
         }
@@ -357,6 +405,10 @@ public sealed class TweakEngine
 
                 case PowerPlanAction:
                     // Kein Registry-Schritt, läuft über die Energie-API
+                    break;
+
+                case JsonSettingAction:
+                    // Kein Registry-Schritt, läuft über die Einstellungsdatei
                     break;
 
                 default:
@@ -472,6 +524,191 @@ public sealed class TweakEngine
 
         _journal.Remove(tweak.Id);
         return TweakResult.Ok;
+    }
+
+    /// <summary>Programm installiert: mindestens eine der genannten Dateien existiert. JSON-Tweaks brauchen zusätzlich ihre Datei.</summary>
+    private bool RequirementsMet(TweakDefinition tweak)
+    {
+        try
+        {
+            if (tweak.Requires.Count > 0 && !tweak.Requires.Any(_apps.FileExists))
+            {
+                return false;
+            }
+
+            return tweak.Actions.OfType<JsonSettingAction>().All(j => _apps.FileExists(j.File));
+        }
+        catch (Exception ex) when (IsExpected(ex))
+        {
+            return false;
+        }
+    }
+
+    private static bool IsJsonTweak(TweakDefinition tweak) => tweak.Actions.Count > 0 && tweak.Actions.All(a => a is JsonSettingAction);
+
+    private JsonObject? ReadJsonObject(string file)
+    {
+        var text = _apps.ReadText(file);
+        if (text is null)
+        {
+            return null;
+        }
+
+        return JsonNode.Parse(text, documentOptions: new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true }) as JsonObject
+            ?? throw new InvalidDataException("Die Einstellungsdatei hat ein unbekanntes Format.");
+    }
+
+    private TweakStatus JsonStatus(TweakDefinition tweak)
+    {
+        var actions = tweak.Actions.OfType<JsonSettingAction>().ToList();
+        try
+        {
+            var matching = 0;
+            foreach (var group in actions.GroupBy(a => a.File, StringComparer.OrdinalIgnoreCase))
+            {
+                var obj = ReadJsonObject(group.Key);
+                if (obj is null)
+                {
+                    continue;
+                }
+
+                matching += group.Count(a => JsonNode.DeepEquals(obj[a.Property], JsonNode.Parse(a.Value.GetRawText())));
+            }
+
+            return matching == actions.Count ? TweakStatus.Applied : matching == 0 ? TweakStatus.NotApplied : TweakStatus.Partial;
+        }
+        catch (Exception ex) when (IsExpected(ex))
+        {
+            return TweakStatus.NotApplied;
+        }
+    }
+
+    private string? RunningProcess(TweakDefinition tweak) =>
+        tweak.Actions.OfType<JsonSettingAction>()
+            .Select(a => a.Process)
+            .FirstOrDefault(p => !string.IsNullOrEmpty(p) && _apps.IsProcessRunning(p));
+
+    private static string ProcessRunningMessage(string process) =>
+        $"{process} läuft noch. Bitte {process} ganz schließen, auch im Infobereich neben der Uhr, und erneut versuchen.";
+
+    private TweakResult ApplyJson(TweakDefinition tweak)
+    {
+        if (RunningProcess(tweak) is { } running)
+        {
+            return TweakResult.Fail(ProcessRunningMessage(running));
+        }
+
+        var actions = tweak.Actions.OfType<JsonSettingAction>().ToList();
+        var originals = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        var snapshots = new List<ActionSnapshot>();
+        try
+        {
+            foreach (var group in actions.GroupBy(a => a.File, StringComparer.OrdinalIgnoreCase))
+            {
+                var text = _apps.ReadText(group.Key) ?? throw new FileNotFoundException("Die Einstellungsdatei fehlt.", group.Key);
+                originals[group.Key] = text;
+                var obj = ReadJsonObject(group.Key) ?? throw new FileNotFoundException("Die Einstellungsdatei fehlt.", group.Key);
+                foreach (var action in group)
+                {
+                    snapshots.Add(new JsonSettingSnapshot
+                    {
+                        File = action.File,
+                        Property = action.Property,
+                        Previous = obj.TryGetPropertyValue(action.Property, out var node) ? node?.ToJsonString() ?? "null" : null,
+                    });
+                    obj[action.Property] = JsonNode.Parse(action.Value.GetRawText());
+                }
+
+                _apps.WriteText(group.Key, obj.ToJsonString(JsonWriteOptions));
+            }
+
+            if (JsonStatus(tweak) != TweakStatus.Applied)
+            {
+                RestoreFiles(originals);
+                return TweakResult.Fail("Kontrolle fehlgeschlagen: Einstellungsdatei");
+            }
+        }
+        catch (Exception ex) when (IsExpected(ex))
+        {
+            RestoreFiles(originals);
+            return TweakResult.Fail(ex.Message);
+        }
+
+        // Beim erneuten Anwenden bleibt der ursprüngliche Zustand erhalten
+        var existing = _journal.Get(tweak.Id);
+        _journal.Set(new JournalEntry
+        {
+            TweakId = tweak.Id,
+            AppliedAt = existing?.AppliedAt ?? _time.GetUtcNow(),
+            Snapshots = existing?.Snapshots.OfType<JsonSettingSnapshot>().Any() == true ? existing.Snapshots : snapshots,
+        });
+        return TweakResult.Ok;
+    }
+
+    private TweakResult RevertJson(TweakDefinition tweak)
+    {
+        if (RunningProcess(tweak) is { } running)
+        {
+            return TweakResult.Fail(ProcessRunningMessage(running));
+        }
+
+        var entry = _journal.Get(tweak.Id);
+        var targets = entry is not null
+            ? entry.Snapshots.OfType<JsonSettingSnapshot>().Select(s => (s.File, s.Property, s.Previous)).ToList()
+            : tweak.Actions.OfType<JsonSettingAction>().Select(a => (a.File, a.Property, Previous: a.Default is { } d ? d.GetRawText() : null)).ToList();
+
+        var originals = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        try
+        {
+            foreach (var group in targets.GroupBy(t => t.File, StringComparer.OrdinalIgnoreCase))
+            {
+                var text = _apps.ReadText(group.Key);
+                if (text is null)
+                {
+                    // Programm entfernt: nichts mehr zurückzusetzen
+                    continue;
+                }
+
+                originals[group.Key] = text;
+                var obj = ReadJsonObject(group.Key)!;
+                foreach (var (_, property, previous) in group)
+                {
+                    if (previous is null)
+                    {
+                        obj.Remove(property);
+                    }
+                    else
+                    {
+                        obj[property] = JsonNode.Parse(previous);
+                    }
+                }
+
+                _apps.WriteText(group.Key, obj.ToJsonString(JsonWriteOptions));
+            }
+        }
+        catch (Exception ex) when (IsExpected(ex))
+        {
+            RestoreFiles(originals);
+            return TweakResult.Fail(ex.Message);
+        }
+
+        _journal.Remove(tweak.Id);
+        return TweakResult.Ok;
+    }
+
+    private void RestoreFiles(Dictionary<string, string> originals)
+    {
+        foreach (var (file, text) in originals)
+        {
+            try
+            {
+                _apps.WriteText(file, text);
+            }
+            catch (Exception ex) when (IsExpected(ex))
+            {
+                // Bestmühe, das Journal enthält die Werte weiterhin
+            }
+        }
     }
 
     private void TryDelete(Guid scheme)

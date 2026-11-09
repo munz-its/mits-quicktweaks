@@ -28,8 +28,19 @@ public sealed partial class StartupItemViewModel : ObservableObject
 
     public string SourceText { get; }
 
+    public string? Publisher => Entry.Publisher;
+
+    public bool HasPublisher => Entry.Publisher is not null;
+
+    public bool FileMissing => Entry.FileMissing;
+
+    public bool CanRemove => Entry.CanRemove;
+
     [ObservableProperty]
     private bool _isEnabled;
+
+    [RelayCommand]
+    private void Remove() => _owner.Remove(this);
 
     [ObservableProperty]
     private string _message = string.Empty;
@@ -114,6 +125,30 @@ public sealed partial class StartupViewModel : PageViewModel
         }
 
         UpdateSummary();
+    }
+
+    internal void Remove(StartupItemViewModel item)
+    {
+        var text = string.Format(System.Globalization.CultureInfo.CurrentCulture, _localization.Get("Startup.ConfirmRemove"), item.Name);
+        if (System.Windows.MessageBox.Show(text, _localization.Get("App.Name"), System.Windows.MessageBoxButton.YesNo,
+                System.Windows.MessageBoxImage.Question) != System.Windows.MessageBoxResult.Yes)
+        {
+            return;
+        }
+
+        var result = _startup.Remove(item.Entry);
+        _history.Add(HistoryAction.StartupRemoved, null, result.Success, result.Success ? item.Name : $"{item.Name}: {result.Error}");
+        _log.LogInformation("Autostart {Name} gelöscht: {Success} {Error}", item.Name, result.Success, result.Error);
+        if (result.Success)
+        {
+            Items.Remove(item);
+            UpdateSummary();
+            OnPropertyChanged(nameof(IsEmpty));
+        }
+        else
+        {
+            item.Message = $"{_localization.Get("Tweak.Failed")} {result.Error}";
+        }
     }
 
     private void UpdateSummary() =>

@@ -19,6 +19,15 @@ public enum StartupSource
 public sealed record StartupEntry(string Id, string Name, string Command, StartupSource Source, bool Enabled)
 {
     public bool IsUserLevel => Source is StartupSource.UserRegistry or StartupSource.UserFolder;
+
+    /// <summary>Herausgeber aus den Dateieigenschaften, null wenn unbekannt.</summary>
+    public string? Publisher { get; init; }
+
+    /// <summary>Programmdatei existiert nicht mehr (z. B. nach einer Deinstallation).</summary>
+    public bool FileMissing { get; init; }
+
+    /// <summary>Kaputte Einträge aus Registry und Autostart-Ordner dürfen gelöscht werden, geplante Aufgaben nicht.</summary>
+    public bool CanRemove => FileMissing && Source != StartupSource.ScheduledTask;
 }
 
 public interface IStartupManager
@@ -26,6 +35,9 @@ public interface IStartupManager
     IReadOnlyList<StartupEntry> List();
 
     Safety.OperationResult SetEnabled(StartupEntry entry, bool enabled);
+
+    /// <summary>Löscht einen Eintrag. Vorher wird er als .reg-Datei bzw. Dateikopie gesichert.</summary>
+    Safety.OperationResult Remove(StartupEntry entry);
 }
 
 /// <summary>
@@ -64,5 +76,29 @@ public static class StartupApproved
 
         var exe = text.IndexOf(".exe", StringComparison.OrdinalIgnoreCase);
         return exe > 0 ? text[..(exe + 4)] : text.Split(' ')[0];
+    }
+
+    /// <summary>
+    /// True nur, wenn der Pfad vollständig ist und die Datei sicher fehlt. Kurze Namen wie rundll32.exe
+    /// sucht Windows selbst im Systemordner, die gelten nie als fehlend.
+    /// </summary>
+    public static bool IsMissing(string command, Func<string, bool> fileExists)
+    {
+        var path = Environment.ExpandEnvironmentVariables(ExtractPath(command));
+        // Windows-Pfad mit Laufwerk (C:\...) oder Netzwerkpfad (\\server\...), unabhängig vom Testsystem geprüft
+        var isFull = path.Length >= 4 && ((char.IsAsciiLetter(path[0]) && path[1] == ':' && path[2] == '\\') || path.StartsWith(@"\\", StringComparison.Ordinal));
+        if (!isFull || path.IndexOfAny(Path.GetInvalidPathChars()) >= 0)
+        {
+            return false;
+        }
+
+        return !fileExists(path);
+    }
+
+    /// <summary>Inhalt einer .reg-Datei für einen einzelnen Zeichenfolgen-Wert, zum Wiederherstellen per Doppelklick.</summary>
+    public static string RegFile(string rootName, string key, string valueName, string value)
+    {
+        static string Escape(string text) => text.Replace("\\", "\\\\", StringComparison.Ordinal).Replace("\"", "\\\"", StringComparison.Ordinal);
+        return $"Windows Registry Editor Version 5.00\r\n\r\n[{rootName}\\{key}]\r\n\"{Escape(valueName)}\"=\"{Escape(value)}\"\r\n";
     }
 }

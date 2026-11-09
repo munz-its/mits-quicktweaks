@@ -69,6 +69,8 @@ public partial class App : Application
                 services.AddSingleton<ISystemNotifier, WindowsNotifier>();
                 services.AddSingleton<IRestorePointService, WindowsRestorePoints>();
                 services.AddSingleton<IPowerPlans, WindowsPowerPlans>();
+                services.AddSingleton<IPowerModes, WindowsPowerModes>();
+                services.AddSingleton<IAppEnvironment, LocalAppEnvironment>();
                 services.AddSingleton(new JournalStore(Path.Combine(AppPaths.MachineData, "state", "journal.json")));
                 services.AddSingleton(new HistoryStore(Path.Combine(AppPaths.MachineData, "state", "history.jsonl")));
                 services.AddSingleton<IRegistryBackup>(sp => new RegExeBackup(AppPaths.BackupDirectory, sp.GetRequiredService<IRegistry>()));
@@ -78,7 +80,8 @@ public partial class App : Application
                     sp.GetRequiredService<JournalStore>(),
                     sp.GetRequiredService<ISystemNotifier>(),
                     sp.GetRequiredService<SystemInfoProvider>().ReadBuild(),
-                    sp.GetRequiredService<IPowerPlans>())
+                    sp.GetRequiredService<IPowerPlans>(),
+                    apps: sp.GetRequiredService<IAppEnvironment>())
                 {
                     // Fremdes Admin-Konto: Benutzer-Tweaks würden im falschen Konto landen
                     UserHiveAllowed = !AccountInfo.IsForeignElevation(),
@@ -86,12 +89,15 @@ public partial class App : Application
                 services.AddSingleton<TweakService>();
                 services.AddSingleton<BatchApplyService>();
                 services.AddSingleton<IAppxManager, WindowsAppx>();
-                services.AddSingleton<IStartupManager>(_ => new WindowsStartup(includeUserLevel: !AccountInfo.IsForeignElevation()));
+                services.AddSingleton<IStartupManager>(_ => new WindowsStartup(includeUserLevel: !AccountInfo.IsForeignElevation(), AppPaths.BackupDirectory));
                 services.AddSingleton<WindowsCleanup>();
 
                 services.AddSingleton<DashboardViewModel>();
                 services.AddSingleton<TweaksViewModel>();
                 services.AddSingleton<PrivacyViewModel>();
+                services.AddSingleton<AppsViewModel>();
+                services.AddSingleton<ProcessRulesViewModel>();
+                services.AddSingleton<PowerViewModel>();
                 services.AddSingleton<DebloatViewModel>();
                 services.AddSingleton<StartupViewModel>();
                 services.AddSingleton<CareViewModel>();

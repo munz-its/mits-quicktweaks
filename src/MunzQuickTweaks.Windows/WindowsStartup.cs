@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Microsoft.Win32;
 using Microsoft.Win32.TaskScheduler;
 using MunzQuickTweaks.Core.Modules;
@@ -13,11 +14,14 @@ public sealed class WindowsStartup : IStartupManager
     private const string ApprovedBase = @"Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\";
 
     private readonly bool _includeUserLevel;
+    private readonly string _backupDirectory;
 
     /// <param name="includeUserLevel">False bei fremdem Admin-Konto: Benutzer-Einträge gehören dann zum falschen Konto.</param>
-    public WindowsStartup(bool includeUserLevel)
+    /// <param name="backupDirectory">Ordner für Sicherungen gelöschter Einträge.</param>
+    public WindowsStartup(bool includeUserLevel, string backupDirectory)
     {
         _includeUserLevel = includeUserLevel;
+        _backupDirectory = backupDirectory;
     }
 
     public IReadOnlyList<StartupEntry> List()
@@ -34,7 +38,81 @@ public sealed class WindowsStartup : IStartupManager
         ReadFolder(entries, Environment.GetFolderPath(Environment.SpecialFolder.CommonStartup), RegistryHive.LocalMachine, StartupSource.CommonFolder);
         ReadTasks(entries);
 
-        return entries.OrderBy(e => e.Name, StringComparer.CurrentCultureIgnoreCase).ToList();
+        return entries.Select(Describe).OrderBy(e => e.Name, StringComparer.CurrentCultureIgnoreCase).ToList();
+    }
+
+    public OperationResult Remove(StartupEntry entry)
+    {
+        if (entry.Source == StartupSource.ScheduledTask)
+        {
+            return OperationResult.Fail("Geplante Aufgaben werden nur deaktiviert, nicht gelöscht.");
+        }
+
+        try
+        {
+            var folder = Path.Combine(_backupDirectory, "autostart");
+            Directory.CreateDirectory(folder);
+            var stamp = DateTime.Now.ToString("yyyyMMdd-HHmmss", System.Globalization.CultureInfo.InvariantCulture);
+            var name = entry.Id[(entry.Id.IndexOf('|') + 1)..];
+            var (hive, approvedKey, approvedName) = Approved(entry);
+
+            if (entry.Source is StartupSource.UserFolder or StartupSource.CommonFolder)
+            {
+                // Verknüpfung in den Sicherungsordner verschieben statt löschen
+                File.Move(entry.Command, Path.Combine(folder, $"{stamp}-{SafeName(name)}"));
+            }
+            else
+            {
+                var runKey = entry.Source == StartupSource.MachineRegistry32 ? Run32Key : RunKey;
+                var rootName = hive == RegistryHive.CurrentUser ? "HKEY_CURRENT_USER" : "HKEY_LOCAL_MACHINE";
+                File.WriteAllText(Path.Combine(folder, $"{stamp}-{SafeName(name)}.reg"),
+                    StartupApproved.RegFile(rootName, runKey, name, entry.Command), System.Text.Encoding.Unicode);
+
+                using var root = RegistryKey.OpenBaseKey(hive, RegistryView.Registry64);
+                using var run = root.OpenSubKey(runKey, writable: true);
+                run?.DeleteValue(name, throwOnMissingValue: false);
+            }
+
+            using (var root = RegistryKey.OpenBaseKey(hive, RegistryView.Registry64))
+            using (var approved = root.OpenSubKey(approvedKey, writable: true))
+            {
+                approved?.DeleteValue(approvedName, throwOnMissingValue: false);
+            }
+
+            return OperationResult.Ok;
+        }
+        catch (Exception ex) when (ex is UnauthorizedAccessException or IOException or System.Security.SecurityException or InvalidOperationException)
+        {
+            return OperationResult.Fail(ex.Message);
+        }
+    }
+
+    private static string SafeName(string name) =>
+        string.Concat(name.Select(c => Path.GetInvalidFileNameChars().Contains(c) ? '_' : c));
+
+    /// <summary>Herausgeber und fehlende Programmdatei ergänzen.</summary>
+    private static StartupEntry Describe(StartupEntry entry)
+    {
+        var path = Environment.ExpandEnvironmentVariables(StartupApproved.ExtractPath(entry.Command));
+
+        // Verknüpfungen im Autostart-Ordner: die .lnk-Datei selbst existiert immer, das Ziel prüft Windows erst beim Start
+        var missing = entry.Source is not (StartupSource.UserFolder or StartupSource.CommonFolder)
+                      && StartupApproved.IsMissing(entry.Command, File.Exists);
+
+        string? publisher = null;
+        if (!missing && Path.IsPathFullyQualified(path) && File.Exists(path) && path.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
+        {
+            try
+            {
+                publisher = FileVersionInfo.GetVersionInfo(path).CompanyName?.Trim();
+            }
+            catch (Exception ex) when (ex is FileNotFoundException or IOException or UnauthorizedAccessException)
+            {
+                // Ohne Herausgeber anzeigen
+            }
+        }
+
+        return entry with { Publisher = string.IsNullOrWhiteSpace(publisher) ? null : publisher, FileMissing = missing };
     }
 
     public OperationResult SetEnabled(StartupEntry entry, bool enabled)

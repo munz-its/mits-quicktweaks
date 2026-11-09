@@ -21,7 +21,7 @@
 
     <sys:String x:Key="Desc.Tweaks">Windows-Einstellungen für Leistung, Gaming, Oberfläche und Netzwerk. Jeder Tweak mit Erklärung, Risiko-Stufe und Rückgängig-Funktion.</sys:String>
     <sys:String x:Key="Desc.Privacy">Telemetrie, Werbe-ID, Aktivitätsverlauf, Websuche im Startmenü, Copilot und Recall.</sys:String>
-    <sys:String x:Key="Desc.Debloat">Vorinstallierte Apps mit Häkchen entfernen. Neuinstallation über den Microsoft Store bleibt möglich.</sys:String>
+    <sys:String x:Key="Desc.Debloat">Vorinstallierte Apps mit Häkchen entfernen. Neben jeder App steht, wie viel Speicher sie belegt. Entfernte Apps lassen sich mit einem Klick zurückholen.</sys:String>
     <sys:String x:Key="Desc.Startup">Programme beim Windows-Start aktivieren oder deaktivieren, ohne sie zu löschen.</sys:String>
     <sys:String x:Key="Desc.Care">Temporäre Dateien und Caches aufräumen, Windows mit SFC und DISM reparieren.</sys:String>
     <sys:String x:Key="Desc.Restore">Drei Sicherungsebenen: Windows-Wiederherstellungspunkt, Journal mit jedem alten Wert und Registry-Export als .reg-Datei.</sys:String>
@@ -130,7 +130,7 @@ Jeder alte Wert wird in jedem Fall zusätzlich von der App gesichert.</sys:Strin
     <sys:String x:Key="Debloat.XboxHint">Hinweis: Xbox und Game Bar brauchst du für Game Pass, Xbox-Erfolge und Aufnahmen. Die Anmeldung in Spielen bleibt erhalten.</sys:String>
     <sys:String x:Key="Debloat.Remove">Ausgewählte entfernen</sys:String>
     <sys:String x:Key="Debloat.Removed">Entfernte Apps</sys:String>
-    <sys:String x:Key="Debloat.RemovedHint">Brauchst du eine App doch wieder, installierst du sie über den Microsoft Store neu.</sys:String>
+    <sys:String x:Key="Debloat.RemovedHint">Liegt die App noch in Windows, holt "Neu installieren" sie ohne Download zurück. Sonst hilft der Microsoft Store.</sys:String>
     <sys:String x:Key="Debloat.OpenStore">Im Store suchen</sys:String>
     <sys:String x:Key="Startup.Source.UserRegistry">Benutzer</sys:String>
     <sys:String x:Key="Startup.Source.MachineRegistry">Alle Benutzer</sys:String>
@@ -260,4 +260,74 @@ Jeder alte Wert wird in jedem Fall zusätzlich von der App gesichert.</sys:Strin
     <sys:String x:Key="Transfer.Exported">Gespeichert ✓ Tweaks in der Datei: {0}.</sys:String>
     <sys:String x:Key="Transfer.AllActive">Alle Tweaks aus der Datei sind auf diesem PC schon aktiv ✓</sys:String>
     <sys:String x:Key="Transfer.Confirm">Aus der Datei: diese {0} Tweaks anwenden?</sys:String>
+    <sys:String x:Key="Nav.Apps">Apps</sys:String>
+    <sys:String x:Key="Nav.Processes">Prozessregeln</sys:String>
+    <sys:String x:Key="Nav.Power">Energie</sys:String>
+    <sys:String x:Key="Desc.Apps">Edge, Chrome, Discord, OneDrive, Steam und Epic Games gezielt einstellen. Angezeigt werden nur Programme, die auf diesem PC installiert sind.</sys:String>
+    <sys:String x:Key="Desc.Processes">Feste Priorität für ein Programm bei jedem Start. Zum Beispiel ein Spiel höher, einen Updater oder Cloud-Sync niedriger. Windows merkt sich die Regel, auch ohne dass diese App läuft.</sys:String>
+    <sys:String x:Key="Desc.Power">Energiemodus und Energieplan. Auf Laptops entscheidet das über Leistung, Lüfter und Akkulaufzeit.</sys:String>
+    <sys:String x:Key="Cat.Apps">APPS</sys:String>
+    <sys:String x:Key="Apps.PolicyHint">Edge und Chrome werden über Richtlinien eingestellt. Der Browser zeigt deshalb den Hinweis "Von Ihrer Organisation verwaltet". Das ist normal und verschwindet, wenn du die Tweaks zurücksetzt.</sys:String>
+    <sys:String x:Key="Apps.NotInstalled">Nicht installiert:</sys:String>
+    <sys:String x:Key="Apps.NotInstalledSelf">Nicht installiert</sys:String>
+    <sys:String x:Key="Apps.Autostart">Autostart</sys:String>
+    <sys:String x:Key="Apps.AutostartOn">Startet wieder mit Windows.</sys:String>
+    <sys:String x:Key="Apps.AutostartOff">Startet nicht mehr mit Windows.</sys:String>
+    <sys:String x:Key="Apps.OneDrive.Uninstall">Deinstallieren</sys:String>
+    <sys:String x:Key="Apps.OneDrive.Install">Installieren</sys:String>
+    <sys:String x:Key="Apps.OneDrive.ConfirmUninstall" xml:space="preserve">OneDrive wirklich deinstallieren?
+
+Dateien, die schon auf diesem PC liegen, bleiben im OneDrive-Ordner. Dateien, die nur in der Cloud liegen, siehst du hier erst nach einer Neuinstallation wieder. In der Cloud geht nichts verloren.</sys:String>
+    <sys:String x:Key="Apps.OneDrive.Uninstalling">OneDrive wird deinstalliert, das dauert bis zu einer Minute.</sys:String>
+    <sys:String x:Key="Apps.OneDrive.Uninstalled">OneDrive ist deinstalliert.</sys:String>
+    <sys:String x:Key="Apps.OneDrive.InstallStarted">Das OneDrive-Setup läuft. Danach meldest du dich in OneDrive an.</sys:String>
+    <sys:String x:Key="Apps.OneDrive.DownloadOpened">Kein Setup auf diesem PC gefunden. Die Download-Seite von Microsoft ist im Browser geöffnet.</sys:String>
+    <sys:String x:Key="Power.Mode">Energiemodus</sys:String>
+    <sys:String x:Key="Power.ModeText">Derselbe Regler wie unter Einstellungen &gt; System &gt; Netzbetrieb und Akku. Beste Leistung macht den PC schneller, Laptops werden dabei wärmer und der Akku hält kürzer.</sys:String>
+    <sys:String x:Key="Power.Efficiency">Beste Energieeffizienz</sys:String>
+    <sys:String x:Key="Power.Balanced">Ausbalanciert</sys:String>
+    <sys:String x:Key="Power.Performance">Beste Leistung</sys:String>
+    <sys:String x:Key="Power.ModeSource">Gilt für die aktuelle Stromquelle. Am Netzteil und im Akkubetrieb merkt sich Windows jeweils einen eigenen Modus.</sys:String>
+    <sys:String x:Key="Power.ModeNeedsBalanced">Der Energiemodus wirkt nur mit dem Energieplan Ausbalanciert. Gerade ist ein anderer Plan aktiv.</sys:String>
+    <sys:String x:Key="Power.UseBalanced">Plan Ausbalanciert aktivieren</sys:String>
+    <sys:String x:Key="Power.Plans">Energieplan</sys:String>
+    <sys:String x:Key="Power.PlansText">Alle Energiepläne auf diesem PC. Der grüne Punkt zeigt den aktiven Plan.</sys:String>
+    <sys:String x:Key="Power.Activate">Aktivieren</sys:String>
+    <sys:String x:Key="Power.ModeSet">Energiemodus gespeichert.</sys:String>
+    <sys:String x:Key="Power.PlanSet">Energieplan {0} ist aktiv.</sys:String>
+    <sys:String x:Key="Process.New">Neue Regel</sys:String>
+    <sys:String x:Key="Process.ExeHint">Programm, z. B. spiel.exe</sys:String>
+    <sys:String x:Key="Process.Browse">Datei wählen</sys:String>
+    <sys:String x:Key="Process.CpuLabel">PROZESSOR-PRIORITÄT</sys:String>
+    <sys:String x:Key="Process.Cpu.Idle">Niedrig</sys:String>
+    <sys:String x:Key="Process.Cpu.BelowNormal">Niedriger als normal</sys:String>
+    <sys:String x:Key="Process.Cpu.Normal">Normal</sys:String>
+    <sys:String x:Key="Process.Cpu.AboveNormal">Höher als normal</sys:String>
+    <sys:String x:Key="Process.Cpu.High">Hoch</sys:String>
+    <sys:String x:Key="Process.IoLabel">Festplatten-Zugriff niedrig (für Hintergrund-Programme)</sys:String>
+    <sys:String x:Key="Process.IoLow">Festplatte niedrig</sys:String>
+    <sys:String x:Key="Process.Add">Regel speichern</sys:String>
+    <sys:String x:Key="Process.Hint">Die Regel greift beim nächsten Start des Programms. Vorher sichert die App den Registry-Schlüssel als .reg-Datei.</sys:String>
+    <sys:String x:Key="Process.Existing">Aktive Regeln</sys:String>
+    <sys:String x:Key="Process.None">Noch keine Regeln.</sys:String>
+    <sys:String x:Key="Process.Remove">Entfernen</sys:String>
+    <sys:String x:Key="Process.ConfirmHigh" xml:space="preserve">Hohe Priorität kann andere Programme ausbremsen, wenn das Programm viel Leistung zieht. Für Spiele meist gut, für Programme im Hintergrund nicht.
+
+Regel trotzdem speichern?</sys:String>
+    <sys:String x:Key="Process.Saved">Regel für {0} gespeichert.</sys:String>
+    <sys:String x:Key="Process.Removed">Regel für {0} entfernt.</sys:String>
+    <sys:String x:Key="Debloat.Reinstall">Neu installieren</sys:String>
+    <sys:String x:Key="Debloat.Reinstalling">Neuinstallation von {0} läuft ...</sys:String>
+    <sys:String x:Key="Debloat.Reinstalled">Fertig, {0} ist wieder installiert.</sys:String>
+    <sys:String x:Key="Startup.Missing">DATEI FEHLT</sys:String>
+    <sys:String x:Key="Startup.Remove">Löschen</sys:String>
+    <sys:String x:Key="Startup.ConfirmRemove" xml:space="preserve">Eintrag "{0}" löschen?
+
+Die Programmdatei existiert nicht mehr. Der Eintrag wird vorher im Sicherungsordner der App gespeichert.</sys:String>
+    <sys:String x:Key="History.AppReinstalled">App neu installiert</sys:String>
+    <sys:String x:Key="History.StartupRemoved">Autostart-Eintrag gelöscht</sys:String>
+    <sys:String x:Key="History.ProcessRuleSet">Prozessregel gespeichert</sys:String>
+    <sys:String x:Key="History.ProcessRuleRemoved">Prozessregel entfernt</sys:String>
+    <sys:String x:Key="History.PowerModeChanged">Energie geändert</sys:String>
+    <sys:String x:Key="History.AppAction">App-Aktion</sys:String>
 </ResourceDictionary>

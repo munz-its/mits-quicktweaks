@@ -26,6 +26,15 @@
         <DataTemplate DataType="{x:Type vm:TweaksViewModel}">
             <views:TweaksView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:AppsViewModel}">
+            <views:AppsView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ProcessRulesViewModel}">
+            <views:ProcessRulesView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:PowerViewModel}">
+            <views:PowerView />
+        </DataTemplate>
         <DataTemplate DataType="{x:Type vm:DebloatViewModel}">
             <views:DebloatView />
         </DataTemplate>

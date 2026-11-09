@@ -50,7 +50,7 @@ public sealed partial class WindowsPowerPlans : IPowerPlans
 
     public void Delete(Guid scheme) => Check(PowerDeleteScheme(IntPtr.Zero, ref scheme));
 
-    private static List<Guid> Enumerate()
+    internal static List<Guid> Enumerate()
     {
         var result = new List<Guid>();
         var size = (uint)Marshal.SizeOf<Guid>();
@@ -93,7 +93,7 @@ public sealed partial class WindowsPowerPlans : IPowerPlans
         }
     }
 
-    private static void Check(uint code)
+    internal static void Check(uint code)
     {
         if (code != 0)
         {

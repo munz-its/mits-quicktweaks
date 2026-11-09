@@ -248,5 +248,30 @@
         "value": "1"
       }
     ]
+  },
+  {
+    "id": "gaming.timerres.global",
+    "category": "Gaming",
+    "risk": "Medium",
+    "restart": "Reboot",
+    "minBuild": 22000,
+    "title": {
+      "de": "Timer Resolution global erlauben",
+      "en": "Allow global timer resolution"
+    },
+    "description": {
+      "de": "Seit Windows 11 gilt eine feinere Zeitauflösung nur noch für das Programm, das sie anfordert, und nur solange sein Fenster sichtbar ist. Manche Spiele und Tools rechnen mit der alten Regel, bei der die Auflösung für das ganze System gilt. Das kann Eingabeverzögerung und Ruckler verringern, kostet aber auf Laptops etwas Akku.",
+      "en": "Since Windows 11 a finer timer resolution only applies to the program that requests it, and only while its window is visible. Some games and tools expect the old rule where the resolution applies system-wide. This can reduce input lag and stutter, but costs some battery on laptops."
+    },
+    "actions": [
+      {
+        "type": "registry",
+        "hive": "HKLM",
+        "key": "SYSTEM\\CurrentControlSet\\Control\\Session Manager\\kernel",
+        "name": "GlobalTimerResolutionRequests",
+        "kind": "DWord",
+        "value": "1"
+      }
+    ]
   }
 ]

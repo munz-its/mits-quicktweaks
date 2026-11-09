@@ -16,6 +16,12 @@ public enum HistoryAction
     StartupDisabled,
     CleanupDone,
     ProfileApplied,
+    AppReinstalled,
+    StartupRemoved,
+    ProcessRuleSet,
+    ProcessRuleRemoved,
+    PowerModeChanged,
+    AppAction,
 }
 
 public sealed record HistoryEntry(DateTimeOffset Time, HistoryAction Action, string? TweakId, bool Success, string? Message);

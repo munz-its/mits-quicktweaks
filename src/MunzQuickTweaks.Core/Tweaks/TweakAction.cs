@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace MunzQuickTweaks.Core.Tweaks;
@@ -32,6 +33,7 @@ public enum ServiceStartType
 [JsonDerivedType(typeof(RegistryAction), "registry")]
 [JsonDerivedType(typeof(ServiceAction), "service")]
 [JsonDerivedType(typeof(PowerPlanAction), "powerPlan")]
+[JsonDerivedType(typeof(JsonSettingAction), "jsonSetting")]
 public abstract class TweakAction
 {
 }
@@ -76,4 +78,24 @@ public sealed class PowerPlanAction : TweakAction
 {
     /// <summary>GUID der Vorlage, z. B. e9a42b02-d5df-448d-aa00-03f14749eb61 für Ultimative Leistung.</summary>
     public string Template { get; set; } = string.Empty;
+}
+
+/// <summary>
+/// Setzt eine Einstellung in der JSON-Einstellungsdatei eines Programms (z. B. Discord).
+/// Nur oberste Ebene, nur in Benutzer-Ordnern. Tweaks mit dieser Aktion enthalten nur JSON-Aktionen.
+/// </summary>
+public sealed class JsonSettingAction : TweakAction
+{
+    /// <summary>Pfad mit Umgebungsvariablen, z. B. %APPDATA%\discord\settings.json.</summary>
+    public string File { get; set; } = string.Empty;
+
+    public string Property { get; set; } = string.Empty;
+
+    public JsonElement Value { get; set; }
+
+    /// <summary>Standard des Programms für Rückgängig ohne Journal. Fehlt er, wird die Einstellung entfernt.</summary>
+    public JsonElement? Default { get; set; }
+
+    /// <summary>Prozessname ohne .exe. Läuft das Programm, wird nichts geändert, weil es die Datei sonst überschreibt.</summary>
+    public string? Process { get; set; }
 }

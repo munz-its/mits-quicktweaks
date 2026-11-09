@@ -1,0 +1,107 @@
+<UserControl x:Class="MunzQuickTweaks.App.Views.PowerView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    </UserControl.Resources>
+
+    <StackPanel MaxWidth="820" HorizontalAlignment="Left">
+        <TextBlock Text="{DynamicResource Desc.Power}" Style="{StaticResource Body2}" Margin="0,0,0,20" />
+
+        <TextBlock Text="{Binding Status}" Margin="0,0,0,16">
+            <TextBlock.Style>
+                <Style TargetType="TextBlock" BasedOn="{StaticResource TextBase}">
+                    <Setter Property="Foreground" Value="{StaticResource Ok}" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding StatusIsError}" Value="True">
+                            <Setter Property="Foreground" Value="{StaticResource Danger}" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Status}" Value="">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
+
+        <!-- Energiemodus -->
+        <Border Style="{StaticResource Card}" Margin="0,0,0,16">
+            <StackPanel>
+                <TextBlock Text="{DynamicResource Power.Mode}" Style="{StaticResource H2}" FontSize="16" />
+                <TextBlock Text="{DynamicResource Power.ModeText}" Style="{StaticResource Body2}" Margin="0,6,0,14" />
+
+                <WrapPanel Visibility="{Binding ModeAvailable, Converter={StaticResource BoolToVis}}">
+                    <RadioButton Style="{StaticResource Chip}" GroupName="PowerMode" Content="{DynamicResource Power.Efficiency}" IsChecked="{Binding IsEfficiency}" />
+                    <RadioButton Style="{StaticResource Chip}" GroupName="PowerMode" Content="{DynamicResource Power.Balanced}" IsChecked="{Binding IsBalanced}" />
+                    <RadioButton Style="{StaticResource Chip}" GroupName="PowerMode" Content="{DynamicResource Power.Performance}" IsChecked="{Binding IsPerformance}" />
+                </WrapPanel>
+                <TextBlock Text="{DynamicResource Power.ModeSource}" Style="{StaticResource MutedText}" FontSize="12" Margin="0,10,0,0"
+                           Visibility="{Binding ModeAvailable, Converter={StaticResource BoolToVis}}" />
+
+                <!-- Modus wirkt nur mit "Ausbalanciert" -->
+                <StackPanel>
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ModeAvailable}" Value="True">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackPanel.Style>
+                    <TextBlock Text="{DynamicResource Power.ModeNeedsBalanced}" Style="{StaticResource TextBase}" Foreground="{StaticResource Warn}" Margin="0,0,0,12" />
+                    <Button Style="{StaticResource SecondaryButton}" HorizontalAlignment="Left" Content="{DynamicResource Power.UseBalanced}" Command="{Binding UseBalancedCommand}" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- Energieplan -->
+        <Border Style="{StaticResource Card}" Visibility="{Binding HasPlanChoice, Converter={StaticResource BoolToVis}}">
+            <StackPanel>
+                <TextBlock Text="{DynamicResource Power.Plans}" Style="{StaticResource H2}" FontSize="16" />
+                <TextBlock Text="{DynamicResource Power.PlansText}" Style="{StaticResource Body2}" Margin="0,6,0,14" />
+                <ItemsControl ItemsSource="{Binding Plans}" Focusable="False">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <Rectangle Width="6" Height="6" Margin="0,0,10,0" VerticalAlignment="Center">
+                                        <Rectangle.Style>
+                                            <Style TargetType="Rectangle">
+                                                <Setter Property="Fill" Value="{StaticResource Line}" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsActive}" Value="True">
+                                                        <Setter Property="Fill" Value="{StaticResource Ok}" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Rectangle.Style>
+                                    </Rectangle>
+                                    <TextBlock Text="{Binding Name}" Style="{StaticResource TextBase}" />
+                                </StackPanel>
+                                <Button Grid.Column="1" Padding="12,6" FontSize="12"
+                                        Content="{DynamicResource Power.Activate}"
+                                        Command="{Binding DataContext.ActivatePlanCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        CommandParameter="{Binding}">
+                                    <Button.Style>
+                                        <Style TargetType="Button" BasedOn="{StaticResource SecondaryButton}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsActive}" Value="True">
+                                                    <Setter Property="Visibility" Value="Hidden" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </Border>
+    </StackPanel>
+</UserControl>

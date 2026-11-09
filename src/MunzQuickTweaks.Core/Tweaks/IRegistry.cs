@@ -20,6 +20,9 @@ public interface IRegistry
 
     /// <summary>Löscht einen Schlüssel nur, wenn er weder Werte noch Unterschlüssel hat.</summary>
     void DeleteKeyIfEmpty(RegistryHive hive, string key);
+
+    /// <summary>Namen der direkten Unterschlüssel. Leer, wenn der Schlüssel fehlt.</summary>
+    IReadOnlyList<string> SubKeys(RegistryHive hive, string key);
 }
 
 /// <summary>Benachrichtigt Windows nach Änderungen, damit sie ohne Neustart greifen.</summary>

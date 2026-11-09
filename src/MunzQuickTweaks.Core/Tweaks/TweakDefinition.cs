@@ -10,6 +10,7 @@ public enum TweakCategory
     Interface,
     Network,
     Services,
+    Apps,
 }
 
 /// <summary>Niedrig: wird direkt angewendet. Mittel: Bestätigungsdialog. Hoch gibt es bewusst nicht.</summary>
@@ -60,6 +61,15 @@ public sealed class TweakDefinition
     public LocalizedText Description { get; set; } = new();
 
     public List<TweakAction> Actions { get; set; } = new();
+
+    /// <summary>Nur für Kategorie Apps: Programm-Kennung, z. B. "edge", "discord".</summary>
+    public string? App { get; set; }
+
+    /// <summary>
+    /// Dateien mit Umgebungsvariablen. Ist die Liste gefüllt, ist der Tweak nur verfügbar,
+    /// wenn mindestens eine davon existiert (Programm installiert).
+    /// </summary>
+    public List<string> Requires { get; set; } = new();
 
     [JsonIgnore]
     public bool IsWindows11Only => MinBuild >= Machine.OsNaming.FirstWindows11Build;

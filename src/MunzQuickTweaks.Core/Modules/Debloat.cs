@@ -20,12 +20,24 @@ public sealed record DebloatApp(string Package, DebloatGroup Group, string Name)
 
 public sealed record InstalledPackage(string Name, string FullName);
 
+/// <summary>Paket, das noch auf dem PC liegt (vorinstalliert oder bei einem anderen Konto), aber beim Nutzer fehlt.</summary>
+public sealed record RestorablePackage(string Name, string FamilyName);
+
 /// <summary>Store-Apps des angemeldeten Nutzers.</summary>
 public interface IAppxManager
 {
     IReadOnlyList<InstalledPackage> ListInstalled();
 
     Task<Safety.OperationResult> RemoveAsync(string packageFullName);
+
+    /// <summary>Pakete, die sich ohne Download wieder einrichten lassen.</summary>
+    IReadOnlyList<RestorablePackage> ListRestorable();
+
+    /// <summary>Richtet ein Paket aus der Windows-Kopie wieder für den Nutzer ein (Ein-Klick-Neuinstallation).</summary>
+    Task<Safety.OperationResult> ReinstallAsync(string familyName);
+
+    /// <summary>Belegter Speicher des Pakets in Byte, null wenn nicht ermittelbar.</summary>
+    long? GetSize(string packageFullName);
 }
 
 /// <summary>

@@ -83,8 +83,20 @@
                                     </ItemsControl.ItemsPanel>
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <CheckBox Style="{StaticResource PixelCheck}" Content="{Binding Name}" IsChecked="{Binding IsSelected}"
-                                                      Width="250" Margin="0,0,8,10" />
+                                            <StackPanel Width="250" Margin="0,0,8,10">
+                                                <CheckBox Style="{StaticResource PixelCheck}" Content="{Binding Name}" IsChecked="{Binding IsSelected}" />
+                                                <TextBlock Text="{Binding SizeText}" FontSize="11" Margin="28,2,0,0">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock" BasedOn="{StaticResource MutedText}">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding SizeText}" Value="">
+                                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </StackPanel>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
@@ -128,10 +140,17 @@
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="{Binding Time}" Style="{StaticResource Label}" Foreground="{StaticResource Muted}" VerticalAlignment="Center" />
                                 <TextBlock Grid.Column="1" Text="{Binding Name}" Style="{StaticResource TextBase}" VerticalAlignment="Center" />
-                                <Button Grid.Column="2" Style="{StaticResource SecondaryButton}" Padding="12,6" FontSize="12"
-                                        Content="{DynamicResource Debloat.OpenStore}"
-                                        Command="{Binding DataContext.OpenStoreCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                        CommandParameter="{Binding StoreUri}" />
+                                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                    <Button Style="{StaticResource PrimaryButton}" Padding="12,6" FontSize="12" Margin="0,0,8,0"
+                                            Content="{DynamicResource Debloat.Reinstall}"
+                                            Command="{Binding DataContext.ReinstallCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"
+                                            Visibility="{Binding CanReinstall, Converter={StaticResource BoolToVis}}" />
+                                    <Button Style="{StaticResource SecondaryButton}" Padding="12,6" FontSize="12"
+                                            Content="{DynamicResource Debloat.OpenStore}"
+                                            Command="{Binding DataContext.OpenStoreCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding StoreUri}" />
+                                </StackPanel>
                             </Grid>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>

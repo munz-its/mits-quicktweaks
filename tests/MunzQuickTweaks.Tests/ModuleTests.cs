@@ -6,7 +6,7 @@ namespace MunzQuickTweaks.Tests;
 
 public class ProfileTests
 {
-    private static IReadOnlyList<TweakDefinition> RepoCatalog()
+    internal static IReadOnlyList<TweakDefinition> RepoCatalog()
     {
         var dir = new DirectoryInfo(AppContext.BaseDirectory);
         while (dir is not null && !File.Exists(Path.Combine(dir.FullName, "Directory.Build.props")))
