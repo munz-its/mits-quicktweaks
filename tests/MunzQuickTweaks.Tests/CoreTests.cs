@@ -173,6 +173,20 @@ public class StringResourceTests
         Assert.Empty(bad);
     }
 
+    // Ein leeres sys:String-Element kann WPF nicht erzeugen (kein Standardkonstruktor) und die App startet nicht
+    [Fact]
+    public void No_empty_string_elements_in_any_xaml()
+    {
+        var root = Path.Combine(FindRepoRoot(), "src", "MunzQuickTweaks.App");
+        var bad = Directory.GetFiles(root, "*.xaml", SearchOption.AllDirectories)
+            .Where(f => !f.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}", StringComparison.Ordinal))
+            .SelectMany(f => XDocument.Load(f).Descendants()
+                .Where(e => e.Name.LocalName == "String" && e.Name.NamespaceName.Contains("System", StringComparison.Ordinal) && e.Value.Length == 0)
+                .Select(e => $"{Path.GetFileName(f)}: {(string?)e.Attribute(X + "Key")}"))
+            .ToList();
+        Assert.Empty(bad);
+    }
+
     private static HashSet<string> ReadKeys(string fileName)
     {
         var path = Path.Combine(FindRepoRoot(), "src", "MunzQuickTweaks.App", "Resources", fileName);

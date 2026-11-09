@@ -219,7 +219,7 @@ Every previous value is saved by the app in any case.</sys:String>
     <sys:String x:Key="Restore.LastPoint">Latest: {0}</sys:String>
     <sys:String x:Key="Restore.RevertOne">Revert</sys:String>
     <sys:String x:Key="Restore.NotInCatalog">This tweak is no longer in the catalog.</sys:String>
-    <sys:String x:Key="NavGroup.Start"></sys:String>
+    <x:Static x:Key="NavGroup.Start" Member="sys:String.Empty" />
     <sys:String x:Key="NavGroup.Optimize">OPTIMIZE</sys:String>
     <sys:String x:Key="NavGroup.System">SYSTEM</sys:String>
     <sys:String x:Key="NavGroup.Tools">TOOLS</sys:String>

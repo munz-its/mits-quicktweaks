@@ -219,7 +219,7 @@ Jeder alte Wert wird in jedem Fall zusätzlich von der App gesichert.</sys:Strin
     <sys:String x:Key="Restore.LastPoint">Letzter: {0}</sys:String>
     <sys:String x:Key="Restore.RevertOne">Zurücksetzen</sys:String>
     <sys:String x:Key="Restore.NotInCatalog">Dieser Tweak ist nicht mehr im Katalog.</sys:String>
-    <sys:String x:Key="NavGroup.Start"></sys:String>
+    <x:Static x:Key="NavGroup.Start" Member="sys:String.Empty" />
     <sys:String x:Key="NavGroup.Optimize">OPTIMIEREN</sys:String>
     <sys:String x:Key="NavGroup.System">SYSTEM</sys:String>
     <sys:String x:Key="NavGroup.Tools">WERKZEUGE</sys:String>
