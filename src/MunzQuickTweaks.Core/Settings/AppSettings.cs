@@ -15,4 +15,7 @@ public sealed class AppSettings
 
     /// <summary>Logo-Aufbau beim Start, Pixel-Wisch und weitere Animationen.</summary>
     public bool AnimationsEnabled { get; set; } = true;
+
+    /// <summary>Beim Start auf munz-its.de nach einer neuen Version sehen.</summary>
+    public bool CheckForUpdates { get; set; } = true;
 }

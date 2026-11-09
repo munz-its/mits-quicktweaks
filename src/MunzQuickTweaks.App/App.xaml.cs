@@ -10,6 +10,7 @@ using MunzQuickTweaks.Core.Modules;
 using MunzQuickTweaks.Core.Safety;
 using MunzQuickTweaks.Core.Settings;
 using MunzQuickTweaks.Core.Tweaks;
+using MunzQuickTweaks.Core.Tools;
 using MunzQuickTweaks.Windows;
 using Serilog;
 
@@ -98,6 +99,16 @@ public partial class App : Application
                 services.AddSingleton<AppsViewModel>();
                 services.AddSingleton<ProcessRulesViewModel>();
                 services.AddSingleton<PowerViewModel>();
+                services.AddSingleton<BenchmarkViewModel>();
+                services.AddSingleton<DiskViewModel>();
+                services.AddSingleton<DriversViewModel>();
+                services.AddSingleton<GameModeViewModel>();
+                services.AddSingleton<UpdateService>();
+                services.AddSingleton<IGpuBenchmark, WindowsGpuBenchmark>();
+                services.AddSingleton<IGameModeSystem, WindowsGameModeSystem>();
+                services.AddSingleton(new BenchmarkStore(Path.Combine(AppPaths.StateDirectory, "benchmarks.jsonl")));
+                services.AddSingleton(sp => new GameModeController(
+                    sp.GetRequiredService<IGameModeSystem>(), sp.GetRequiredService<IRegistry>(), Path.Combine(AppPaths.StateDirectory, "gamemode.json")));
                 services.AddSingleton<DebloatViewModel>();
                 services.AddSingleton<StartupViewModel>();
                 services.AddSingleton<CareViewModel>();

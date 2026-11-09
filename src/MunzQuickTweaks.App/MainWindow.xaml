@@ -35,6 +35,18 @@
         <DataTemplate DataType="{x:Type vm:PowerViewModel}">
             <views:PowerView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:BenchmarkViewModel}">
+            <views:BenchmarkView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:DiskViewModel}">
+            <views:DiskView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:DriversViewModel}">
+            <views:DriversView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:GameModeViewModel}">
+            <views:GameModeView />
+        </DataTemplate>
         <DataTemplate DataType="{x:Type vm:DebloatViewModel}">
             <views:DebloatView />
         </DataTemplate>
@@ -157,6 +169,27 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
                     <StackPanel Margin="0,0,0,24">
+                        <!-- Update-Leiste: neue Version auf munz-its.de gemeldet -->
+                        <Border Background="{StaticResource BlueSoft}" BorderBrush="{StaticResource Blue}" BorderThickness="1" CornerRadius="10"
+                                Padding="16,10" Margin="0,8,0,10">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding HasUpdate}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <DockPanel>
+                                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                                    <Button Style="{StaticResource PrimaryButton}" Padding="14,7" FontSize="13" Content="{DynamicResource Update.Download}" Command="{Binding OpenUpdateCommand}" Margin="0,0,8,0" />
+                                    <Button Style="{StaticResource SecondaryButton}" Padding="14,7" FontSize="13" Content="{DynamicResource RestartBar.Later}" Command="{Binding DismissUpdateCommand}" />
+                                </StackPanel>
+                                <TextBlock Text="{Binding UpdateText}" Style="{StaticResource TextBase}" VerticalAlignment="Center" Margin="0,0,16,0" TextWrapping="Wrap" />
+                            </DockPanel>
+                        </Border>
                         <!-- Neustart-Leiste: erscheint, wenn Tweaks erst nach Explorer-Neustart, Abmelden oder Neustart wirken -->
                         <Border Background="{StaticResource BlueSoft}" BorderBrush="{StaticResource Blue}" BorderThickness="1" CornerRadius="10"
                                 Padding="16,10" Margin="0,8,0,18">

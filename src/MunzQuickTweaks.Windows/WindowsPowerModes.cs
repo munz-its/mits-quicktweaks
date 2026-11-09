@@ -51,6 +51,31 @@ public sealed partial class WindowsPowerModes : IPowerModes
         }
     }
 
+    /// <summary>Roher Overlay-Wert, auch für Modi, die die App nicht kennt.</summary>
+    public static Guid? GetOverlayId()
+    {
+        try
+        {
+            return PowerGetEffectiveOverlayScheme(out var overlay) == 0 ? overlay : null;
+        }
+        catch (EntryPointNotFoundException)
+        {
+            return null;
+        }
+    }
+
+    public static void SetOverlayId(Guid overlay)
+    {
+        try
+        {
+            WindowsPowerPlans.Check(PowerSetActiveOverlayScheme(overlay));
+        }
+        catch (EntryPointNotFoundException ex)
+        {
+            throw new NotSupportedException("Diese Windows-Version kennt keinen Energiemodus.", ex);
+        }
+    }
+
     public IReadOnlyList<PowerPlanInfo> ListPlans()
     {
         var active = _plans.GetActive();

@@ -22,14 +22,33 @@ public sealed partial class MainViewModel : ObservableObject
         ProcessRulesViewModel processes,
         PowerViewModel power,
         DebloatViewModel debloat,
+        BenchmarkViewModel benchmark,
+        DiskViewModel disk,
+        DriversViewModel drivers,
+        GameModeViewModel gameMode,
         StartupViewModel startup,
         CareViewModel care,
         RestoreViewModel restore,
         HelpViewModel help,
-        SettingsViewModel settings)
+        SettingsViewModel settings,
+        UpdateService updates,
+        SettingsService appSettings)
     {
         _localization = localization;
         _tweaks = tweakService;
+        _updates = updates;
+
+        // Update-Leiste: nur nach Prüfung beim Start oder über die Einstellungen
+        updates.AvailableChanged += (_, _) => System.Windows.Application.Current?.Dispatcher.Invoke(RefreshUpdate);
+        localization.LanguageChanged += (_, _) => RefreshUpdate();
+        if (appSettings.Current.CheckForUpdates)
+        {
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(TimeSpan.FromSeconds(3));
+                await updates.CheckAsync();
+            });
+        }
 
         // Neustart-Leiste: es zählt der stärkste offene Hinweis (Explorer < Abmelden < Neustart)
         tweakService.RestartNeeded += (_, hint) =>
@@ -53,6 +72,10 @@ public sealed partial class MainViewModel : ObservableObject
             new("Nav.Debloat", "11111/01110/01010/01010/01110", debloat, "NavGroup.System"),
             new("Nav.Startup", "00100/10101/10101/10001/01110", startup, "NavGroup.System"),
             new("Nav.Care", "00100/00100/11111/00100/00100", care, "NavGroup.System"),
+            new("Nav.GameMode", "10001/11111/10101/11111/01010", gameMode, "NavGroup.Tools"),
+            new("Nav.Benchmark", "00001/00010/10100/01000/00000", benchmark, "NavGroup.Tools"),
+            new("Nav.Disk", "11111/10001/10111/10001/11111", disk, "NavGroup.Tools"),
+            new("Nav.Drivers", "01010/11111/01110/11111/01010", drivers, "NavGroup.Tools"),
             new("Nav.Restore", "01110/10101/10111/10001/01110", restore, "NavGroup.Safety"),
             new("Nav.Help", "01110/10001/00110/00000/00100", help, "NavGroup.App"),
             SettingsItem,
@@ -66,6 +89,41 @@ public sealed partial class MainViewModel : ObservableObject
     public ObservableCollection<NavItem> Items { get; }
 
     public NavItem SettingsItem { get; }
+
+    private readonly UpdateService _updates;
+
+    [ObservableProperty]
+    private bool _hasUpdate;
+
+    [ObservableProperty]
+    private string _updateText = string.Empty;
+
+    private void RefreshUpdate()
+    {
+        HasUpdate = _updates.Available is not null;
+        UpdateText = _updates.Available is { } info
+            ? string.Format(System.Globalization.CultureInfo.CurrentCulture, _localization.Get("Update.Available"), info.Version, _updates.CurrentVersion)
+            : string.Empty;
+    }
+
+    [RelayCommand]
+    private void OpenUpdate()
+    {
+        if (_updates.Available is { } info)
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(info.Url) { UseShellExecute = true })?.Dispose();
+            }
+            catch (System.ComponentModel.Win32Exception)
+            {
+                // Kein Browser
+            }
+        }
+    }
+
+    [RelayCommand]
+    private void DismissUpdate() => _updates.Dismiss();
 
     [ObservableProperty]
     private PageViewModel? _currentPage;

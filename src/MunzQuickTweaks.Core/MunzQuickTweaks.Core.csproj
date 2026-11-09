@@ -7,4 +7,9 @@
   <ItemGroup>
     <InternalsVisibleTo Include="MunzQuickTweaks.Tests" />
   </ItemGroup>
+  <PropertyGroup>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+  </ItemGroup>
 </Project>

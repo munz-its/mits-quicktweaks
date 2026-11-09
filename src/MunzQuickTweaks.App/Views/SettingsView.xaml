@@ -40,6 +40,28 @@
             </Grid>
         </Border>
 
+        <!-- Update-Prüfung -->
+        <Border Style="{StaticResource Card}" Margin="0,0,0,16">
+            <StackPanel>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Margin="0,0,24,0">
+                        <TextBlock Text="{DynamicResource Update.Title}" Style="{StaticResource H2}" FontSize="16" />
+                        <TextBlock Text="{DynamicResource Update.Hint}" Style="{StaticResource MutedText}" Margin="0,4,0,0" TextWrapping="Wrap" />
+                    </StackPanel>
+                    <CheckBox Grid.Column="1" Style="{StaticResource Toggle}" IsChecked="{Binding CheckForUpdates}" VerticalAlignment="Center"
+                              AutomationProperties.Name="{DynamicResource Update.Title}" />
+                </Grid>
+                <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
+                    <Button Style="{StaticResource SecondaryButton}" Content="{DynamicResource Update.CheckNow}" Command="{Binding CheckNowCommand}" />
+                    <TextBlock Text="{Binding UpdateStatus}" Style="{StaticResource TextBase}" Foreground="{StaticResource Text2}" VerticalAlignment="Center" Margin="14,0,0,0" TextWrapping="Wrap" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
         <!-- Tweak-Auswahl übertragen -->
         <Border Style="{StaticResource Card}" Margin="0,0,0,16">
             <StackPanel>

@@ -14,9 +14,11 @@ public sealed partial class SettingsViewModel : PageViewModel
     private readonly TweakService _tweaks;
     private readonly BatchApplyService _batch;
 
-    public SettingsViewModel(SettingsService settings, LocalizationService localization, TweakService tweaks, BatchApplyService batch)
+    public SettingsViewModel(SettingsService settings, LocalizationService localization, TweakService tweaks, BatchApplyService batch, UpdateService updates)
         : base("Nav.Settings")
     {
+        _updates = updates;
+        _checkForUpdates = settings.Current.CheckForUpdates;
         _settings = settings;
         _localization = localization;
         _tweaks = tweaks;
@@ -29,6 +31,46 @@ public sealed partial class SettingsViewModel : PageViewModel
     }
 
     public string Version { get; }
+
+    private readonly UpdateService _updates;
+
+    [ObservableProperty]
+    private bool _checkForUpdates;
+
+    [ObservableProperty]
+    private string _updateStatus = string.Empty;
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(CheckNowCommand))]
+    private bool _isChecking;
+
+    partial void OnCheckForUpdatesChanged(bool value)
+    {
+        _settings.Current.CheckForUpdates = value;
+        _settings.Save();
+    }
+
+    private bool CanCheck() => !IsChecking;
+
+    [RelayCommand(CanExecute = nameof(CanCheck))]
+    private async Task CheckNowAsync()
+    {
+        IsChecking = true;
+        UpdateStatus = _localization.Get("Update.Checking");
+        try
+        {
+            var (newer, error) = await _updates.CheckAsync();
+            UpdateStatus = error is not null
+                ? $"{_localization.Get("Update.Failed")} {error}"
+                : newer is not null
+                    ? string.Format(System.Globalization.CultureInfo.CurrentCulture, _localization.Get("Update.Available"), newer.Version, _updates.CurrentVersion)
+                    : _localization.Get("Update.Current");
+        }
+        finally
+        {
+            IsChecking = false;
+        }
+    }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsSystemLanguage), nameof(IsGerman), nameof(IsEnglish))]

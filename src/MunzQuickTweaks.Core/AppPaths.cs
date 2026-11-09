@@ -19,4 +19,6 @@ public static class AppPaths
 
     /// <summary>.reg-Exporte vor dem ersten Anwenden eines Tweaks.</summary>
     public static string BackupDirectory => Path.Combine(MachineData, "backups");
+
+    public static string StateDirectory => Path.Combine(MachineData, "state");
 }
