@@ -1,6 +1,7 @@
 name: Build
 
-# Baut bei jedem Push und Pull Request. Bei einem Tag v* entsteht zusätzlich ein GitHub Release.
+# Baut bei jedem Push und Pull Request. Ein GitHub Release entsteht bei einem Tag v* oder bei einem Push auf main,
+# wenn es zur Version in Directory.Build.props noch kein Release gibt (Tag wird dann von GitHub angelegt).
 on:
   push:
     branches: [main, dev]
@@ -51,11 +52,35 @@ jobs:
             publish/MunzQuickTweaks.exe.sha256
           if-no-files-found: error
 
+      - name: Version
+        id: version
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $v = (Select-Xml -Path Directory.Build.props -XPath '//Version').Node.InnerText.Trim()
+          "version=$v" >> $env:GITHUB_OUTPUT
+          gh release view "v$v" --repo ${{ github.repository }} *> $null
+          $exists = if ($LASTEXITCODE -eq 0) { '1' } else { '0' }
+          "exists=$exists" >> $env:GITHUB_OUTPUT
+          Write-Host "Version $v, Release vorhanden: $exists"
+          $global:LASTEXITCODE = 0
+
       - name: Release
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: startsWith(github.ref, 'refs/tags/v') || (github.ref == 'refs/heads/main' && steps.version.outputs.exists == '0')
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || format('v{0}', steps.version.outputs.version) }}
+          target_commitish: ${{ github.sha }}
+          name: Munz Quick Tweaks ${{ steps.version.outputs.version }}
+          body: |
+            Kostenlose Windows-10/11-Tweak-App von Munz IT Service.
+
+            Herunterladen: MunzQuickTweaks.exe (portabel, keine Installation). Die Prüfsumme steht in MunzQuickTweaks.exe.sha256.
+            Die exe ist nicht signiert. Windows SmartScreen kann deshalb beim ersten Start warnen: "Weitere Informationen" und dann "Trotzdem ausführen".
+
+            Hilfe: support@munz-its.de
           files: |
             publish/MunzQuickTweaks.exe
             publish/MunzQuickTweaks.exe.sha256
-          prerelease: ${{ startsWith(github.ref, 'refs/tags/v0.') }}
+          prerelease: ${{ startsWith(steps.version.outputs.version, '0.') }}
