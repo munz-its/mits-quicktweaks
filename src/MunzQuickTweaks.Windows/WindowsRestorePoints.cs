@@ -14,12 +14,32 @@ public sealed class WindowsRestorePoints : IRestorePointService
     private const int ModifySettings = 12;
     private const int BeginSystemChange = 100;
 
-    /// <summary>Fehlertext mit HRESULT, auch wenn Windows keine Meldung liefert.</summary>
-    private static string Describe(Exception ex)
+    /// <summary>Verständlicher Fehlertext mit HRESULT, auch wenn Windows keine Meldung liefert.</summary>
+    internal static string Describe(Exception ex)
     {
+        var known = Explain(ex.HResult);
+        if (known is not null)
+        {
+            return $"{known} (0x{ex.HResult:X8})";
+        }
+
         var text = string.IsNullOrWhiteSpace(ex.Message) ? ex.GetType().Name : ex.Message.Trim();
         return $"{text} (0x{ex.HResult:X8})";
     }
+
+    /// <summary>Häufige Ursachen, in Alltagssprache.</summary>
+    internal static string? Explain(int hresult) => unchecked((uint)hresult) switch
+    {
+        0x80070422 => "Der Windows-Dienst \"Volumeschattenkopie\" ist deaktiviert. Starttyp in den Diensten auf \"Manuell\" stellen",
+        0x80070005 => "Zugriff verweigert. Die App braucht Administratorrechte",
+        0x80042306 => "Der Schattenkopie-Anbieter meldet einen Fehler. Ein anderes Sicherungsprogramm blockiert eventuell",
+        0x80042316 => "Gerade läuft schon eine andere Schattenkopie. Später erneut versuchen",
+        0x8004230F => "Der Schattenkopie-Anbieter hat einen unerwarteten Fehler gemeldet",
+        0x80070070 => "Zu wenig freier Speicherplatz für den Wiederherstellungspunkt",
+        0x81000101 => "Windows erlaubt gerade keinen weiteren Wiederherstellungspunkt",
+        0x80070032 => "Wiederherstellungspunkte werden auf diesem System nicht unterstützt",
+        _ => null,
+    };
 
     private static string SystemDrive => (Environment.GetEnvironmentVariable("SystemDrive") ?? "C:") + "\\";
 
@@ -57,7 +77,7 @@ public sealed class WindowsRestorePoints : IRestorePointService
             input["Drive"] = SystemDrive;
             using var output = sr.InvokeMethod("Enable", input, null);
             var code = Convert.ToUInt32(output?["ReturnValue"] ?? 1u, CultureInfo.InvariantCulture);
-            return code == 0 ? OperationResult.Ok : OperationResult.Fail($"Enable: Code {code}");
+            return code == 0 ? OperationResult.Ok : OperationResult.Fail(Explain(unchecked((int)code)) ?? $"Systemschutz einschalten: Code {code}");
         }
         catch (Exception ex) when (ex is ManagementException or System.Runtime.InteropServices.COMException or UnauthorizedAccessException)
         {
@@ -93,7 +113,7 @@ public sealed class WindowsRestorePoints : IRestorePointService
             input["EventType"] = BeginSystemChange;
             using var output = cls.InvokeMethod("CreateRestorePoint", input, null);
             var code = Convert.ToUInt32(output?["ReturnValue"] ?? 1u, CultureInfo.InvariantCulture);
-            return code == 0 ? OperationResult.Ok : OperationResult.Fail($"CreateRestorePoint: Code {code}");
+            return code == 0 ? OperationResult.Ok : OperationResult.Fail(Explain(unchecked((int)code)) ?? $"Wiederherstellungspunkt: Code {code}");
         }
         catch (Exception ex) when (ex is ManagementException or System.Runtime.InteropServices.COMException or UnauthorizedAccessException)
         {

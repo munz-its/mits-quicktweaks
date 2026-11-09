@@ -20,9 +20,12 @@ public sealed partial class DashboardViewModel : PageViewModel
     private readonly HistoryStore _history;
     private bool _loaded;
 
-    public DashboardViewModel(SystemInfoProvider provider, TweakService tweaks, IRestorePointService restorePoints, LocalizationService localization, HistoryStore history)
+    private readonly BatchApplyService _batch;
+
+    public DashboardViewModel(SystemInfoProvider provider, TweakService tweaks, IRestorePointService restorePoints, LocalizationService localization, HistoryStore history, BatchApplyService batch)
         : base("Nav.Dashboard")
     {
+        _batch = batch;
         _provider = provider;
         _tweaks = tweaks;
         _restorePoints = restorePoints;
@@ -67,7 +70,7 @@ public sealed partial class DashboardViewModel : PageViewModel
     private void OpenHistory() => NavigateRequested?.Invoke("Nav.Restore");
 
     [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(ApplyProfileCommand))]
+    [NotifyCanExecuteChangedFor(nameof(ApplyProfileCommand), nameof(ReapplyResetCommand))]
     private bool _isApplyingProfile;
 
     [ObservableProperty]
@@ -107,60 +110,22 @@ public sealed partial class DashboardViewModel : PageViewModel
             return;
         }
 
-        var lang = _localization.CurrentLanguage;
         var profile = ProfileCatalog.Get(kind, _tweaks.Tweaks);
-        var todo = await Task.Run(() => profile.TweakIds
-            .Select(_tweaks.Find)
-            .OfType<TweakDefinition>()
-            .Where(t => _tweaks.GetStatus(t) is TweakStatus.NotApplied or TweakStatus.Partial)
-            .ToList());
-
+        var todo = await _batch.FilterTodoAsync(profile.TweakIds);
         if (todo.Count == 0)
         {
             ProfileStatus = string.Format(CultureInfo.CurrentCulture, _localization.Get("Profile.AllActive"), profileName);
             return;
         }
 
-        var medium = _localization.Get("Profile.MediumMark");
-        var list = string.Join("\n", todo.Select(t => "• " + t.Title.Get(lang) + (t.Risk == TweakRisk.Medium ? $" ({medium})" : string.Empty)));
-        var question = string.Format(CultureInfo.CurrentCulture, _localization.Get("Profile.Confirm"), profileName, todo.Count) + "\n\n" + list;
-        if (todo.Any(t => t.Risk == TweakRisk.Medium))
-        {
-            question += "\n\n" + _localization.Get("Profile.MediumHint");
-        }
-
-        if (MessageBox.Show(question, appName, MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
-        {
-            return;
-        }
-
         IsApplyingProfile = true;
         try
         {
-            int ok = 0, failed = 0;
-            for (var i = 0; i < todo.Count; i++)
-            {
-                var tweak = todo[i];
-                var progress = $"{tweak.Title.Get(lang)} ({i + 1}/{todo.Count})";
-                ProfileStatus = progress;
-                var prompt = new DialogSafetyPrompt(_localization, stage => ProfileStatus = $"{progress}: {stage}");
-                var result = await _tweaks.ApplyAsync(tweak, prompt);
-                if (result.Success)
-                {
-                    ok++;
-                }
-                else
-                {
-                    failed++;
-                    if (result.Error == "Abgebrochen.")
-                    {
-                        break;
-                    }
-                }
-            }
-
-            _history.Add(HistoryAction.ProfileApplied, null, failed == 0, $"{kind}: {ok} ok, {failed} Fehler");
-            ProfileStatus = string.Format(CultureInfo.CurrentCulture, _localization.Get("Profile.Done"), profileName, ok, failed);
+            var heading = string.Format(CultureInfo.CurrentCulture, _localization.Get("Profile.Confirm"), profileName, todo.Count);
+            var result = await _batch.ConfirmAndApplyAsync(todo, heading, text => ProfileStatus = text, kind.ToString());
+            ProfileStatus = result.Cancelled
+                ? string.Empty
+                : string.Format(CultureInfo.CurrentCulture, _localization.Get("Profile.Done"), profileName, result.Applied, result.Failed);
             await RefreshCountsAsync();
         }
         finally
@@ -168,6 +133,39 @@ public sealed partial class DashboardViewModel : PageViewModel
             IsApplyingProfile = false;
         }
     }
+
+    /// <summary>Tweaks, die ein Windows-Update zurückgesetzt hat, wieder anwenden.</summary>
+    [RelayCommand(CanExecute = nameof(CanApplyProfile))]
+    private async Task ReapplyResetAsync()
+    {
+        var todo = await Task.Run(_tweaks.FindResetByWindows);
+        if (todo.Count == 0)
+        {
+            await RefreshCountsAsync();
+            return;
+        }
+
+        IsApplyingProfile = true;
+        try
+        {
+            var heading = string.Format(CultureInfo.CurrentCulture, _localization.Get("Reset.Confirm"), todo.Count);
+            var result = await _batch.ConfirmAndApplyAsync(todo, heading, text => ProfileStatus = text, "Reapply");
+            ProfileStatus = result.Cancelled
+                ? string.Empty
+                : string.Format(CultureInfo.CurrentCulture, _localization.Get("Reset.Done"), result.Applied, result.Failed);
+            await RefreshCountsAsync();
+        }
+        finally
+        {
+            IsApplyingProfile = false;
+        }
+    }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasResetTweaks))]
+    private string _resetText = string.Empty;
+
+    public bool HasResetTweaks => ResetText.Length > 0;
 
     /// <summary>Kacheln, Profil-Zähler und "Zuletzt geändert" neu berechnen.</summary>
     private async Task RefreshCountsAsync()
@@ -180,8 +178,11 @@ public sealed partial class DashboardViewModel : PageViewModel
                 Statuses: statuses,
                 Protection: _restorePoints.GetProtectionState(),
                 Last: points.FirstOrDefault(),
-                History: _history.Latest(3));
+                History: _history.Latest(3),
+                Reset: _tweaks.FindResetByWindows().Count);
         });
+
+        ResetText = data.Reset == 0 ? string.Empty : string.Format(CultureInfo.CurrentCulture, _localization.Get("Reset.Banner"), data.Reset);
 
         var available = data.Statuses.Values.Count(s => s != TweakStatus.NotAvailable);
         ActiveTweaks = data.Statuses.Values.Count(s => s == TweakStatus.Applied);

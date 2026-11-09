@@ -84,6 +84,7 @@ public partial class App : Application
                     UserHiveAllowed = !AccountInfo.IsForeignElevation(),
                 });
                 services.AddSingleton<TweakService>();
+                services.AddSingleton<BatchApplyService>();
                 services.AddSingleton<IAppxManager, WindowsAppx>();
                 services.AddSingleton<IStartupManager>(_ => new WindowsStartup(includeUserLevel: !AccountInfo.IsForeignElevation()));
                 services.AddSingleton<WindowsCleanup>();
@@ -95,6 +96,7 @@ public partial class App : Application
                 services.AddSingleton<StartupViewModel>();
                 services.AddSingleton<CareViewModel>();
                 services.AddSingleton<RestoreViewModel>();
+                services.AddSingleton<HelpViewModel>();
                 services.AddSingleton<SettingsViewModel>();
                 services.AddSingleton<MainViewModel>();
                 services.AddSingleton<MainWindow>();

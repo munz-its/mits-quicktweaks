@@ -97,7 +97,7 @@ public partial class MainWindow : Window
 
     private static TranslateTransform Transform(UIElement element) => (TranslateTransform)element.RenderTransform;
 
-    private NavItem? CurrentNavItem() => _viewModel.Items.Append(_viewModel.SettingsItem).FirstOrDefault(i => i.IsSelected);
+    private NavItem? CurrentNavItem() => _viewModel.Items.FirstOrDefault(i => i.IsSelected);
 
     /// <summary>Schiebt Auswahl-Hintergrund und blaues Pixel zum gewählten Eintrag.</summary>
     private void UpdateNavIndicator(NavItem? item, bool animate)
@@ -150,10 +150,26 @@ public partial class MainWindow : Window
 
     private RadioButton? FindNavButton(NavItem item)
     {
-        DependencyObject? container = ReferenceEquals(item, _viewModel.SettingsItem)
-            ? SettingsNav
-            : NavList.ItemContainerGenerator.ContainerFromItem(item);
-        return container is null ? null : FindChild<RadioButton>(container);
+        // Mit Gruppen liefert der Container-Generator nichts: Schalter über den Visual Tree suchen
+        return FindChildren<RadioButton>(NavList).FirstOrDefault(b => ReferenceEquals(b.DataContext, item));
+    }
+
+    private static IEnumerable<T> FindChildren<T>(DependencyObject parent)
+        where T : DependencyObject
+    {
+        for (var i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+        {
+            var child = VisualTreeHelper.GetChild(parent, i);
+            if (child is T match)
+            {
+                yield return match;
+            }
+
+            foreach (var nested in FindChildren<T>(child))
+            {
+                yield return nested;
+            }
+        }
     }
 
     private static T? FindChild<T>(DependencyObject parent)

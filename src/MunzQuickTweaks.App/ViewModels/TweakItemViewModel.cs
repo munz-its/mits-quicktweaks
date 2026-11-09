@@ -65,6 +65,16 @@ public sealed partial class TweakItemViewModel : ObservableObject
     [ObservableProperty]
     private bool _messageIsError;
 
+    /// <summary>Technische Details für "Mehr Info".</summary>
+    [ObservableProperty]
+    private string _details = string.Empty;
+
+    [ObservableProperty]
+    private bool _isExpanded;
+
+    [RelayCommand]
+    private void ToggleDetails() => IsExpanded = !IsExpanded;
+
     /// <summary>Zählt erfolgreiche Anwendungen hoch und startet damit den Pixel-Wisch.</summary>
     [ObservableProperty]
     private int _wipeCount;
@@ -95,6 +105,7 @@ public sealed partial class TweakItemViewModel : ObservableObject
         Description = Definition.Description.Get(lang);
         RiskText = _localization.Get($"Risk.{Definition.Risk}");
         RestartText = Definition.Restart == RestartHint.None ? string.Empty : _localization.Get($"Restart.{Definition.Restart}");
+        Details = string.Join(Environment.NewLine, TweakDetails.Describe(Definition, lang));
         if (IsBlockedByAccount)
         {
             Message = _localization.Get("Tweak.BlockedAccount");

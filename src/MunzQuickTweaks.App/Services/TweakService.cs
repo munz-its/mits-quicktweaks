@@ -44,6 +44,20 @@ public sealed class TweakService
     /// <summary>Wird nach jeder Änderung ausgelöst (Dashboard und Wiederherstellung aktualisieren sich).</summary>
     public event EventHandler? Changed;
 
+    /// <summary>Ein erfolgreicher Tweak braucht Explorer-Neustart, Abmelden oder Neustart.</summary>
+    public event EventHandler<RestartHint>? RestartNeeded;
+
+    /// <summary>
+    /// Tweaks, die laut Journal aktiv sein sollten, aber nicht mehr im Zielzustand sind:
+    /// meist von einem Windows-Update zurückgesetzt.
+    /// </summary>
+    public IReadOnlyList<TweakDefinition> FindResetByWindows() =>
+        Engine.Journal.All
+            .Select(e => Find(e.TweakId))
+            .OfType<TweakDefinition>()
+            .Where(t => GetStatus(t) is TweakStatus.NotApplied or TweakStatus.Partial)
+            .ToList();
+
     public TweakStatus GetStatus(TweakDefinition tweak)
     {
         try
@@ -144,6 +158,10 @@ public sealed class TweakService
         if (result.Success)
         {
             _log.LogInformation("{TweakId}: {Action}", tweak.Id, action);
+            if (tweak.Restart != RestartHint.None)
+            {
+                RestartNeeded?.Invoke(this, tweak.Restart);
+            }
         }
         else
         {

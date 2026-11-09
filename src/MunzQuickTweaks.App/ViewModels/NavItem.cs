@@ -5,12 +5,19 @@ namespace MunzQuickTweaks.App.ViewModels;
 /// <summary>Ein Eintrag in der Seitennavigation.</summary>
 public sealed partial class NavItem : ObservableObject
 {
-    public NavItem(string titleKey, string iconPattern, PageViewModel page)
+    public NavItem(string titleKey, string iconPattern, PageViewModel page, string groupKey = "")
     {
         TitleKey = titleKey;
         IconPattern = iconPattern;
         Page = page;
+        GroupKey = groupKey;
     }
+
+    /// <summary>Gruppe in der Seitenleiste, z. B. NavGroup.Optimize. Leer = ohne Überschrift.</summary>
+    public string GroupKey { get; }
+
+    [ObservableProperty]
+    private string _groupTitle = string.Empty;
 
     /// <summary>Schlüssel im Sprach-Wörterbuch, z. B. Nav.Tweaks.</summary>
     public string TitleKey { get; }

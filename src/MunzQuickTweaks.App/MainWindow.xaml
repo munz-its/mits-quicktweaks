@@ -38,12 +38,22 @@
         <DataTemplate DataType="{x:Type vm:RestoreViewModel}">
             <views:RestoreView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:HelpViewModel}">
+            <views:HelpView />
+        </DataTemplate>
         <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
             <views:SettingsView />
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:PlaceholderViewModel}">
             <views:PlaceholderView />
         </DataTemplate>
+
+        <!-- Navigation nach Gruppen -->
+        <CollectionViewSource x:Key="NavGroups" Source="{Binding Items}">
+            <CollectionViewSource.GroupDescriptions>
+                <PropertyGroupDescription PropertyName="GroupKey" />
+            </CollectionViewSource.GroupDescriptions>
+        </CollectionViewSource>
 
         <DataTemplate x:Key="NavItemTemplate" DataType="{x:Type vm:NavItem}">
             <RadioButton Style="{StaticResource NavItem}" GroupName="Nav"
@@ -78,19 +88,40 @@
                            FontWeight="Bold" FontSize="14" Margin="10,0,0,0" VerticalAlignment="Center" TextWrapping="NoWrap" />
             </StackPanel>
 
-            <!-- Gleitende Auswahl: Hintergrund und blaues Pixel wandern zum gewählten Eintrag -->
-            <Canvas x:Name="NavOverlay" Grid.Row="1" Grid.Column="0" Margin="12,14,12,14" IsHitTestVisible="False" ClipToBounds="False">
-                <Border x:Name="NavPill" CornerRadius="8" Background="{StaticResource BlueSoft}" Width="{Binding ActualWidth, ElementName=NavOverlay}" Height="40" Opacity="0" />
-                <Rectangle x:Name="NavMarker" Width="4" Height="4" Fill="{StaticResource Blue}" Canvas.Left="4" Opacity="0" />
-            </Canvas>
-
-            <DockPanel Grid.Row="1" Grid.Column="0" Margin="12,14,12,14" LastChildFill="False">
-                <StackPanel DockPanel.Dock="Bottom">
-                    <Border Height="1" Background="{StaticResource Line}" Margin="4,0,4,8" />
-                    <ContentControl x:Name="SettingsNav" Content="{Binding SettingsItem}" ContentTemplate="{StaticResource NavItemTemplate}" Focusable="False" />
-                    <TextBlock Text="{DynamicResource App.By}" Style="{StaticResource Label}" Foreground="{StaticResource Muted}" Margin="12,10,0,0" />
-                </StackPanel>
-                <ItemsControl x:Name="NavList" DockPanel.Dock="Top" ItemsSource="{Binding Items}" ItemTemplate="{StaticResource NavItemTemplate}" Focusable="False" />
+            <!-- Seitenleiste: Gruppen scrollen bei kleinem Fenster, Markierung gleitet mit -->
+            <DockPanel Grid.Row="1" Grid.Column="0" Margin="12,6,12,14">
+                <TextBlock DockPanel.Dock="Bottom" Text="{DynamicResource App.By}" Style="{StaticResource Label}" Foreground="{StaticResource Muted}" Margin="12,10,0,0" />
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
+                    <Grid>
+                        <!-- Gleitende Auswahl: Hintergrund und blaues Pixel wandern zum gewählten Eintrag -->
+                        <Canvas x:Name="NavOverlay" IsHitTestVisible="False" ClipToBounds="False">
+                            <Border x:Name="NavPill" CornerRadius="8" Background="{StaticResource BlueSoft}" Width="{Binding ActualWidth, ElementName=NavOverlay}" Height="40" Opacity="0" />
+                            <Rectangle x:Name="NavMarker" Width="4" Height="4" Fill="{StaticResource Blue}" Canvas.Left="4" Opacity="0" />
+                        </Canvas>
+                        <ItemsControl x:Name="NavList" ItemsSource="{Binding Source={StaticResource NavGroups}}" ItemTemplate="{StaticResource NavItemTemplate}" Focusable="False">
+                            <ItemsControl.GroupStyle>
+                                <GroupStyle>
+                                    <GroupStyle.HeaderTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Items[0].GroupTitle}" FontSize="11" Margin="12,14,0,4">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock" BasedOn="{StaticResource Label}">
+                                                        <Setter Property="Foreground" Value="{StaticResource Muted}" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Items[0].GroupTitle}" Value="">
+                                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </GroupStyle.HeaderTemplate>
+                                </GroupStyle>
+                            </ItemsControl.GroupStyle>
+                        </ItemsControl>
+                    </Grid>
+                </ScrollViewer>
             </DockPanel>
 
             <!-- Titelleiste rechts -->
@@ -117,6 +148,27 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
                     <StackPanel Margin="0,0,0,24">
+                        <!-- Neustart-Leiste: erscheint, wenn Tweaks erst nach Explorer-Neustart, Abmelden oder Neustart wirken -->
+                        <Border Background="{StaticResource BlueSoft}" BorderBrush="{StaticResource Blue}" BorderThickness="1" CornerRadius="10"
+                                Padding="16,10" Margin="0,8,0,18">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding HasPendingRestart}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <DockPanel>
+                                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                                    <Button Style="{StaticResource PrimaryButton}" Padding="14,7" FontSize="13" Content="{Binding RestartActionText}" Command="{Binding RunRestartActionCommand}" Margin="0,0,8,0" />
+                                    <Button Style="{StaticResource SecondaryButton}" Padding="14,7" FontSize="13" Content="{DynamicResource RestartBar.Later}" Command="{Binding DismissRestartCommand}" />
+                                </StackPanel>
+                                <TextBlock Text="{Binding RestartText}" Style="{StaticResource TextBase}" VerticalAlignment="Center" Margin="0,0,16,0" />
+                            </DockPanel>
+                        </Border>
                         <TextBlock Text="{Binding CurrentPage.Label}" Style="{StaticResource Label}" Margin="0,0,0,6" />
                         <TextBlock Text="{Binding CurrentPage.Heading}" Style="{StaticResource Display}" />
                     </StackPanel>

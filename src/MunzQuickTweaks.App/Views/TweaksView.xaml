@@ -103,6 +103,36 @@
 
                                                 <TextBlock Text="{Binding Description}" Style="{StaticResource Body2}" FontSize="13" />
 
+                                                <!-- Mehr Info: genau welche Einstellung geändert wird -->
+                                                <Button HorizontalAlignment="Left" Cursor="Hand" Command="{Binding ToggleDetailsCommand}" Margin="0,6,0,0" Focusable="True">
+                                                    <Button.Template>
+                                                        <ControlTemplate TargetType="Button">
+                                                            <TextBlock x:Name="Link" FontFamily="{StaticResource FontSans}" FontSize="12" Foreground="{StaticResource BlueXl}">
+                                                                <TextBlock.Style>
+                                                                    <Style TargetType="TextBlock">
+                                                                        <Setter Property="Text" Value="{DynamicResource Tweak.MoreInfo}" />
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding IsExpanded}" Value="True">
+                                                                                <Setter Property="Text" Value="{DynamicResource Tweak.LessInfo}" />
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </TextBlock.Style>
+                                                            </TextBlock>
+                                                            <ControlTemplate.Triggers>
+                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                    <Setter TargetName="Link" Property="TextDecorations" Value="Underline" />
+                                                                </Trigger>
+                                                            </ControlTemplate.Triggers>
+                                                        </ControlTemplate>
+                                                    </Button.Template>
+                                                </Button>
+                                                <Border Background="{StaticResource Bg3}" CornerRadius="8" Padding="12,10" Margin="0,8,0,0"
+                                                        Visibility="{Binding IsExpanded, Converter={StaticResource BoolToVis}}">
+                                                    <TextBlock Text="{Binding Details}" FontFamily="{StaticResource FontMono}" FontSize="11.5"
+                                                               Foreground="{StaticResource Text2}" TextWrapping="Wrap" LineHeight="18" />
+                                                </Border>
+
                                                 <TextBlock Text="{DynamicResource Tweak.Partial}" Style="{StaticResource TextBase}" FontSize="12" Foreground="{StaticResource Warn}" Margin="0,8,0,0"
                                                            Visibility="{Binding IsPartial, Converter={StaticResource BoolToVis}}" />
 

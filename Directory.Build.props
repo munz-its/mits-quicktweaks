@@ -1,7 +1,7 @@
 <Project>
   <!-- Gemeinsame Einstellungen für alle Projekte von Munz Quick Tweaks -->
   <PropertyGroup>
-    <Version>0.7.2</Version>
+    <Version>0.8.0</Version>
     <Product>Munz Quick Tweaks</Product>
     <Company>Munz IT Service</Company>
     <Authors>Mert Munz</Authors>

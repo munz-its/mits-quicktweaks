@@ -1,0 +1,90 @@
+<UserControl x:Class="MunzQuickTweaks.App.Views.HelpView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:MunzQuickTweaks.App.Controls">
+    <StackPanel MaxWidth="820" HorizontalAlignment="Left">
+        <TextBlock Text="{DynamicResource Help.Intro}" Style="{StaticResource Body2}" Margin="0,0,0,20" />
+
+        <TextBlock Text="{Binding Status}" Margin="0,0,0,16">
+            <TextBlock.Style>
+                <Style TargetType="TextBlock" BasedOn="{StaticResource TextBase}">
+                    <Setter Property="Foreground" Value="{StaticResource BlueXl}" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Status}" Value="">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
+
+        <!-- Fernwartung: Kern-Leistung von Munz IT Service -->
+        <Border Style="{StaticResource Card}" Margin="0,0,0,16">
+            <DockPanel>
+                <Border DockPanel.Dock="Left" Width="44" Height="44" CornerRadius="10" Background="{StaticResource BlueSoft}" VerticalAlignment="Top" Margin="0,0,18,0">
+                    <c:PixelIcon Pattern="11111/10001/11111/00100/01110" Width="18" Height="18" Foreground="{StaticResource BlueL}" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="{DynamicResource Help.Remote}" Style="{StaticResource H2}" FontSize="16" />
+                    <TextBlock Text="{DynamicResource Help.RemoteText}" Style="{StaticResource Body2}" Margin="0,6,0,14" />
+                    <WrapPanel>
+                        <Button Style="{StaticResource PrimaryButton}" Content="{DynamicResource Help.RemoteButton}" Command="{Binding OpenRemoteHelpCommand}" Margin="0,0,10,0" />
+                        <Button Style="{StaticResource SecondaryButton}" Content="{DynamicResource Help.MailButton}" Command="{Binding MailSupportCommand}" />
+                    </WrapPanel>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- Support-Paket -->
+        <Border Style="{StaticResource Card}" Margin="0,0,0,16">
+            <DockPanel>
+                <Border DockPanel.Dock="Left" Width="44" Height="44" CornerRadius="10" Background="{StaticResource BlueSoft}" VerticalAlignment="Top" Margin="0,0,18,0">
+                    <c:PixelIcon Pattern="11111/11011/10101/10001/11111" Width="18" Height="18" Foreground="{StaticResource BlueL}" />
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="{DynamicResource Help.Package}" Style="{StaticResource H2}" FontSize="16" />
+                    <TextBlock Text="{DynamicResource Help.PackageText}" Style="{StaticResource Body2}" Margin="0,6,0,14" />
+                    <WrapPanel>
+                        <Button Style="{StaticResource SecondaryButton}" Content="{DynamicResource Help.PackageButton}" Command="{Binding SaveSupportPackageCommand}" />
+                    </WrapPanel>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- Kontakt -->
+        <Border Style="{StaticResource Card}">
+            <StackPanel>
+                <TextBlock Text="{DynamicResource Help.Contact}" Style="{StaticResource H2}" FontSize="16" Margin="0,0,0,12" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="110" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="E-MAIL" Style="{StaticResource Label}" Foreground="{StaticResource Muted}" Margin="0,0,0,10" />
+                    <TextBlock Grid.Column="1" Text="{Binding MailAddress}" Style="{StaticResource TextBase}" Margin="0,0,0,10" />
+                    <TextBlock Grid.Row="1" Text="WEB" Style="{StaticResource Label}" Foreground="{StaticResource Muted}" Margin="0,0,0,10" />
+                    <Button Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" Cursor="Hand" Command="{Binding OpenWebsiteCommand}" Margin="0,0,0,10">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <TextBlock Text="munz-its.de" FontFamily="{StaticResource FontSans}" FontSize="14" Foreground="{StaticResource BlueXl}" TextDecorations="Underline" />
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                    <TextBlock Grid.Row="2" Text="DISCORD" Style="{StaticResource Label}" Foreground="{StaticResource Muted}" />
+                    <Button Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left" Cursor="Hand" Command="{Binding OpenDiscordCommand}">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <TextBlock Text="discord.gg/zmg2eqyM7M" FontFamily="{StaticResource FontSans}" FontSize="14" Foreground="{StaticResource BlueXl}" TextDecorations="Underline" />
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </Grid>
+            </StackPanel>
+        </Border>
+    </StackPanel>
+</UserControl>

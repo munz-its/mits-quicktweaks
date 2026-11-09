@@ -214,7 +214,7 @@
                     <Grid Background="Transparent">
                         <Border x:Name="Hover" CornerRadius="8" Background="{StaticResource HoverSoft}" Opacity="0" />
                         <Border x:Name="Focus" CornerRadius="8" BorderThickness="1" BorderBrush="Transparent" />
-                        <ContentPresenter x:Name="Content" Margin="12,9" VerticalAlignment="Center" Opacity="0.78" />
+                        <ContentPresenter x:Name="Content" Margin="12,8" VerticalAlignment="Center" Opacity="0.78" />
                     </Grid>
                     <ControlTemplate.Triggers>
                         <!-- Hover blendet weich ein und langsamer wieder aus -->

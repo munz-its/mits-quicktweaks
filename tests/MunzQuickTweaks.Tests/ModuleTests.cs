@@ -195,3 +195,46 @@ public sealed class FolderCleanerTests : IDisposable
         }
     }
 }
+
+public class TweakSelectionTests
+{
+    [Fact]
+    public void Round_trip_keeps_ids_and_removes_duplicates()
+    {
+        var json = new TweakSelection { AppVersion = "0.8.0", Tweaks = new() { "ui.a.b", "ui.a.b", "privacy.c.d", " " } }.ToJson();
+        var parsed = TweakSelection.Parse(json);
+        Assert.Equal(new[] { "ui.a.b", "privacy.c.d" }, parsed.Tweaks);
+    }
+
+    [Theory]
+    [InlineData("{ kaputt")]
+    [InlineData("{\"format\":\"andere-app\",\"tweaks\":[\"x\"]}")]
+    [InlineData("{\"format\":\"munz-quicktweaks-selection\",\"formatVersion\":2,\"tweaks\":[]}")]
+    public void Foreign_or_broken_files_are_rejected(string json)
+    {
+        Assert.Throws<FormatException>(() => TweakSelection.Parse(json));
+    }
+}
+
+public class TweakDetailsTests
+{
+    [Fact]
+    public void Describes_registry_service_and_build_in_german()
+    {
+        var tweak = new TweakDefinition
+        {
+            Id = "test.x.y",
+            MinBuild = 22000,
+            Actions =
+            {
+                new RegistryAction { Hive = RegistryHive.HKCU, Key = @"Software\X", Name = "", Kind = RegistryKind.String, Value = "" },
+                new ServiceAction { Name = "WSearch", StartType = ServiceStartType.Disabled, Default = ServiceStartType.AutomaticDelayed },
+            },
+        };
+
+        var lines = TweakDetails.Describe(tweak, "de");
+        Assert.Contains(@"HKCU\Software\X\(Standard) = """" (String) · Windows-Standard: Wert fehlt", lines);
+        Assert.Contains("Dienst WSearch: Starttyp Deaktiviert · Windows-Standard: Automatisch (verzögert)", lines);
+        Assert.Contains("Ab Windows-Build 22000", lines);
+    }
+}
