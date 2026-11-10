@@ -4,7 +4,23 @@ namespace MunzQuickTweaks.Core.Tools;
 public sealed record DnsProvider(string Id, string Name, IReadOnlyList<string> Servers);
 
 /// <summary>Aktiver Netzwerkadapter. Servers leer = automatisch vom Router.</summary>
-public sealed record NetAdapterDns(int Index, string Name, string Guid, IReadOnlyList<string> Servers);
+public sealed record NetAdapterDns(int Index, string Name, string Guid, IReadOnlyList<string> Servers)
+{
+    /// <summary>IPv4-Adressen des Adapters. Leer oder nur 169.254.x.x heißt: keine Adresse vom Router bekommen.</summary>
+    public IReadOnlyList<string> Ipv4 { get; init; } = Array.Empty<string>();
+
+    public bool HasNoAddress => !NetworkHealth.HasValidIpv4(Ipv4);
+}
+
+public static class NetworkHealth
+{
+    /// <summary>Gültig ist jede IPv4 außer der Windows-Notadresse 169.254.x.x (kein DHCP).</summary>
+    public static bool HasValidIpv4(IEnumerable<string> addresses) =>
+        addresses.Any(a => System.Net.IPAddress.TryParse(a, out var ip)
+            && ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork
+            && !a.StartsWith("169.254.", StringComparison.Ordinal)
+            && !a.StartsWith("0.", StringComparison.Ordinal));
+}
 
 public sealed record PingTarget(string Name, string Host);
 

@@ -501,12 +501,6 @@ Die Programmdatei existiert nicht mehr. Der Eintrag wird vorher im Sicherungsord
     <sys:String x:Key="Net.ToolsTitle">Probleme beheben</sys:String>
     <sys:String x:Key="Net.Flush">DNS-Cache leeren</sys:String>
     <sys:String x:Key="Net.Flushed">DNS-Cache geleert.</sys:String>
-    <sys:String x:Key="Net.Reset">Netzwerk zurücksetzen</sys:String>
-    <sys:String x:Key="Net.ResetHint">Netzwerk zurücksetzen hilft bei hartnäckigen Verbindungsproblemen. Danach ist ein Neustart nötig, VPN-Programme müssen eventuell neu eingerichtet werden.</sys:String>
-    <sys:String x:Key="Net.ConfirmReset" xml:space="preserve">Netzwerk wirklich zurücksetzen?
-
-Winsock und TCP/IP werden auf den Werkszustand gesetzt. Danach musst du den PC neu starten. VPN-Programme musst du eventuell neu einrichten.</sys:String>
-    <sys:String x:Key="Net.ResetDone">Netzwerk zurückgesetzt. Bitte jetzt den PC neu starten.</sys:String>
     <sys:String x:Key="Health.DisksTitle">DATENTRÄGER</sys:String>
     <sys:String x:Key="Health.BatteryTitle">AKKU</sys:String>
     <sys:String x:Key="Health.Battery">Akku</sys:String>
@@ -581,4 +575,12 @@ Winsock und TCP/IP werden auf den Werkszustand gesetzt. Danach musst du den PC n
     <sys:String x:Key="Privacy.Controller">Mert Munz, Munz IT Service, c/o IP-Management #10553, Ludwig-Erhard-Str. 18, 20459 Hamburg, support@munz-its.de</sys:String>
     <sys:String x:Key="Privacy.OpenPolicy">Datenschutzerklärung auf munz-its.de</sys:String>
     <sys:String x:Key="Privacy.OpenFolder">Datenordner öffnen</sys:String>
+    <sys:String x:Key="Net.Repair">Netzwerk reparieren</sys:String>
+    <sys:String x:Key="Net.RepairHint">Netzwerk reparieren ist sicher und braucht keinen Neustart. Es repariert nur Adapter, die keine Adresse vom Router bekommen haben, und leert den DNS-Cache. Fest eingestellte Adressen und VPN-Programme bleiben unverändert.</sys:String>
+    <sys:String x:Key="Net.Repairing">Netzwerk wird repariert, das dauert etwa 15 Sekunden ...</sys:String>
+    <sys:String x:Key="Net.Repaired">Netzwerk repariert. Die Verbindung steht.</sys:String>
+    <sys:String x:Key="Net.RepairNotEnough">Repariert, aber noch keine Verbindung. Trenne das WLAN in Windows und verbinde dich neu. Hilft das nicht, starte den Router neu.</sys:String>
+    <sys:String x:Key="Net.DnsRolledBack">Mit {0} kam keine Verbindung zustande. Die vorherigen DNS-Server wurden automatisch wiederhergestellt.</sys:String>
+    <sys:String x:Key="Net.NoAddressTitle">Keine Adresse vom Router</sys:String>
+    <sys:String x:Key="Net.NoAddressText">Mindestens ein Adapter hat vom Router keine IP-Adresse bekommen (169.254.x.x). Dadurch gibt es kein Internet. Ein Klick behebt das in den meisten Fällen.</sys:String>
 </ResourceDictionary>

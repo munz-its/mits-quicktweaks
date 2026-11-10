@@ -197,6 +197,30 @@ public class StringResourceTests
         Assert.Equal(Keys("Theme.xaml").OrderBy(k => k), Keys("ThemeApple.xaml").OrderBy(k => k));
     }
 
+    [Theory]
+    [InlineData(new[] { "192.168.178.23" }, true)]
+    [InlineData(new[] { "169.254.216.243" }, false)]
+    [InlineData(new string[0], false)]
+    [InlineData(new[] { "169.254.1.1", "10.0.0.5" }, true)]
+    [InlineData(new[] { "0.0.0.0" }, false)]
+    public void Detects_missing_router_address(string[] addresses, bool valid)
+    {
+        Assert.Equal(valid, MunzQuickTweaks.Core.Tools.NetworkHealth.HasValidIpv4(addresses));
+    }
+
+    // Netzwerk-Reset per netsh hat schon einmal WLAN ohne Adresse hinterlassen und darf nicht zurückkommen
+    [Fact]
+    public void No_global_network_stack_reset()
+    {
+        var root = Path.Combine(FindRepoRoot(), "src");
+        foreach (var file in Directory.GetFiles(root, "*.cs", SearchOption.AllDirectories).Where(f => !f.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}")))
+        {
+            var text = File.ReadAllText(file);
+            Assert.DoesNotContain("winsock reset", text, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("int ip reset", text, StringComparison.OrdinalIgnoreCase);
+        }
+    }
+
     // Ein <StaticResource>-Element als Eintrag bricht das Nachladen im Wörterbuch: spätere Schlüssel werden nicht mehr gefunden
     [Fact]
     public void Themes_contain_no_static_resource_entries()

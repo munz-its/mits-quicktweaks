@@ -8,7 +8,7 @@ using MunzQuickTweaks.Core.Tools;
 
 namespace MunzQuickTweaks.Windows;
 
-/// <summary>DNS pro Adapter, Netzwerk zurücksetzen und Ping. DNS läuft über die Windows-Cmdlets, die auch die Einstellungen nutzen.</summary>
+/// <summary>DNS pro Adapter, sichere Netzwerk-Reparatur und Ping. Bewusst kein globaler netsh-Reset von Winsock oder TCP/IP: der kann WLAN ohne Adresse zurücklassen. DNS läuft über die Windows-Cmdlets, die auch die Einstellungen nutzen.</summary>
 public static class WindowsNetwork
 {
     private const string Tcpip4 = @"SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces\";
@@ -25,14 +25,79 @@ public static class WindowsNetwork
         }
 
         using var doc = JsonDocument.Parse(json);
+        var interfaces = NetworkInterface.GetAllNetworkInterfaces();
         foreach (var item in doc.RootElement.EnumerateArray())
         {
             var guid = item.GetProperty("InterfaceGuid").GetString() ?? string.Empty;
             var servers = ReadServers(Tcpip4 + guid).Concat(ReadServers(Tcpip6 + guid)).ToList();
-            list.Add(new NetAdapterDns(item.GetProperty("ifIndex").GetInt32(), item.GetProperty("Name").GetString() ?? "?", guid, servers));
+            list.Add(new NetAdapterDns(item.GetProperty("ifIndex").GetInt32(), item.GetProperty("Name").GetString() ?? "?", guid, servers)
+            {
+                Ipv4 = Ipv4Of(interfaces, guid),
+            });
         }
 
         return list;
+    }
+
+    private static IReadOnlyList<string> Ipv4Of(NetworkInterface[] interfaces, string guid)
+    {
+        var nic = interfaces.FirstOrDefault(n => string.Equals(n.Id, guid, StringComparison.OrdinalIgnoreCase));
+        return nic is null
+            ? Array.Empty<string>()
+            : nic.GetIPProperties().UnicastAddresses
+                .Where(u => u.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                .Select(u => u.Address.ToString())
+                .ToList();
+    }
+
+    /// <summary>Klappt eine DNS-Auflösung gerade? Prüft zwei Namen, damit ein einzelner Ausfall nicht täuscht.</summary>
+    public static async Task<bool> CanResolveAsync()
+    {
+        foreach (var host in new[] { "www.microsoft.com", "munz-its.de" })
+        {
+            try
+            {
+                var lookup = Dns.GetHostAddressesAsync(host);
+                if (await Task.WhenAny(lookup, Task.Delay(4000)) == lookup && lookup.Result.Length > 0)
+                {
+                    return true;
+                }
+            }
+            catch (Exception ex) when (ex is System.Net.Sockets.SocketException or ArgumentException)
+            {
+                // nächster Name
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Sichere Reparatur ohne Neustart. Setzt nichts global zurück: Nur Adapter ohne gültige Adresse
+    /// bekommen wieder DHCP und automatische DNS-Server. Fest eingestellte Adressen bleiben unangetastet.
+    /// </summary>
+    public static OperationResult Repair()
+    {
+        const string script = """
+            $ErrorActionPreference = 'Continue'
+            Set-Service Dhcp -StartupType Automatic
+            Start-Service Dhcp
+            $fixed = @()
+            foreach ($a in Get-NetAdapter -Physical | Where-Object Status -eq 'Up') {
+                $ips = @(Get-NetIPAddress -InterfaceIndex $a.ifIndex -AddressFamily IPv4 -ErrorAction SilentlyContinue | Where-Object { $_.IPAddress -notlike '169.254.*' })
+                if ($ips.Count -eq 0) {
+                    Set-NetIPInterface -InterfaceIndex $a.ifIndex -AddressFamily IPv4 -Dhcp Enabled
+                    Set-DnsClientServerAddress -InterfaceIndex $a.ifIndex -ResetServerAddresses
+                    Restart-NetAdapter -Name $a.Name -Confirm:$false
+                    $fixed += $a.Name
+                }
+            }
+            if ($fixed.Count -gt 0) { Start-Sleep -Seconds 8; ipconfig /renew | Out-Null }
+            ipconfig /flushdns | Out-Null
+            Write-Output ($fixed -join ', ')
+            """;
+        var (code, output, error) = Run(script);
+        return code == 0 ? OperationResult.Ok : OperationResult.Fail(string.IsNullOrWhiteSpace(error) ? $"Code {code}" : error.Trim());
     }
 
     /// <summary>Leere Liste = automatisch vom Router.</summary>
@@ -48,29 +113,6 @@ public static class WindowsNetwork
             : $"Set-DnsClientServerAddress -InterfaceIndex {adapter.Index} -ServerAddresses ({string.Join(",", servers.Select(s => $"'{s}'"))}) -ErrorAction Stop";
         var (code, error) = PowerShellResult(command);
         return code == 0 ? OperationResult.Ok : OperationResult.Fail(string.IsNullOrWhiteSpace(error) ? $"Code {code}" : error.Trim());
-    }
-
-    /// <summary>Winsock und TCP/IP auf Werkszustand. Wirkt nach einem Neustart.</summary>
-    public static OperationResult ResetStack()
-    {
-        foreach (var args in new[] { "winsock reset", "int ip reset" })
-        {
-            using var process = Process.Start(new ProcessStartInfo(Path.Combine(Environment.SystemDirectory, "netsh.exe"), args)
-            {
-                UseShellExecute = false,
-                CreateNoWindow = true,
-                RedirectStandardOutput = true,
-            });
-            if (process is null)
-            {
-                return OperationResult.Fail("netsh ließ sich nicht starten.");
-            }
-
-            process.StandardOutput.ReadToEnd();
-            process.WaitForExit(60_000);
-        }
-
-        return OperationResult.Ok;
     }
 
     public static async Task<PingResult> PingAsync(PingTarget target, int count = 4)

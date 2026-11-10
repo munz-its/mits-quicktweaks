@@ -12,7 +12,7 @@ namespace MunzQuickTweaks.App.ViewModels;
 
 public sealed record PingRow(string Name, string Host, string Result, bool IsGood, bool IsBad);
 
-/// <summary>DNS wechseln, DNS-Cache leeren, Netzwerk zurücksetzen und Ping zu Spieleservern.</summary>
+/// <summary>DNS wechseln (mit automatischer Rücknahme), DNS-Cache leeren, sichere Reparatur und Ping zu Spieleservern.</summary>
 public sealed partial class NetworkViewModel : PageViewModel
 {
     private readonly ChangeLedger _ledger;
@@ -41,8 +41,11 @@ public sealed partial class NetworkViewModel : PageViewModel
     private string _currentDns = string.Empty;
 
     [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(SetDnsCommand), nameof(PingCommand), nameof(ResetNetworkCommand), nameof(FlushDnsCommand))]
+    [NotifyCanExecuteChangedFor(nameof(SetDnsCommand), nameof(PingCommand), nameof(RepairNetworkCommand), nameof(FlushDnsCommand))]
     private bool _isBusy;
+
+    [ObservableProperty]
+    private bool _hasAddressProblem;
 
     [ObservableProperty]
     private string _status = string.Empty;
@@ -67,6 +70,7 @@ public sealed partial class NetworkViewModel : PageViewModel
         AdapterText = _adapters.Count == 0
             ? _localization.Get("Net.NoAdapter")
             : string.Join(", ", _adapters.Select(a => a.Name));
+        HasAddressProblem = _adapters.Any(a => a.HasNoAddress);
         var ids = _adapters.Select(a => NetworkPresets.Detect(a.Servers)).Distinct().ToList();
         CurrentDns = ids.Count == 1 ? DnsName(ids[0]) : _localization.Get("Net.Mixed");
     }
@@ -93,8 +97,11 @@ public sealed partial class NetworkViewModel : PageViewModel
         IsBusy = true;
         try
         {
+            // Sicherheitsnetz: lief DNS vorher und danach nicht mehr, kommt automatisch der alte Stand zurück
+            var workedBefore = await Windows.WindowsNetwork.CanResolveAsync();
+            var before = _adapters.ToList();
             var errors = new List<string>();
-            foreach (var adapter in _adapters)
+            foreach (var adapter in before)
             {
                 _ledger.RecordDns(adapter.Guid, adapter.Servers);
                 var result = await Task.Run(() => Windows.WindowsNetwork.SetDns(adapter, servers));
@@ -106,10 +113,25 @@ public sealed partial class NetworkViewModel : PageViewModel
             }
 
             _cleanup.FlushDns();
-            _log.LogInformation("DNS {Provider}, Fehler {Count}", providerId, errors.Count);
-            Show(errors.Count > 0, errors.Count == 0
-                ? string.Format(CultureInfo.CurrentCulture, _localization.Get("Net.DnsSet"), DnsName(providerId))
-                : $"{_localization.Get("Tweak.Failed")} {string.Join(" · ", errors)}");
+            if (workedBefore && !await Windows.WindowsNetwork.CanResolveAsync())
+            {
+                foreach (var adapter in before)
+                {
+                    await Task.Run(() => Windows.WindowsNetwork.SetDns(adapter, adapter.Servers));
+                }
+
+                _cleanup.FlushDns();
+                _history.Add(HistoryAction.AppAction, $"dns.{providerId}.rollback", true, null);
+                _log.LogWarning("DNS {Provider} ohne Verbindung, alter Stand wiederhergestellt", providerId);
+                Show(true, string.Format(CultureInfo.CurrentCulture, _localization.Get("Net.DnsRolledBack"), DnsName(providerId)));
+            }
+            else
+            {
+                _log.LogInformation("DNS {Provider}, Fehler {Count}", providerId, errors.Count);
+                Show(errors.Count > 0, errors.Count == 0
+                    ? string.Format(CultureInfo.CurrentCulture, _localization.Get("Net.DnsSet"), DnsName(providerId))
+                    : $"{_localization.Get("Tweak.Failed")} {string.Join(" · ", errors)}");
+            }
         }
         finally
         {
@@ -127,19 +149,23 @@ public sealed partial class NetworkViewModel : PageViewModel
     }
 
     [RelayCommand(CanExecute = nameof(CanRun))]
-    private async Task ResetNetworkAsync()
+    private async Task RepairNetworkAsync()
     {
-        if (MessageBox.Show(_localization.Get("Net.ConfirmReset"), _localization.Get("App.Name"), MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes)
-        {
-            return;
-        }
-
         IsBusy = true;
+        Show(false, _localization.Get("Net.Repairing"));
         try
         {
-            var result = await Task.Run(Windows.WindowsNetwork.ResetStack);
-            _history.Add(HistoryAction.AppAction, "network.reset", result.Success, result.Error);
-            Show(!result.Success, result.Success ? _localization.Get("Net.ResetDone") : $"{_localization.Get("Tweak.Failed")} {result.Error}");
+            var result = await Task.Run(Windows.WindowsNetwork.Repair);
+            _history.Add(HistoryAction.AppAction, "network.repair", result.Success, result.Error);
+            if (!result.Success)
+            {
+                Show(true, $"{_localization.Get("Tweak.Failed")} {result.Error}");
+                return;
+            }
+
+            await LoadAsync();
+            var online = await Windows.WindowsNetwork.CanResolveAsync();
+            Show(!online || HasAddressProblem, _localization.Get(online && !HasAddressProblem ? "Net.Repaired" : "Net.RepairNotEnough"));
         }
         finally
         {

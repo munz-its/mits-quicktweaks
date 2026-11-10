@@ -501,12 +501,6 @@ The program file no longer exists. The entry is saved to the app's backup folder
     <sys:String x:Key="Net.ToolsTitle">Fix problems</sys:String>
     <sys:String x:Key="Net.Flush">Flush DNS cache</sys:String>
     <sys:String x:Key="Net.Flushed">DNS cache flushed.</sys:String>
-    <sys:String x:Key="Net.Reset">Reset network</sys:String>
-    <sys:String x:Key="Net.ResetHint">Resetting the network helps with stubborn connection problems. A restart is needed afterwards, VPN programs may need to be set up again.</sys:String>
-    <sys:String x:Key="Net.ConfirmReset" xml:space="preserve">Really reset the network?
-
-Winsock and TCP/IP are set back to factory defaults. You need to restart the PC afterwards. VPN programs may need to be set up again.</sys:String>
-    <sys:String x:Key="Net.ResetDone">Network reset. Please restart the PC now.</sys:String>
     <sys:String x:Key="Health.DisksTitle">DRIVES</sys:String>
     <sys:String x:Key="Health.BatteryTitle">BATTERY</sys:String>
     <sys:String x:Key="Health.Battery">Battery</sys:String>
@@ -581,4 +575,12 @@ Winsock and TCP/IP are set back to factory defaults. You need to restart the PC 
     <sys:String x:Key="Privacy.Controller">Mert Munz, Munz IT Service, c/o IP-Management #10553, Ludwig-Erhard-Str. 18, 20459 Hamburg, Germany, support@munz-its.de</sys:String>
     <sys:String x:Key="Privacy.OpenPolicy">Privacy policy on munz-its.de</sys:String>
     <sys:String x:Key="Privacy.OpenFolder">Open data folder</sys:String>
+    <sys:String x:Key="Net.Repair">Repair network</sys:String>
+    <sys:String x:Key="Net.RepairHint">Repair network is safe and needs no restart. It only fixes adapters that got no address from the router and clears the DNS cache. Fixed addresses and VPN programs stay unchanged.</sys:String>
+    <sys:String x:Key="Net.Repairing">Repairing network, this takes about 15 seconds ...</sys:String>
+    <sys:String x:Key="Net.Repaired">Network repaired. The connection is up.</sys:String>
+    <sys:String x:Key="Net.RepairNotEnough">Repaired, but still no connection. Disconnect the Wi-Fi in Windows and connect again. If that does not help, restart the router.</sys:String>
+    <sys:String x:Key="Net.DnsRolledBack">No connection with {0}. The previous DNS servers were restored automatically.</sys:String>
+    <sys:String x:Key="Net.NoAddressTitle">No address from the router</sys:String>
+    <sys:String x:Key="Net.NoAddressText">At least one adapter got no IP address from the router (169.254.x.x). That is why there is no internet. One click fixes this in most cases.</sys:String>
 </ResourceDictionary>
