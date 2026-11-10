@@ -35,7 +35,7 @@
     <SolidColorBrush x:Key="HoverSoft" Color="#FFFFFF" Opacity="0.06" />
     <!-- Unterschiede der Designs, die das Hauptfenster liest (Liquid Glass) -->
     <SolidColorBrush x:Key="NavPillBrush" Color="#1F5EFF" />
-    <Thickness x:Key="ContentMargin">40,76,40,40</Thickness>
+    <Thickness x:Key="ContentMargin">40,8,40,40</Thickness>
 
     <!-- Schriften aus der Landingpage (SIL Open Font License, siehe Assets/Fonts) -->
     <!-- Apple-Variante: eine Schriftfamilie für alles, wie SF Pro bei Apple -->

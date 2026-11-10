@@ -30,12 +30,7 @@ public partial class MainWindow : Window
         Loaded += OnLoaded;
         SourceInitialized += (_, _) => ApplyBackdrop();
 
-        // Munz-Design: Inhalt beginnt unter der Titelleiste. Liquid Glass: Inhalt läuft unter der Glasleiste durch
-        if (!Controls.UiDesign.IsLiquidGlass)
-        {
-            Grid.SetRow(ContentScroller, 1);
-            Grid.SetRowSpan(ContentScroller, 1);
-        }
+        StartHitchWatch();
         viewModel.PropertyChanged += (_, e) =>
         {
             if (e.PropertyName == nameof(MainViewModel.CurrentPage))
@@ -264,19 +259,24 @@ public partial class MainWindow : Window
     }
 
     /// <summary>Großer Titel scrollt weg, der kleine Titel in der Glasleiste blendet passend ein.</summary>
-    private void OnContentScrolled(object sender, ScrollChangedEventArgs e)
+    // Stockt die Oberfläche spürbar, landet das mit Seite und Dauer im Log. So lässt sich gezielt nachbessern
+    private void StartHitchWatch()
     {
-        if (Controls.UiDesign.IsLiquidGlass)
+        var watch = System.Diagnostics.Stopwatch.StartNew();
+        var last = 0L;
+        var timer = new DispatcherTimer(DispatcherPriority.Input) { Interval = TimeSpan.FromMilliseconds(50) };
+        timer.Tick += (_, _) =>
         {
-            TopTitle.Opacity = Math.Clamp((e.VerticalOffset - 40) / 40, 0, 1);
-
-            // Glas nur berechnen, wenn wirklich Inhalt darunter liegt. Ganz oben reicht die getönte Fläche
-            var needsGlass = e.VerticalOffset > 1;
-            if (needsGlass != (TopGlass.Source is not null))
+            var now = watch.ElapsedMilliseconds;
+            var gap = now - last - 50;
+            last = now;
+            if (gap > 150 && IsVisible)
             {
-                TopGlass.Source = needsGlass ? ContentScroller : null;
+                Serilog.Log.Warning("Oberfläche stockte {Ms} ms, Seite {Page}, Design {Design}",
+                    gap, _viewModel.CurrentPage?.GetType().Name ?? "-", Controls.UiDesign.IsLiquidGlass ? "Liquid Glass" : "Munz");
             }
-        }
+        };
+        timer.Start();
     }
 
     // Fertig gebaute Seiten: ein Seitenwechsel zeigt nur noch die vorhandene Seite, statt sie jedes Mal neu aufzubauen
@@ -292,6 +292,7 @@ public partial class MainWindow : Window
 
         if (!_pages.TryGetValue(page, out var view))
         {
+            var watch = System.Diagnostics.Stopwatch.StartNew();
             if (TryFindResource(new DataTemplateKey(page.GetType())) is DataTemplate template && template.LoadContent() is FrameworkElement built)
             {
                 built.DataContext = page;
@@ -303,6 +304,7 @@ public partial class MainWindow : Window
             }
 
             _pages[page] = view;
+            Serilog.Log.Information("Seite {Page} gebaut in {Ms} ms", page.GetType().Name, watch.ElapsedMilliseconds);
         }
 
         Controls.SmoothScroll.Reset(ContentScroller);
