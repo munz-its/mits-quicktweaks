@@ -76,13 +76,6 @@ Ergebnis: `publish/MunzQuickTweaks.exe`.
 
 Selbsttest: `MunzQuickTweaks.exe --selftest` oder `tools/selftest/Selbsttest starten.bat`.
 
-## Veröffentlichen
-
-1. Version in `Directory.Build.props` erhöhen.
-2. `RELEASE_NOTES.md` anpassen. Der Text wird automatisch der Release-Text.
-3. Nach `main` pushen. GitHub Actions baut die exe und legt das Release an, sobald es für diese Version noch keins gibt.
-4. `version.json` auf munz-its.de anpassen, damit bestehende Installationen das Update melden.
-
 ## Speicherorte
 
 - Einstellungen: `%LocalAppData%\MunzQuickTweaks\settings.json`
