@@ -66,8 +66,10 @@
                             </StackPanel>
                         </Border>
 
-                        <ItemsControl ItemsSource="{Binding Tweaks}" Focusable="False" Margin="18,0,0,0" ItemTemplate="{StaticResource TweakItemTemplate}"
-                                      Visibility="{Binding IsInstalled, Converter={StaticResource BoolToVis}}" />
+                        <Border Style="{StaticResource Card}" Padding="0" ClipToBounds="True"
+                                Visibility="{Binding ShowTweaks, Converter={StaticResource BoolToVis}}">
+                            <ItemsControl ItemsSource="{Binding Tweaks}" Focusable="False" ItemTemplate="{StaticResource TweakItemTemplate}" Margin="0,-1,0,0" />
+                        </Border>
                     </StackPanel>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>

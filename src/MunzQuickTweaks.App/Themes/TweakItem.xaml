@@ -5,12 +5,15 @@
     <BooleanToVisibilityConverter x:Key="TweakBoolToVis" />
 
     <DataTemplate x:Key="TweakItemTemplate">
-        <Border Margin="0,0,0,10" Padding="20,16" Visibility="{Binding IsVisible, Converter={StaticResource TweakBoolToVis}}">
+        <!-- Zeile in einer gruppierten Liste: Trennlinie oben, die Gruppe liefert die Karte -->
+        <Border Padding="22,16" BorderThickness="0,1,0,0" Visibility="{Binding IsVisible, Converter={StaticResource TweakBoolToVis}}">
             <Border.Style>
-                <Style TargetType="Border" BasedOn="{StaticResource Card}">
+                <Style TargetType="Border">
+                    <Setter Property="BorderBrush" Value="{StaticResource Line}" />
+                    <Setter Property="Background" Value="Transparent" />
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding IsOn}" Value="True">
-                            <Setter Property="BorderBrush" Value="{StaticResource Blue}" />
+                            <Setter Property="Background" Value="#0F1F5EFF" />
                         </DataTrigger>
                         <DataTrigger Binding="{Binding IsAvailable}" Value="False">
                             <Setter Property="Opacity" Value="0.5" />

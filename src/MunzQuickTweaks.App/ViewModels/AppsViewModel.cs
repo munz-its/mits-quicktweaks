@@ -35,8 +35,11 @@ public sealed partial class AppSectionViewModel : ObservableObject
     public IReadOnlyList<StartupEntry> StartupEntries { get; set; } = Array.Empty<StartupEntry>();
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ShowUninstall), nameof(ShowInstall))]
+    [NotifyPropertyChangedFor(nameof(ShowUninstall), nameof(ShowInstall), nameof(ShowTweaks))]
     private bool _isInstalled;
+
+    /// <summary>Tweak-Liste nur zeigen, wenn das Programm installiert ist und Tweaks hat (Steam und Epic haben nur Autostart).</summary>
+    public bool ShowTweaks => IsInstalled && HasTweaks;
 
     [ObservableProperty]
     private bool _hasAutostart;
