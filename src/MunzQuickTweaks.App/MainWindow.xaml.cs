@@ -1,5 +1,8 @@
 using System.Windows;
+using System.Runtime.InteropServices;
 using System.Windows.Controls;
+using System.Windows.Interop;
+using System.Windows.Shell;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
@@ -25,6 +28,7 @@ public partial class MainWindow : Window
         DataContext = viewModel;
 
         Loaded += OnLoaded;
+        SourceInitialized += (_, _) => ApplyBackdrop();
         viewModel.PropertyChanged += (_, e) =>
         {
             if (e.PropertyName == nameof(MainViewModel.CurrentPage))
@@ -191,6 +195,58 @@ public partial class MainWindow : Window
 
         return null;
     }
+
+    /// <summary>
+    /// Apple-Variante: unter Windows 11 (ab 22H2) Mica-Glas hinter der Seitenleiste, dunkle Fensterrahmen und runde Ecken.
+    /// Windows 10 kennt das nicht, dort bleibt alles fest und dunkel.
+    /// </summary>
+    private void ApplyBackdrop()
+    {
+        if (Environment.OSVersion.Version.Build < 22621)
+        {
+            return;
+        }
+
+        try
+        {
+            var hwnd = new WindowInteropHelper(this).Handle;
+            var dark = 1;
+            DwmSetWindowAttribute(hwnd, DwmUseImmersiveDarkMode, ref dark, sizeof(int));
+            var round = 2;
+            DwmSetWindowAttribute(hwnd, DwmWindowCornerPreference, ref round, sizeof(int));
+            var mica = 2;
+            if (DwmSetWindowAttribute(hwnd, DwmSystemBackdropType, ref mica, sizeof(int)) != 0)
+            {
+                return;
+            }
+
+            // Das Glas wird nur sichtbar, wo WPF nichts malt: Fenster durchsichtig, Inhalt fest, Seitenleiste leicht getönt
+            if (HwndSource.FromHwnd(hwnd)?.CompositionTarget is { } target)
+            {
+                target.BackgroundColor = Colors.Transparent;
+            }
+
+            WindowChrome.GetWindowChrome(this).GlassFrameThickness = new Thickness(-1);
+            Background = Brushes.Transparent;
+            SidebarBg.Background = new SolidColorBrush(Color.FromArgb(0x59, 0x14, 0x15, 0x18));
+            RootBorder.BorderThickness = new Thickness(0);
+            if (Splash.Background is SolidColorBrush)
+            {
+                Splash.Background = (Brush)FindResource("Bg");
+            }
+        }
+        catch (Exception ex) when (ex is DllNotFoundException or EntryPointNotFoundException or COMException)
+        {
+            // Ohne Glas weiter
+        }
+    }
+
+    private const int DwmUseImmersiveDarkMode = 20;
+    private const int DwmWindowCornerPreference = 33;
+    private const int DwmSystemBackdropType = 38;
+
+    [DllImport("dwmapi.dll")]
+    private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attribute, ref int value, int size);
 
     // Maximiert ragt ein randloses Fenster über den Bildschirm hinaus: Rand ausgleichen
     private void UpdateMaximizedMargin()
