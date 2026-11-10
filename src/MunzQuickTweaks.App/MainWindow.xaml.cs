@@ -29,6 +29,14 @@ public partial class MainWindow : Window
 
         Loaded += OnLoaded;
         SourceInitialized += (_, _) => ApplyBackdrop();
+
+        // Munz-Design: Inhalt beginnt unter der Titelleiste. Liquid Glass: Inhalt läuft unter der Glasleiste durch
+        if (!Controls.UiDesign.IsLiquidGlass)
+        {
+            Grid.SetRow(ContentScroller, 1);
+            Grid.SetRowSpan(ContentScroller, 1);
+            TopGlass.Source = null;
+        }
         viewModel.PropertyChanged += (_, e) =>
         {
             if (e.PropertyName == nameof(MainViewModel.CurrentPage))
@@ -202,7 +210,7 @@ public partial class MainWindow : Window
     /// </summary>
     private void ApplyBackdrop()
     {
-        if (Environment.OSVersion.Version.Build < 22621)
+        if (!Controls.UiDesign.IsLiquidGlass || Environment.OSVersion.Version.Build < 22621)
         {
             return;
         }
@@ -258,7 +266,10 @@ public partial class MainWindow : Window
     /// <summary>Großer Titel scrollt weg, der kleine Titel in der Glasleiste blendet passend ein.</summary>
     private void OnContentScrolled(object sender, ScrollChangedEventArgs e)
     {
-        TopTitle.Opacity = Math.Clamp((e.VerticalOffset - 40) / 40, 0, 1);
+        if (Controls.UiDesign.IsLiquidGlass)
+        {
+            TopTitle.Opacity = Math.Clamp((e.VerticalOffset - 40) / 40, 0, 1);
+        }
     }
 
     private void OnMinimize(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;

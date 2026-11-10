@@ -101,5 +101,32 @@
                 </Grid>
             </StackPanel>
         </Border>
+        <!-- Datenschutzhinweise: was die App sendet und was lokal bleibt -->
+        <Border Style="{StaticResource Card}" Margin="0,0,0,16">
+            <StackPanel>
+                <TextBlock Text="{DynamicResource Privacy.Title}" Style="{StaticResource H2}" FontSize="16" />
+                <TextBlock Text="{DynamicResource Privacy.Summary}" Style="{StaticResource TextBase}" FontWeight="SemiBold" Margin="0,8,0,14" TextWrapping="Wrap" />
+
+                <TextBlock Text="{DynamicResource Privacy.NetTitle}" Style="{StaticResource Label}" Margin="0,0,0,6" />
+                <TextBlock Text="{DynamicResource Privacy.Update}" Style="{StaticResource Body2}" Margin="0,0,0,6" TextWrapping="Wrap" />
+                <TextBlock Text="{DynamicResource Privacy.Network}" Style="{StaticResource Body2}" Margin="0,0,0,6" TextWrapping="Wrap" />
+                <TextBlock Text="{DynamicResource Privacy.Install}" Style="{StaticResource Body2}" Margin="0,0,0,6" TextWrapping="Wrap" />
+                <TextBlock Text="{DynamicResource Privacy.Links}" Style="{StaticResource Body2}" Margin="0,0,0,14" TextWrapping="Wrap" />
+
+                <TextBlock Text="{DynamicResource Privacy.SupportTitle}" Style="{StaticResource Label}" Margin="0,0,0,6" />
+                <TextBlock Text="{DynamicResource Privacy.Support}" Style="{StaticResource Body2}" Margin="0,0,0,14" TextWrapping="Wrap" />
+
+                <TextBlock Text="{DynamicResource Privacy.LocalTitle}" Style="{StaticResource Label}" Margin="0,0,0,6" />
+                <TextBlock Text="{DynamicResource Privacy.Local}" Style="{StaticResource Body2}" Margin="0,0,0,14" TextWrapping="Wrap" />
+
+                <TextBlock Text="{DynamicResource Privacy.ControllerTitle}" Style="{StaticResource Label}" Margin="0,0,0,6" />
+                <TextBlock Text="{DynamicResource Privacy.Controller}" Style="{StaticResource Body2}" Margin="0,0,0,14" TextWrapping="Wrap" />
+
+                <WrapPanel>
+                    <Button Style="{StaticResource SecondaryButton}" Margin="0,0,10,10" Content="{DynamicResource Privacy.OpenPolicy}" Command="{Binding OpenPrivacyPolicyCommand}" />
+                    <Button Style="{StaticResource SecondaryButton}" Margin="0,0,10,10" Content="{DynamicResource Privacy.OpenFolder}" Command="{Binding OpenDataFolderCommand}" />
+                </WrapPanel>
+            </StackPanel>
+        </Border>
     </StackPanel>
 </UserControl>

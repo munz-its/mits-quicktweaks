@@ -44,6 +44,20 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         _singleInstance = new Mutex(initiallyOwned: true, MutexName, out var isFirst);
+
+        // Neustart nach Designwechsel: kurz warten, bis die alte Instanz beendet ist
+        if (!isFirst && e.Args.Contains("--restart", StringComparer.OrdinalIgnoreCase))
+        {
+            try
+            {
+                isFirst = _singleInstance.WaitOne(TimeSpan.FromSeconds(15));
+            }
+            catch (AbandonedMutexException)
+            {
+                isFirst = true;
+            }
+        }
+
         if (!isFirst)
         {
             MessageBox.Show("Munz Quick Tweaks läuft bereits.", "Munz Quick Tweaks",
@@ -128,6 +142,7 @@ public partial class App : Application
             .Build();
 
         var settings = _host.Services.GetRequiredService<SettingsService>();
+        Controls.UiDesign.Apply(this, settings.Current.Design);
         Controls.UiMotion.Enabled = settings.Current.AnimationsEnabled;
         Controls.GlassPanel.Enabled = settings.Current.GlassEnabled;
         _host.Services.GetRequiredService<LocalizationService>().Apply(settings.Current.Language);

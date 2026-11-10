@@ -57,7 +57,7 @@ public sealed class PixelIcon : FrameworkElement
 
     protected override void OnRender(DrawingContext dc)
     {
-        if (Pattern is { } key && Glyphs.TryGetValue(key, out var glyph))
+        if (UiDesign.IsLiquidGlass && Pattern is { } key && Glyphs.TryGetValue(key, out var glyph))
         {
             var text = new FormattedText(glyph, System.Globalization.CultureInfo.InvariantCulture, FlowDirection.LeftToRight,
                 SymbolFont, Math.Min(ActualWidth, ActualHeight), Foreground, VisualTreeHelper.GetDpi(this).PixelsPerDip);

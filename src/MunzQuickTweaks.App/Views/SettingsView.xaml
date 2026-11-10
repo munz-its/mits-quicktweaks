@@ -1,6 +1,10 @@
 <UserControl x:Class="MunzQuickTweaks.App.Views.SettingsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    </UserControl.Resources>
+
     <StackPanel MaxWidth="720" HorizontalAlignment="Left">
 
         <!-- Sprache -->
@@ -62,8 +66,26 @@
             </StackPanel>
         </Border>
 
-        <!-- Liquid Glass -->
+        <!-- Design wählen -->
         <Border Style="{StaticResource Card}" Margin="0,0,0,16">
+            <StackPanel>
+                <TextBlock Text="{DynamicResource Settings.Design}" Style="{StaticResource H2}" FontSize="16" />
+                <TextBlock Text="{DynamicResource Settings.DesignHint}" Style="{StaticResource MutedText}" Margin="0,4,0,12" TextWrapping="Wrap" />
+                <Border Background="{StaticResource Bg3}" CornerRadius="8" HorizontalAlignment="Left" Padding="2">
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton Style="{StaticResource Segment}" GroupName="Design" Content="{DynamicResource Settings.Design.Munz}" IsChecked="{Binding IsMunzDesign}" />
+                        <RadioButton Style="{StaticResource Segment}" GroupName="Design" Content="{DynamicResource Settings.Design.Glass}" IsChecked="{Binding IsGlassDesign}" />
+                    </StackPanel>
+                </Border>
+                <StackPanel Orientation="Horizontal" Margin="0,12,0,0" Visibility="{Binding DesignChanged, Converter={StaticResource BoolToVis}}">
+                    <TextBlock Text="{DynamicResource Settings.DesignRestart}" Style="{StaticResource TextBase}" Foreground="{StaticResource Text2}" VerticalAlignment="Center" Margin="0,0,14,0" />
+                    <Button Style="{StaticResource PrimaryButton}" Padding="14,7" FontSize="13" Content="{DynamicResource Settings.RestartNow}" Command="{Binding RestartAppCommand}" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- Liquid Glass -->
+        <Border Style="{StaticResource Card}" Margin="0,0,0,16" Visibility="{Binding IsGlassDesign, Converter={StaticResource BoolToVis}}">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />

@@ -21,6 +21,8 @@ public sealed partial class SettingsViewModel : PageViewModel
         _checkForUpdates = settings.Current.CheckForUpdates;
         _checkResetAfterUpdates = settings.Current.CheckResetAfterUpdates;
         _glassEnabled = settings.Current.GlassEnabled;
+        _design = settings.Current.Design == Controls.UiDesign.LiquidGlass ? Controls.UiDesign.LiquidGlass : Controls.UiDesign.Munz;
+        _startDesign = _design;
         _settings = settings;
         _localization = localization;
         _tweaks = tweaks;
@@ -51,6 +53,53 @@ public sealed partial class SettingsViewModel : PageViewModel
 
     [ObservableProperty]
     private bool _glassEnabled;
+
+    private readonly string _startDesign;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsMunzDesign), nameof(IsGlassDesign), nameof(DesignChanged))]
+    private string _design;
+
+    public bool IsMunzDesign
+    {
+        get => Design == Controls.UiDesign.Munz;
+        set { if (value) Design = Controls.UiDesign.Munz; }
+    }
+
+    public bool IsGlassDesign
+    {
+        get => Design == Controls.UiDesign.LiquidGlass;
+        set { if (value) Design = Controls.UiDesign.LiquidGlass; }
+    }
+
+    /// <summary>Anderes Design als beim Start gewählt: Neustart nötig.</summary>
+    public bool DesignChanged => Design != _startDesign;
+
+    partial void OnDesignChanged(string value)
+    {
+        _settings.Current.Design = value;
+        _settings.Save();
+    }
+
+    /// <summary>Startet die App neu, damit das gewählte Design geladen wird.</summary>
+    [RelayCommand]
+    private void RestartApp()
+    {
+        if (Environment.ProcessPath is not { } exe)
+        {
+            return;
+        }
+
+        try
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(exe, "--restart") { UseShellExecute = true })?.Dispose();
+            System.Windows.Application.Current.Shutdown();
+        }
+        catch (System.ComponentModel.Win32Exception)
+        {
+            // Neustart abgelehnt (UAC): App läuft weiter, Wechsel gilt beim nächsten Start
+        }
+    }
 
     partial void OnGlassEnabledChanged(bool value)
     {

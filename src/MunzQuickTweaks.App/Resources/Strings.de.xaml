@@ -560,4 +560,25 @@ Winsock und TCP/IP werden auf den Werkszustand gesetzt. Danach musst du den PC n
     <sys:String x:Key="Reset.Notice.Apply">Wieder anwenden</sys:String>
     <sys:String x:Key="Settings.Glass">Glaseffekte</sys:String>
     <sys:String x:Key="Settings.GlassHint">Liquid Glass mit Weichzeichnen und Lichtbrechung. Auf schwachen PCs oder in virtuellen Maschinen abschalten, wenn das Scrollen ruckelt. Gilt nach einem Neustart der App.</sys:String>
+    <sys:String x:Key="Settings.Design">Design</sys:String>
+    <sys:String x:Key="Settings.DesignHint">Munz ist das Design von Munz IT Service. Liquid Glass ist an Apple angelehnt, mit Glaseffekten und der Schrift Inter.</sys:String>
+    <sys:String x:Key="Settings.Design.Munz">Munz</sys:String>
+    <sys:String x:Key="Settings.Design.Glass">Liquid Glass</sys:String>
+    <sys:String x:Key="Settings.DesignRestart">Das neue Design gilt nach einem Neustart der App.</sys:String>
+    <sys:String x:Key="Settings.RestartNow">Jetzt neu starten</sys:String>
+    <sys:String x:Key="Privacy.Title">Datenschutz</sys:String>
+    <sys:String x:Key="Privacy.Summary">Munz Quick Tweaks sammelt keine Nutzungsdaten, zeigt keine Werbung, braucht kein Konto und sendet keine Telemetrie. Alles, was die App über deinen PC weiß, bleibt auf deinem PC.</sys:String>
+    <sys:String x:Key="Privacy.NetTitle">VERBINDUNGEN INS INTERNET</sys:String>
+    <sys:String x:Key="Privacy.Update">Update-Prüfung: Beim Start ruft die App die Datei munz-its.de/quicktweaks/version.json ab. Der Server sieht dabei deine IP-Adresse und die Kennung "MunzQuickTweaks", sonst nichts. Du kannst die Prüfung in den Einstellungen abschalten.</sys:String>
+    <sys:String x:Key="Privacy.Network">Ping-Test und DNS: Beides passiert nur, wenn du es selbst startest. Wählst du Cloudflare, Quad9 oder Google als DNS, gehen deine DNS-Anfragen an diesen Anbieter. Dann gelten dessen Datenschutzbestimmungen.</sys:String>
+    <sys:String x:Key="Privacy.Install">Programme installieren: winget lädt die Programme von Microsoft und direkt von den Herstellern. Für die Installation gelten deren Bedingungen.</sys:String>
+    <sys:String x:Key="Privacy.Links">Links zu Herstellerseiten, Microsoft Store, Discord oder munz-its.de öffnen deinen Browser. Die App selbst überträgt dabei nichts.</sys:String>
+    <sys:String x:Key="Privacy.SupportTitle">SUPPORT-ANFRAGE</sys:String>
+    <sys:String x:Key="Privacy.Support">Die App öffnet dein eigenes Mailprogramm, verschickt wird erst, wenn du auf Senden klickst. Das Support-Paket enthält die Protokolle der letzten 7 Tage, die von der App geänderten Einstellungen, Windows-Version, Prozessor, Grafikkarte und Arbeitsspeicher. Es geht nur mit, wenn du es selbst anhängst.</sys:String>
+    <sys:String x:Key="Privacy.LocalTitle">LOKAL GESPEICHERT</sys:String>
+    <sys:String x:Key="Privacy.Local">Unter C:\ProgramData\MunzQuickTweaks liegen Protokolle (14 Tage), Journal und Verlauf der Änderungen, Registry-Sicherungen, Benchmark-Ergebnisse und deine Einstellungen. Zum vollständigen Entfernen zuerst "Alles zurücksetzen" ausführen und danach den Ordner löschen.</sys:String>
+    <sys:String x:Key="Privacy.ControllerTitle">VERANTWORTLICH</sys:String>
+    <sys:String x:Key="Privacy.Controller">Mert Munz, Munz IT Service, c/o IP-Management #10553, Ludwig-Erhard-Str. 18, 20459 Hamburg, support@munz-its.de</sys:String>
+    <sys:String x:Key="Privacy.OpenPolicy">Datenschutzerklärung auf munz-its.de</sys:String>
+    <sys:String x:Key="Privacy.OpenFolder">Datenordner öffnen</sys:String>
 </ResourceDictionary>

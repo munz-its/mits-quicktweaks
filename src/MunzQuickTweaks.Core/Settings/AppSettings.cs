@@ -24,4 +24,7 @@ public sealed class AppSettings
 
     /// <summary>Liquid-Glass-Effekte (Weichzeichnen, Lichtbrechung). Aus für schwache PCs und VMs.</summary>
     public bool GlassEnabled { get; set; } = true;
+
+    /// <summary>Design: "munz" (Standard) oder "liquidglass". Gilt nach einem Neustart.</summary>
+    public string Design { get; set; } = "munz";
 }

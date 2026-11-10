@@ -113,6 +113,19 @@ public sealed partial class HelpViewModel : PageViewModel
     [RelayCommand]
     private void OpenDiscord() => Open(Discord);
 
+    public const string PrivacyPolicy = "https://munz-its.de/datenschutz";
+
+    [RelayCommand]
+    private void OpenPrivacyPolicy() => Open(PrivacyPolicy);
+
+    /// <summary>Ordner mit allen lokal gespeicherten Daten der App.</summary>
+    [RelayCommand]
+    private void OpenDataFolder()
+    {
+        Directory.CreateDirectory(MunzQuickTweaks.Core.AppPaths.MachineData);
+        Open("explorer.exe", $"\"{MunzQuickTweaks.Core.AppPaths.MachineData}\"");
+    }
+
     private bool CanSave() => !IsBusy;
 
     /// <summary>

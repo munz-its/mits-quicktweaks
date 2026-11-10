@@ -69,6 +69,17 @@ public partial class PreviewWindow : Window
     /// <summary>Schnappschuss der App für das Glas im Blatt. Die App ändert sich nicht, solange das Blatt offen ist.</summary>
     private void UseSnapshotOf(Window? owner)
     {
+        if (!Controls.UiDesign.IsLiquidGlass)
+        {
+            // Munz-Design: festes Blatt mit Rahmen statt Glas
+            SheetGlass.Visibility = Visibility.Collapsed;
+            Sheet.Background = (Brush)FindResource("Bg2");
+            Sheet.BorderBrush = (Brush)FindResource("Line");
+            Sheet.BorderThickness = new Thickness(1);
+            Sheet.CornerRadius = new CornerRadius(18);
+            return;
+        }
+
         if (owner is null || !Controls.GlassPanel.Enabled || owner.ActualWidth < 1)
         {
             return;

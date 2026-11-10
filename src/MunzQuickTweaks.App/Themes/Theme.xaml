@@ -1,21 +1,21 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <!-- Apple-Variante: neutrale Grautöne wie in macOS, Munz-Blau bleibt die Akzentfarbe -->
-    <Color x:Key="BgColor">#141518</Color>
-    <Color x:Key="Bg2Color">#1E1F23</Color>
-    <Color x:Key="Bg3Color">#2A2B30</Color>
-    <Color x:Key="TextColor">#F5F5F7</Color>
-    <Color x:Key="Text2Color">#D2D2D7</Color>
-    <Color x:Key="MutedColor">#A1A1A8</Color>
-    <Color x:Key="LineColor">#2E2F35</Color>
+    <!-- Farben 1:1 aus mits-landingpage (app/globals.css) -->
+    <Color x:Key="BgColor">#0A0C10</Color>
+    <Color x:Key="Bg2Color">#11141A</Color>
+    <Color x:Key="Bg3Color">#171B23</Color>
+    <Color x:Key="TextColor">#F2F4F8</Color>
+    <Color x:Key="Text2Color">#D3D8E0</Color>
+    <Color x:Key="MutedColor">#B6BDC9</Color>
+    <Color x:Key="LineColor">#262B35</Color>
     <Color x:Key="BlueColor">#1F5EFF</Color>
     <Color x:Key="BlueHoverColor">#3A72FF</Color>
     <Color x:Key="BlueLColor">#5B8CFF</Color>
     <Color x:Key="BlueXlColor">#8FA9FF</Color>
-    <Color x:Key="WarnColor">#FF9F0A</Color>
-    <Color x:Key="DangerColor">#FF453A</Color>
-    <Color x:Key="OkColor">#30D158</Color>
+    <Color x:Key="WarnColor">#FFB547</Color>
+    <Color x:Key="DangerColor">#FF5C5C</Color>
+    <Color x:Key="OkColor">#3DD68C</Color>
 
     <SolidColorBrush x:Key="Bg" Color="{StaticResource BgColor}" />
     <SolidColorBrush x:Key="Bg2" Color="{StaticResource Bg2Color}" />
@@ -32,16 +32,17 @@
     <SolidColorBrush x:Key="Danger" Color="{StaticResource DangerColor}" />
     <SolidColorBrush x:Key="Ok" Color="{StaticResource OkColor}" />
     <SolidColorBrush x:Key="BlueSoft" Color="#1F5EFF" Opacity="0.14" />
-    <SolidColorBrush x:Key="HoverSoft" Color="#FFFFFF" Opacity="0.06" />
+    <SolidColorBrush x:Key="HoverSoft" Color="#FFFFFF" Opacity="0.05" />
+    <!-- Unterschiede der Designs, die das Hauptfenster liest (Munz-Design) -->
+    <StaticResource x:Key="NavPillBrush" ResourceKey="BlueSoft" />
+    <Thickness x:Key="ContentMargin">40,8,40,40</Thickness>
 
     <!-- Schriften aus der Landingpage (SIL Open Font License, siehe Assets/Fonts) -->
-    <!-- Apple-Variante: eine Schriftfamilie für alles, wie SF Pro bei Apple -->
-    <!-- Inter (SIL Open Font License, Assets/Fonts/OFL-Inter.txt): kommt SF Pro am nächsten. Inter Display für große Titel -->
-    <FontFamily x:Key="FontSans">pack://application:,,,/Assets/Fonts/#Inter</FontFamily>
-    <FontFamily x:Key="FontDisplay">pack://application:,,,/Assets/Fonts/#Inter Display</FontFamily>
-    <FontFamily x:Key="FontMono">Cascadia Mono, Consolas</FontFamily>
+    <FontFamily x:Key="FontSans">pack://application:,,,/Assets/Fonts/#Munz Sans</FontFamily>
+    <FontFamily x:Key="FontDisplay">pack://application:,,,/Assets/Fonts/#Munz Display</FontFamily>
+    <FontFamily x:Key="FontMono">pack://application:,,,/Assets/Fonts/#IBM Plex Mono</FontFamily>
     <!-- Fließtext in der Windows-Systemschrift: optisch für kleine Größen gebaut, besser lesbar. Titel bleiben in der Munz-Schrift. -->
-    <FontFamily x:Key="FontText">pack://application:,,,/Assets/Fonts/#Inter</FontFamily>
+    <FontFamily x:Key="FontText">Segoe UI Variable Text, Segoe UI</FontFamily>
 
     <!-- Texte -->
     <Style x:Key="TextBase" TargetType="TextBlock">
@@ -60,11 +61,10 @@
         <Setter Property="FontWeight" Value="Bold" />
         <Setter Property="FontSize" Value="18" />
     </Style>
-    <!-- Abschnittsüberschrift wie in den Apple-Einstellungen: klein, halbfett, grau -->
     <Style x:Key="Label" TargetType="TextBlock" BasedOn="{StaticResource TextBase}">
+        <Setter Property="FontFamily" Value="{StaticResource FontMono}" />
         <Setter Property="FontSize" Value="12" />
-        <Setter Property="FontWeight" Value="SemiBold" />
-        <Setter Property="Foreground" Value="{StaticResource Muted}" />
+        <Setter Property="Foreground" Value="{StaticResource BlueXl}" />
     </Style>
     <Style x:Key="Body2" TargetType="TextBlock" BasedOn="{StaticResource TextBase}">
         <Setter Property="Foreground" Value="{StaticResource Text2}" />
@@ -79,8 +79,8 @@
     <Style x:Key="Card" TargetType="Border">
         <Setter Property="Background" Value="{StaticResource Bg2}" />
         <Setter Property="BorderBrush" Value="{StaticResource Line}" />
-        <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="CornerRadius" Value="12" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="14" />
         <Setter Property="Padding" Value="22,20" />
     </Style>
 
@@ -328,7 +328,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="RadioButton">
-                    <Border x:Name="Bd" Background="{StaticResource Bg3}" BorderBrush="Transparent" BorderThickness="1" CornerRadius="9" Padding="14,8" MinHeight="34">
+                    <Border x:Name="Bd" Background="{StaticResource Bg2}" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="18" Padding="14,8" MinHeight="36">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
                     <ControlTemplate.Triggers>
@@ -358,32 +358,32 @@
     </Style>
 
     <!-- Schalter (An/Aus) mit Pixel-Knopf -->
-    <!-- Schalter wie in iOS und macOS: Pille, weißer runder Knopf, grün wenn an -->
     <Style x:Key="Toggle" TargetType="CheckBox">
         <Setter Property="Cursor" Value="Hand" />
-        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="CheckBox">
-                    <Border x:Name="Track" Width="46" Height="28" CornerRadius="14" Background="#4D787880" BorderThickness="2" BorderBrush="Transparent">
-                        <Ellipse x:Name="Knob" Width="22" Height="22" Fill="White" HorizontalAlignment="Left" Margin="1,0,0,0">
-                            <Ellipse.Effect>
-                                <DropShadowEffect BlurRadius="4" ShadowDepth="1" Direction="270" Opacity="0.35" />
-                            </Ellipse.Effect>
-                            <Ellipse.RenderTransform>
+                    <!-- Der Knopf gleitet statt zu springen, so sieht man die Richtung der Änderung -->
+                    <Border x:Name="Track" Width="44" Height="24" CornerRadius="6" Background="{StaticResource Bg3}"
+                            BorderBrush="{StaticResource Line}" BorderThickness="1">
+                        <Rectangle x:Name="Knob" Width="14" Height="14" Fill="{StaticResource Muted}"
+                                   HorizontalAlignment="Left" Margin="4,0,0,0">
+                            <Rectangle.RenderTransform>
                                 <TranslateTransform x:Name="KnobMove" />
-                            </Ellipse.RenderTransform>
-                        </Ellipse>
+                            </Rectangle.RenderTransform>
+                        </Rectangle>
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsChecked" Value="True">
-                            <Setter TargetName="Track" Property="Background" Value="{StaticResource Ok}" />
+                            <Setter TargetName="Track" Property="Background" Value="{StaticResource Blue}" />
+                            <Setter TargetName="Track" Property="BorderBrush" Value="{StaticResource Blue}" />
+                            <Setter TargetName="Knob" Property="Fill" Value="White" />
                             <Trigger.EnterActions>
                                 <BeginStoryboard>
                                     <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="KnobMove" Storyboard.TargetProperty="X" To="18" Duration="0:0:0.26">
+                                        <DoubleAnimation Storyboard.TargetName="KnobMove" Storyboard.TargetProperty="X" To="20" Duration="0:0:0.2">
                                             <DoubleAnimation.EasingFunction>
-                                                <BackEase EasingMode="EaseOut" Amplitude="0.25" />
+                                                <CubicEase EasingMode="EaseOut" />
                                             </DoubleAnimation.EasingFunction>
                                         </DoubleAnimation>
                                     </Storyboard>
@@ -392,9 +392,9 @@
                             <Trigger.ExitActions>
                                 <BeginStoryboard>
                                     <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="KnobMove" Storyboard.TargetProperty="X" To="0" Duration="0:0:0.26">
+                                        <DoubleAnimation Storyboard.TargetName="KnobMove" Storyboard.TargetProperty="X" To="0" Duration="0:0:0.2">
                                             <DoubleAnimation.EasingFunction>
-                                                <BackEase EasingMode="EaseOut" Amplitude="0.25" />
+                                                <CubicEase EasingMode="EaseOut" />
                                             </DoubleAnimation.EasingFunction>
                                         </DoubleAnimation>
                                     </Storyboard>
@@ -402,10 +402,7 @@
                             </Trigger.ExitActions>
                         </Trigger>
                         <Trigger Property="IsKeyboardFocused" Value="True">
-                            <Setter TargetName="Track" Property="BorderBrush" Value="{StaticResource BlueL}" />
-                        </Trigger>
-                        <Trigger Property="IsEnabled" Value="False">
-                            <Setter TargetName="Track" Property="Opacity" Value="0.45" />
+                            <Setter TargetName="Track" Property="BorderBrush" Value="{StaticResource BlueXl}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -534,10 +531,9 @@
             <Setter.Value>
                 <ControlTemplate TargetType="CheckBox">
                     <StackPanel Orientation="Horizontal" Background="Transparent">
-                        <Border x:Name="Box" Width="18" Height="18" CornerRadius="5" BorderThickness="1.5"
-                                BorderBrush="#66A1A1A8" Background="Transparent" VerticalAlignment="Center">
-                            <Path x:Name="Mark" Data="M3.5,9 L7.5,12.5 L14,5" Stroke="White" StrokeThickness="2.2" StrokeStartLineCap="Round"
-                                  StrokeEndLineCap="Round" StrokeLineJoin="Round" Visibility="Collapsed" Margin="-1.5,-1.5,0,0" />
+                        <Border x:Name="Box" Width="18" Height="18" CornerRadius="4" BorderThickness="1"
+                                BorderBrush="{StaticResource Line}" Background="{StaticResource Bg3}" VerticalAlignment="Center">
+                            <Rectangle x:Name="Mark" Width="8" Height="8" Fill="White" Visibility="Collapsed" />
                         </Border>
                         <ContentPresenter Margin="10,0,0,0" VerticalAlignment="Center" />
                     </StackPanel>

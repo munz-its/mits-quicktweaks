@@ -187,6 +187,16 @@ public class StringResourceTests
         Assert.Empty(bad);
     }
 
+    // Beide Designs müssen dieselben Schlüssel haben, sonst fehlt beim Umschalten ein Style und die App stürzt ab
+    [Fact]
+    public void Both_designs_define_the_same_keys()
+    {
+        var themes = Path.Combine(FindRepoRoot(), "src", "MunzQuickTweaks.App", "Themes");
+        HashSet<string> Keys(string file) => XDocument.Load(Path.Combine(themes, file)).Descendants()
+            .Select(e => (string?)e.Attribute(X + "Key")).OfType<string>().ToHashSet();
+        Assert.Equal(Keys("Theme.xaml").OrderBy(k => k), Keys("ThemeApple.xaml").OrderBy(k => k));
+    }
+
     private static HashSet<string> ReadKeys(string fileName)
     {
         var path = Path.Combine(FindRepoRoot(), "src", "MunzQuickTweaks.App", "Resources", fileName);
