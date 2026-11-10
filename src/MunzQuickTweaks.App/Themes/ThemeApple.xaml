@@ -289,6 +289,11 @@
                         <Trigger Property="IsKeyboardFocused" Value="True">
                             <Setter TargetName="Focus" Property="BorderBrush" Value="{StaticResource BlueL}" />
                         </Trigger>
+                        <!-- Gewählter Eintrag: nur die gleitende Auswahl zeigen, kein Hover- oder Fokusrahmen darüber -->
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Hover" Property="Visibility" Value="Collapsed" />
+                            <Setter TargetName="Focus" Property="BorderBrush" Value="Transparent" />
+                        </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
