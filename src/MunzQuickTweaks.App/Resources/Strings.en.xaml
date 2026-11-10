@@ -56,8 +56,8 @@
     <sys:String x:Key="Settings.Version">Version</sys:String>
     <sys:String x:Key="Settings.Imprint">Imprint</sys:String>
     <sys:String x:Key="Settings.Privacy">Privacy</sys:String>
-    <sys:String x:Key="Settings.PrivacyText">Munz Quick Tweaks collects no data, needs no account and makes no internet connection. Settings and logs stay on your PC.</sys:String>
-    <sys:String x:Key="Settings.Licenses">Fonts: Archivo and IBM Plex, SIL Open Font License 1.1.</sys:String>
+    <sys:String x:Key="Settings.PrivacyText">Munz Quick Tweaks collects no usage data, needs no account and sends no telemetry. The app only goes online for the update check (can be turned off) and for features you start yourself, such as the ping test or installing programs. Settings and logs stay on your PC. Details are under Help, Privacy.</sys:String>
+    <sys:String x:Key="Settings.Licenses">Fonts: Archivo, IBM Plex and Inter, SIL Open Font License 1.1.</sys:String>
     <sys:String x:Key="Cat.Performance">PERFORMANCE</sys:String>
     <sys:String x:Key="Cat.Gaming">GAMING</sys:String>
     <sys:String x:Key="Cat.Privacy">PRIVACY</sys:String>

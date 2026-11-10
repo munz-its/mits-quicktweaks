@@ -356,12 +356,26 @@ public partial class MainWindow : Window
         }
     }
 
+    // Wie die normale Vorlagensuche: auch Basistypen prüfen (z. B. Datenschutz nutzt die Vorlage der Tweaks-Seite)
+    private DataTemplate? FindPageTemplate(Type? type)
+    {
+        for (; type is not null && type != typeof(object); type = type.BaseType)
+        {
+            if (TryFindResource(new DataTemplateKey(type)) is DataTemplate template)
+            {
+                return template;
+            }
+        }
+
+        return null;
+    }
+
     private FrameworkElement BuildPage(object page)
     {
         if (!_pages.TryGetValue(page, out var view))
         {
             var watch = System.Diagnostics.Stopwatch.StartNew();
-            if (TryFindResource(new DataTemplateKey(page.GetType())) is DataTemplate template && template.LoadContent() is FrameworkElement built)
+            if (FindPageTemplate(page.GetType()) is { } template && template.LoadContent() is FrameworkElement built)
             {
                 built.DataContext = page;
                 view = built;

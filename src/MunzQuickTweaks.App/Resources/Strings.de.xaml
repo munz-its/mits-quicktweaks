@@ -56,8 +56,8 @@
     <sys:String x:Key="Settings.Version">Version</sys:String>
     <sys:String x:Key="Settings.Imprint">Impressum</sys:String>
     <sys:String x:Key="Settings.Privacy">Datenschutz</sys:String>
-    <sys:String x:Key="Settings.PrivacyText">Munz Quick Tweaks sammelt keine Daten, braucht kein Konto und baut keine Internetverbindung auf. Einstellungen und Protokolle bleiben auf deinem PC.</sys:String>
-    <sys:String x:Key="Settings.Licenses">Schriften: Archivo und IBM Plex, SIL Open Font License 1.1.</sys:String>
+    <sys:String x:Key="Settings.PrivacyText">Munz Quick Tweaks sammelt keine Nutzungsdaten, braucht kein Konto und sendet keine Telemetrie. Ins Internet geht die App nur für die Update-Prüfung (abschaltbar) und für Funktionen, die du selbst startest, etwa Ping-Test oder Programme installieren. Einstellungen und Protokolle bleiben auf deinem PC. Details stehen unter Hilfe, Datenschutz.</sys:String>
+    <sys:String x:Key="Settings.Licenses">Schriften: Archivo, IBM Plex und Inter, SIL Open Font License 1.1.</sys:String>
     <sys:String x:Key="Cat.Performance">LEISTUNG</sys:String>
     <sys:String x:Key="Cat.Gaming">GAMING</sys:String>
     <sys:String x:Key="Cat.Privacy">DATENSCHUTZ</sys:String>
