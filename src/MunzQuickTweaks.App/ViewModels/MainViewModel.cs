@@ -187,6 +187,9 @@ public sealed partial class MainViewModel : ObservableObject
     /// <summary>Läuft vor dem Wechsel der Seite, z. B. zum Ausblenden der alten Seite.</summary>
     public Func<Task>? BeforePageChange { get; set; }
 
+    /// <summary>Wartet, bis die neue Seite eingeblendet ist, damit das Nachladen der Daten die Animation nicht stört.</summary>
+    public Func<Task>? AfterPageShown { get; set; }
+
     // Parallel erlaubt: sonst wäre die Navigation gesperrt, solange eine Seite lädt
     [RelayCommand(AllowConcurrentExecutions = true)]
     private async Task NavigateAsync(NavItem item)
@@ -210,7 +213,15 @@ public sealed partial class MainViewModel : ObservableObject
         }
 
         CurrentPage = item.Page;
-        await item.Page.OnNavigatedToAsync();
+        if (AfterPageShown is not null)
+        {
+            await AfterPageShown();
+        }
+
+        if (item.IsSelected)
+        {
+            await item.Page.OnNavigatedToAsync();
+        }
     }
 
     /// <summary>Öffnet eine Seite über ihren Titel-Schlüssel, z. B. Nav.Restore.</summary>

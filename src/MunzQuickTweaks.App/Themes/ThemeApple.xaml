@@ -374,14 +374,14 @@
             <Setter.Value>
                 <ControlTemplate TargetType="CheckBox">
                     <Border x:Name="Track" Width="46" Height="28" CornerRadius="14" Background="#4D787880" BorderThickness="2" BorderBrush="Transparent">
-                        <Ellipse x:Name="Knob" Width="22" Height="22" Fill="White" HorizontalAlignment="Left" Margin="1,0,0,0">
-                            <Ellipse.Effect>
-                                <DropShadowEffect BlurRadius="4" ShadowDepth="1" Direction="270" Opacity="0.35" />
-                            </Ellipse.Effect>
-                            <Ellipse.RenderTransform>
+                        <!-- Schatten als zweiter Kreis statt Effekt: bei vielen Schaltern deutlich schneller -->
+                        <Grid Width="22" Height="23" HorizontalAlignment="Left" Margin="1,1,0,0">
+                            <Grid.RenderTransform>
                                 <TranslateTransform x:Name="KnobMove" />
-                            </Ellipse.RenderTransform>
-                        </Ellipse>
+                            </Grid.RenderTransform>
+                            <Ellipse Width="22" Height="22" Fill="#38000000" VerticalAlignment="Bottom" />
+                            <Ellipse x:Name="Knob" Width="22" Height="22" Fill="White" VerticalAlignment="Top" />
+                        </Grid>
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsChecked" Value="True">

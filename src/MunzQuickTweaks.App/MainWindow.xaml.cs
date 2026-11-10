@@ -41,6 +41,7 @@ public partial class MainWindow : Window
         };
         viewModel.SelectionChanged += (_, item) => UpdateNavIndicator(item, animate: true);
         viewModel.BeforePageChange = FadePageOutAsync;
+        viewModel.AfterPageShown = () => PageInCompleted;
         SizeChanged += (_, _) => UpdateNavIndicator(CurrentNavItem(), animate: false);
         StateChanged += (_, _) => UpdateMaximizedMargin();
     }
@@ -52,6 +53,7 @@ public partial class MainWindow : Window
         if (!_settings.Current.AnimationsEnabled)
         {
             Splash.Visibility = Visibility.Collapsed;
+            _ = PrebuildPagesAsync();
             return;
         }
 
@@ -62,11 +64,31 @@ public partial class MainWindow : Window
         var fade = new DoubleAnimation(1, 0, TimeSpan.FromSeconds(0.25)) { EasingFunction = new CubicEase() };
         fade.Completed += (_, _) => Splash.Visibility = Visibility.Collapsed;
         Splash.BeginAnimation(OpacityProperty, fade);
+        _ = PrebuildPagesAsync();
     }
 
     private static readonly TimeSpan GlideDuration = TimeSpan.FromSeconds(0.38);
-    private static readonly TimeSpan FadeOutDuration = TimeSpan.FromSeconds(0.14);
-    private static readonly TimeSpan FadeInDuration = TimeSpan.FromSeconds(0.38);
+    private static readonly TimeSpan FadeOutDuration = TimeSpan.FromSeconds(0.1);
+    private static readonly TimeSpan FadeInDuration = TimeSpan.FromSeconds(0.26);
+
+    // Während des Übergangs wird die Seite als Bild zwischengespeichert. Sonst zeichnet WPF jede Karte in jedem Bild neu
+    private readonly BitmapCache _transitionCache = new() { SnapsToDevicePixels = true };
+    private TaskCompletionSource? _pageInDone;
+
+    /// <summary>Fertig, sobald die neue Seite eingeblendet ist. Erst danach lädt die Seite ihre Daten nach.</summary>
+    public Task PageInCompleted => _pageInDone?.Task ?? Task.CompletedTask;
+
+    private void BeginTransition()
+    {
+        _transitionCache.RenderAtScale = VisualTreeHelper.GetDpi(this).DpiScaleX;
+        PageHost.CacheMode = _transitionCache;
+    }
+
+    private void EndTransition()
+    {
+        // Danach wieder normal und gestochen scharf zeichnen
+        PageHost.CacheMode = null;
+    }
 
     private bool _indicatorPlaced;
 
@@ -80,6 +102,7 @@ public partial class MainWindow : Window
 
         var done = new TaskCompletionSource();
         var ease = new SineEase { EasingMode = EasingMode.EaseIn };
+        BeginTransition();
         var fade = new DoubleAnimation(PageHost.Opacity, 0, FadeOutDuration) { EasingFunction = ease };
         fade.Completed += (_, _) => done.TrySetResult();
         PageHost.BeginAnimation(OpacityProperty, fade);
@@ -94,12 +117,30 @@ public partial class MainWindow : Window
         {
             PageHost.BeginAnimation(OpacityProperty, null);
             PageHost.Opacity = 1;
+            EndTransition();
             return;
         }
 
+        // Neue Seite erst fertig anordnen, dann animieren: so fällt die Arbeit nicht mitten in die Bewegung
+        PageHost.UpdateLayout();
+        _pageInDone?.TrySetResult();
+        var done = new TaskCompletionSource();
+        _pageInDone = done;
+
         var ease = new QuinticEase { EasingMode = EasingMode.EaseOut };
-        PageHost.BeginAnimation(OpacityProperty, new DoubleAnimation(0, 1, FadeInDuration) { EasingFunction = ease });
-        Transform(PageHost).BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(12, 0, FadeInDuration) { EasingFunction = ease });
+        BeginTransition();
+        var fade = new DoubleAnimation(0, 1, FadeInDuration) { EasingFunction = ease };
+        fade.Completed += (_, _) =>
+        {
+            if (ReferenceEquals(_pageInDone, done))
+            {
+                EndTransition();
+            }
+
+            done.TrySetResult();
+        };
+        PageHost.BeginAnimation(OpacityProperty, fade);
+        Transform(PageHost).BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(8, 0, FadeInDuration) { EasingFunction = ease });
     }
 
     private static TranslateTransform Transform(UIElement element) => (TranslateTransform)element.RenderTransform;
@@ -290,6 +331,33 @@ public partial class MainWindow : Window
             return;
         }
 
+        var view = BuildPage(page);
+        Controls.SmoothScroll.Reset(ContentScroller);
+        ContentScroller.ScrollToTop();
+        PageHost.Content = view;
+    }
+
+    /// <summary>Baut die übrigen Seiten nach dem Start im Leerlauf vor, eine nach der anderen. Der erste Wechsel ist dann sofort da.</summary>
+    private async Task PrebuildPagesAsync()
+    {
+        foreach (var page in _viewModel.Items.Select(i => i.Page).Append(_viewModel.SettingsItem.Page).ToList())
+        {
+            await Dispatcher.InvokeAsync(() =>
+            {
+                if (_pages.ContainsKey(page))
+                {
+                    return;
+                }
+
+                var view = BuildPage(page);
+                view.DataContext = page;
+                view.Measure(new Size(Math.Max(300, PageHost.ActualWidth), double.PositiveInfinity));
+            }, DispatcherPriority.ApplicationIdle);
+        }
+    }
+
+    private FrameworkElement BuildPage(object page)
+    {
         if (!_pages.TryGetValue(page, out var view))
         {
             var watch = System.Diagnostics.Stopwatch.StartNew();
@@ -307,9 +375,7 @@ public partial class MainWindow : Window
             Serilog.Log.Information("Seite {Page} gebaut in {Ms} ms", page.GetType().Name, watch.ElapsedMilliseconds);
         }
 
-        Controls.SmoothScroll.Reset(ContentScroller);
-        ContentScroller.ScrollToTop();
-        PageHost.Content = view;
+        return view;
     }
 
     private void OnMinimize(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
