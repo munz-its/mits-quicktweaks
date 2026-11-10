@@ -129,7 +129,7 @@
             <!-- Seitenleiste: Gruppen scrollen bei kleinem Fenster, Markierung gleitet mit -->
             <DockPanel Grid.Row="1" Grid.Column="0" Margin="12,6,12,14">
                 <TextBlock DockPanel.Dock="Bottom" Text="{DynamicResource App.By}" Style="{StaticResource Label}" Foreground="{StaticResource Muted}" Margin="12,10,0,0" />
-                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False" c:SmoothScroll.IsEnabled="True">
                     <Grid>
                         <!-- Gleitende Auswahl: Hintergrund und blaues Pixel wandern zum gewählten Eintrag -->
                         <Canvas x:Name="NavOverlay" IsHitTestVisible="False" ClipToBounds="False">
@@ -165,7 +165,7 @@
 
             <!-- Inhalt -->
             <!-- Inhalt läuft unter der Glasleiste oben durch -->
-            <ScrollViewer x:Name="ContentScroller" Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" VerticalScrollBarVisibility="Auto" Focusable="False" ScrollChanged="OnContentScrolled">
+            <ScrollViewer x:Name="ContentScroller" Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" VerticalScrollBarVisibility="Auto" Focusable="False" ScrollChanged="OnContentScrolled" c:SmoothScroll.IsEnabled="True">
                 <Grid Margin="{StaticResource ContentMargin}" MaxWidth="980" HorizontalAlignment="Stretch">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -218,7 +218,8 @@
                         <TextBlock Text="{Binding CurrentPage.Label}" Style="{StaticResource Label}" Margin="0,0,0,6" Visibility="{x:Static c:UiDesign.MunzVisibility}" />
                         <TextBlock Text="{Binding CurrentPage.Heading}" Style="{StaticResource Display}" />
                     </StackPanel>
-                    <ContentControl x:Name="PageHost" Grid.Row="1" Content="{Binding CurrentPage}" Focusable="False">
+                    <!-- Seiten werden einmal gebaut und danach wiederverwendet (MainWindow.ShowPage) -->
+                    <ContentControl x:Name="PageHost" Grid.Row="1" Focusable="False">
                         <ContentControl.RenderTransform>
                             <TranslateTransform />
                         </ContentControl.RenderTransform>
@@ -228,7 +229,7 @@
 
             <!-- Liquid Glass: schwebende Leiste, zeigt den Inhalt darunter gebrochen und weichgezeichnet. Der kleine Titel erscheint beim Scrollen -->
             <c:GlassPanel x:Name="TopGlass" Grid.Row="0" Grid.Column="1" VerticalAlignment="Top" Height="44" Margin="16,8,156,0" Visibility="{x:Static c:UiDesign.LiquidGlassVisibility}"
-                          CornerRadius="22" Blur="24" Refraction="12" Tint="#4D1E1F23" Source="{Binding ElementName=ContentScroller}">
+                          CornerRadius="22" Blur="24" Refraction="12" Tint="#4D1E1F23">
                 <TextBlock x:Name="TopTitle" Text="{Binding CurrentPage.Heading}" Style="{StaticResource TextBase}" FontWeight="SemiBold" FontSize="14"
                            VerticalAlignment="Center" Margin="20,0" Opacity="0" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" IsHitTestVisible="False" />
             </c:GlassPanel>

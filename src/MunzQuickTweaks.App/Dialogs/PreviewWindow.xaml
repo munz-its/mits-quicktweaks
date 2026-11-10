@@ -18,7 +18,7 @@
                 <TranslateTransform x:Name="SheetMove" Y="-28" />
             </Border.RenderTransform>
             <Border.Effect>
-                <DropShadowEffect BlurRadius="50" ShadowDepth="16" Direction="270" Opacity="0.5" Color="Black" />
+                <DropShadowEffect BlurRadius="28" ShadowDepth="10" Direction="270" Opacity="0.5" Color="Black" RenderingBias="Performance" />
             </Border.Effect>
         <!-- Liquid Glass: die App dahinter erscheint im Blatt gebrochen und weichgezeichnet -->
         <Grid>

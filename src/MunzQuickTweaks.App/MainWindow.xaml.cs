@@ -35,12 +35,12 @@ public partial class MainWindow : Window
         {
             Grid.SetRow(ContentScroller, 1);
             Grid.SetRowSpan(ContentScroller, 1);
-            TopGlass.Source = null;
         }
         viewModel.PropertyChanged += (_, e) =>
         {
             if (e.PropertyName == nameof(MainViewModel.CurrentPage))
             {
+                ShowPage(viewModel.CurrentPage);
                 AnimatePageIn();
             }
         };
@@ -269,7 +269,45 @@ public partial class MainWindow : Window
         if (Controls.UiDesign.IsLiquidGlass)
         {
             TopTitle.Opacity = Math.Clamp((e.VerticalOffset - 40) / 40, 0, 1);
+
+            // Glas nur berechnen, wenn wirklich Inhalt darunter liegt. Ganz oben reicht die getönte Fläche
+            var needsGlass = e.VerticalOffset > 1;
+            if (needsGlass != (TopGlass.Source is not null))
+            {
+                TopGlass.Source = needsGlass ? ContentScroller : null;
+            }
         }
+    }
+
+    // Fertig gebaute Seiten: ein Seitenwechsel zeigt nur noch die vorhandene Seite, statt sie jedes Mal neu aufzubauen
+    private readonly Dictionary<object, FrameworkElement> _pages = new();
+
+    private void ShowPage(object? page)
+    {
+        if (page is null)
+        {
+            PageHost.Content = null;
+            return;
+        }
+
+        if (!_pages.TryGetValue(page, out var view))
+        {
+            if (TryFindResource(new DataTemplateKey(page.GetType())) is DataTemplate template && template.LoadContent() is FrameworkElement built)
+            {
+                built.DataContext = page;
+                view = built;
+            }
+            else
+            {
+                view = new ContentPresenter { Content = page };
+            }
+
+            _pages[page] = view;
+        }
+
+        Controls.SmoothScroll.Reset(ContentScroller);
+        ContentScroller.ScrollToTop();
+        PageHost.Content = view;
     }
 
     private void OnMinimize(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
