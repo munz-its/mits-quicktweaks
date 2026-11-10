@@ -13,6 +13,8 @@ public sealed record BenchmarkRow(string Label, string Value, string Change, boo
 
 public sealed record BenchmarkHistoryRow(string Time, string Summary, string Note);
 
+public sealed record BootRow(string Time, string Desktop, string Total);
+
 public sealed partial class DriveChoice : ObservableObject
 {
     public DriveChoice(string name, bool selected)
@@ -39,9 +41,10 @@ public sealed partial class BenchmarkViewModel : PageViewModel
     private CancellationTokenSource? _cancel;
 
     public BenchmarkViewModel(BenchmarkStore store, IGpuBenchmark gpu, GameModeController gameMode, UpdateService app,
-        LocalizationService localization, ILogger<BenchmarkViewModel> log)
+        LocalizationService localization, TweakService tweaks, ILogger<BenchmarkViewModel> log)
         : base("Nav.Benchmark")
     {
+        _tweaks = tweaks;
         _store = store;
         _gpu = gpu;
         _gameMode = gameMode;
@@ -54,6 +57,49 @@ public sealed partial class BenchmarkViewModel : PageViewModel
     public ObservableCollection<DriveChoice> Drives { get; } = new();
 
     public ObservableCollection<BenchmarkRow> Rows { get; } = new();
+
+    private readonly TweakService _tweaks;
+
+    public ObservableCollection<BootRow> Boots { get; } = new();
+
+    public bool HasBoots => Boots.Count > 0;
+
+    [ObservableProperty]
+    private string _bootSummary = string.Empty;
+
+    /// <summary>Startzeiten aus dem Ereignisprotokoll, verglichen vor und nach dem ersten Tweak.</summary>
+    private async Task LoadBootsAsync()
+    {
+        IReadOnlyList<BootRecord> boots;
+        try
+        {
+            boots = await Task.Run(() => Windows.WindowsBootTimes.Read());
+        }
+        catch (Exception ex)
+        {
+            _log.LogWarning(ex, "Startzeiten nicht lesbar");
+            BootSummary = _localization.Get("Boot.Unavailable");
+            return;
+        }
+
+        Boots.Clear();
+        foreach (var boot in boots.Take(10))
+        {
+            Boots.Add(new BootRow(boot.Time.ToString("g", CultureInfo.CurrentCulture),
+                (boot.MainPathMs / 1000.0).ToString("0.0", CultureInfo.CurrentCulture) + " s",
+                (boot.TotalMs / 1000.0).ToString("0.0", CultureInfo.CurrentCulture) + " s"));
+        }
+
+        var first = _tweaks.Engine.Journal.All.Select(e => e.AppliedAt).DefaultIfEmpty().Min();
+        var (before, after) = first == default ? (null, null) : BootTimes.Compare(boots, first.LocalDateTime);
+        BootSummary = boots.Count == 0
+            ? _localization.Get("Boot.None")
+            : before is { } b && after is { } a
+                ? string.Format(CultureInfo.CurrentCulture, _localization.Get("Boot.Compare"), b, a)
+                : string.Format(CultureInfo.CurrentCulture, _localization.Get("Boot.Average"),
+                    Math.Round(boots.Take(5).Average(x => x.MainPathMs) / 1000.0, 1));
+        OnPropertyChanged(nameof(HasBoots));
+    }
 
     public ObservableCollection<BenchmarkHistoryRow> History { get; } = new();
 
@@ -108,6 +154,7 @@ public sealed partial class BenchmarkViewModel : PageViewModel
                 Drives[0].IsSelected = true;
             }
             ShowLatest();
+            return LoadBootsAsync();
         }
 
         return Task.CompletedTask;

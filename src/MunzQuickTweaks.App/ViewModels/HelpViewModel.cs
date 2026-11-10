@@ -35,7 +35,7 @@ public sealed partial class HelpViewModel : PageViewModel
     public string MailAddress => SupportMail;
 
     [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(SaveSupportPackageCommand))]
+    [NotifyCanExecuteChangedFor(nameof(SaveSupportPackageCommand), nameof(SendRequestCommand))]
     private bool _isBusy;
 
     [ObservableProperty]
@@ -57,6 +57,54 @@ public sealed partial class HelpViewModel : PageViewModel
         var version = Assembly.GetEntryAssembly()?.GetName().Version?.ToString(3) ?? "?";
         var subject = Uri.EscapeDataString($"Munz Quick Tweaks {version}: Support-Anfrage");
         Open($"mailto:{SupportMail}?subject={subject}");
+    }
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(SendRequestCommand))]
+    private string _problem = string.Empty;
+
+    [ObservableProperty]
+    private string _requestStatus = string.Empty;
+
+    private bool CanSend() => !IsBusy && Problem.Trim().Length >= 10;
+
+    /// <summary>
+    /// Support-Anfrage: Support-Paket auf den Desktop, E-Mail mit Beschreibung und Systemdaten im Mailprogramm öffnen.
+    /// Das Paket hängt der Nutzer selbst an, mailto kann keine Anhänge.
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(CanSend))]
+    private async Task SendRequestAsync()
+    {
+        IsBusy = true;
+        RequestStatus = _localization.Get("Help.Saving");
+        try
+        {
+            var (file, system) = await Task.Run(() => (BuildPackage(), DescribeSystem()));
+            var version = Assembly.GetEntryAssembly()?.GetName().Version?.ToString(3) ?? "?";
+            var subject = $"Munz Quick Tweaks {version}: Support-Anfrage";
+
+            // Systemdaten ohne Tweak-Liste, damit der Link nicht zu lang für das Mailprogramm wird
+            var shortSystem = string.Join("\r\n", system.Split('\n').TakeWhile(l => !l.StartsWith("Aktive Tweaks", StringComparison.Ordinal)).Select(l => l.TrimEnd('\r')));
+            var body = $"{Problem.Trim()}\r\n\r\n{_localization.Get("Help.Request.AttachHint")} {Path.GetFileName(file)}\r\n\r\n---\r\n{shortSystem}";
+            if (body.Length > 1800)
+            {
+                body = body[..1800];
+            }
+
+            Open($"mailto:{SupportMail}?subject={Uri.EscapeDataString(subject)}&body={Uri.EscapeDataString(body)}");
+            Open("explorer.exe", $"/select,\"{file}\"");
+            RequestStatus = string.Format(System.Globalization.CultureInfo.CurrentCulture, _localization.Get("Help.Request.Opened"), Path.GetFileName(file));
+            _log.LogInformation("Support-Anfrage vorbereitet: {File}", file);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidDataException)
+        {
+            _log.LogError(ex, "Support-Anfrage nicht vorbereitet");
+            RequestStatus = $"{_localization.Get("Tweak.Failed")} {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
     }
 
     [RelayCommand]

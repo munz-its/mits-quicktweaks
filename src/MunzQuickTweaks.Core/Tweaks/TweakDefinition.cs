@@ -11,6 +11,7 @@ public enum TweakCategory
     Network,
     Services,
     Apps,
+    ContextMenu,
 }
 
 /// <summary>Niedrig: wird direkt angewendet. Mittel: Bestätigungsdialog. Hoch gibt es bewusst nicht.</summary>

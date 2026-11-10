@@ -457,4 +457,25 @@ Die Programmdatei existiert nicht mehr. Der Eintrag wird vorher im Sicherungsord
     <sys:String x:Key="Preview.NothingToReset">Es gibt nichts zurückzusetzen ✓</sys:String>
     <sys:String x:Key="Preview.ResetDone">Alles ist zurückgesetzt ✓</sys:String>
     <sys:String x:Key="Preview.ResetErrors">Zurückgesetzt, aber {0} Punkte haben nicht geklappt. Details im Protokoll.</sys:String>
+    <sys:String x:Key="Cat.ContextMenu">KONTEXTMENÜ</sys:String>
+    <sys:String x:Key="Care.ShaderCache">Shader-Cache (Spiele)</sys:String>
+    <sys:String x:Key="Care.ShaderCache.Hint">Gespeicherte Shader von DirectX, NVIDIA, AMD und Intel. Hilft bei Grafikfehlern nach Treiber-Updates. Spiele laden beim nächsten Start etwas länger.</sys:String>
+    <sys:String x:Key="Care.BrowserCache">Browser-Cache</sys:String>
+    <sys:String x:Key="Care.BrowserCache.Hint">Zwischenspeicher von Chrome, Edge, Brave und Firefox. Lesezeichen, Passwörter, Verlauf und Anmeldungen bleiben erhalten.</sys:String>
+    <sys:String x:Key="Care.AppCache">App-Cache</sys:String>
+    <sys:String x:Key="Care.AppCache.Hint">Zwischenspeicher von Discord, Steam, Spotify und Teams. Einstellungen und Downloads bleiben erhalten.</sys:String>
+    <sys:String x:Key="Boot.Title">Startzeit</sys:String>
+    <sys:String x:Key="Boot.Desktop">Desktop</sys:String>
+    <sys:String x:Key="Boot.Total">Gesamt</sys:String>
+    <sys:String x:Key="Boot.Compare">Bis zum Desktop vor deinen Tweaks im Schnitt {0} s, danach {1} s.</sys:String>
+    <sys:String x:Key="Boot.Average">Bis zum Desktop im Schnitt {0} s (letzte 5 Starts).</sys:String>
+    <sys:String x:Key="Boot.None">Noch keine Startzeiten erfasst. Windows misst nach jedem vollständigen Neustart.</sys:String>
+    <sys:String x:Key="Boot.Unavailable">Startzeiten sind auf diesem PC nicht lesbar.</sys:String>
+    <sys:String x:Key="Boot.Hint">Windows misst die Startzeit selbst. Mit Schnellstart zählt nur ein echter Neustart, nicht Herunterfahren und Einschalten.</sys:String>
+    <sys:String x:Key="Help.Request.Title">Support-Anfrage</sys:String>
+    <sys:String x:Key="Help.Request.Text">Beschreibe kurz dein Problem. Die App erstellt ein Support-Paket auf dem Desktop und öffnet eine fertige E-Mail an support@munz-its.de in deinem Mailprogramm. Das Paket hängst du dort an.</sys:String>
+    <sys:String x:Key="Help.Request.Placeholder">Was ist passiert? Was hast du vorher gemacht?</sys:String>
+    <sys:String x:Key="Help.Request.Send">Anfrage vorbereiten</sys:String>
+    <sys:String x:Key="Help.Request.AttachHint">Support-Paket im Anhang:</sys:String>
+    <sys:String x:Key="Help.Request.Opened">E-Mail geöffnet. Bitte noch die Datei {0} vom Desktop anhängen und senden.</sys:String>
 </ResourceDictionary>

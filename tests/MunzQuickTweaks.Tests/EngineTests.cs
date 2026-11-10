@@ -336,14 +336,14 @@ public class CatalogTests
             .ToList();
 
         var tweaks = CatalogLoader.Load(files);
-        Assert.InRange(tweaks.Count, 50, 80);
+        Assert.InRange(tweaks.Count, 50, 140);
 
         // Jede Kategorie ist vertreten, Dienst- und Energieplan-Tweaks sind nie "Niedrig" ohne Grund
         Assert.Equal(Enum.GetValues<TweakCategory>().Length, tweaks.Select(t => t.Category).Distinct().Count());
         Assert.All(tweaks.Where(t => t.Actions.OfType<PowerPlanAction>().Any()), t => Assert.Equal(TweakRisk.Medium, t.Risk));
 
         // Policy-Werte ohne Standard werden beim Rückgängig gelöscht: nur unter Policies erlaubt oder bewusst gewählt
-        var allowedWithoutDefault = new[] { "Policies", "Serialize", "Siuf", "GraphicsDrivers", "PowerThrottling", "UserGpuPreferences", "International", "CLSID", "Advanced", @"CurrentVersion\Search", @"Session Manager\kernel" };
+        var allowedWithoutDefault = new[] { "Policies", "Serialize", "Siuf", "GraphicsDrivers", "PowerThrottling", "UserGpuPreferences", "International", "CLSID", "Advanced", @"CurrentVersion\Search", @"Session Manager\kernel", @"Shell Extensions\Blocked" };
         foreach (var action in tweaks.SelectMany(t => t.Actions).OfType<RegistryAction>().Where(a => a.Default is null))
         {
             Assert.Contains(allowedWithoutDefault, part => action.Key.Contains(part, StringComparison.OrdinalIgnoreCase));

@@ -93,6 +93,35 @@
             </ItemsControl>
         </StackPanel>
 
+        <!-- Startzeit -->
+        <Border Style="{StaticResource Card}" Margin="0,0,0,16">
+            <StackPanel>
+                <TextBlock Text="{DynamicResource Boot.Title}" Style="{StaticResource H2}" FontSize="16" />
+                <TextBlock Text="{Binding BootSummary}" Style="{StaticResource TextBase}" Foreground="{StaticResource Text2}" Margin="0,6,0,12" TextWrapping="Wrap" />
+                <ItemsControl ItemsSource="{Binding Boots}" Focusable="False" Visibility="{Binding HasBoots, Converter={StaticResource BoolToVis}}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Margin="0,0,0,6">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="170" />
+                                    <ColumnDefinition Width="160" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{Binding Time}" Style="{StaticResource MutedText}" FontSize="12" />
+                                <TextBlock Grid.Column="1" FontFamily="{StaticResource FontMono}" FontSize="12" Foreground="{StaticResource Text}">
+                                    <Run Text="{DynamicResource Boot.Desktop}" /><Run Text=" " /><Run Text="{Binding Desktop, Mode=OneWay}" />
+                                </TextBlock>
+                                <TextBlock Grid.Column="2" FontFamily="{StaticResource FontMono}" FontSize="12" Foreground="{StaticResource Muted}">
+                                    <Run Text="{DynamicResource Boot.Total}" /><Run Text=" " /><Run Text="{Binding Total, Mode=OneWay}" />
+                                </TextBlock>
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <TextBlock Text="{DynamicResource Boot.Hint}" Style="{StaticResource MutedText}" FontSize="12" Margin="0,8,0,0" TextWrapping="Wrap" />
+            </StackPanel>
+        </Border>
+
         <!-- Verlauf -->
         <Border Style="{StaticResource Card}" Visibility="{Binding HasHistory, Converter={StaticResource BoolToVis}}">
             <StackPanel>

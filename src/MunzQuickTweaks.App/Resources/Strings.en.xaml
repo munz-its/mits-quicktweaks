@@ -457,4 +457,25 @@ The program file no longer exists. The entry is saved to the app's backup folder
     <sys:String x:Key="Preview.NothingToReset">Nothing to reset ✓</sys:String>
     <sys:String x:Key="Preview.ResetDone">Everything is reset ✓</sys:String>
     <sys:String x:Key="Preview.ResetErrors">Reset, but {0} items did not work. Details in the log.</sys:String>
+    <sys:String x:Key="Cat.ContextMenu">CONTEXT MENU</sys:String>
+    <sys:String x:Key="Care.ShaderCache">Shader cache (games)</sys:String>
+    <sys:String x:Key="Care.ShaderCache.Hint">Saved shaders from DirectX, NVIDIA, AMD and Intel. Helps with graphics glitches after driver updates. Games load a bit longer on the next start.</sys:String>
+    <sys:String x:Key="Care.BrowserCache">Browser cache</sys:String>
+    <sys:String x:Key="Care.BrowserCache.Hint">Cache of Chrome, Edge, Brave and Firefox. Bookmarks, passwords, history and sign-ins stay.</sys:String>
+    <sys:String x:Key="Care.AppCache">App cache</sys:String>
+    <sys:String x:Key="Care.AppCache.Hint">Cache of Discord, Steam, Spotify and Teams. Settings and downloads stay.</sys:String>
+    <sys:String x:Key="Boot.Title">Startup time</sys:String>
+    <sys:String x:Key="Boot.Desktop">Desktop</sys:String>
+    <sys:String x:Key="Boot.Total">Total</sys:String>
+    <sys:String x:Key="Boot.Compare">Time to desktop before your tweaks averaged {0} s, after {1} s.</sys:String>
+    <sys:String x:Key="Boot.Average">Time to desktop averages {0} s (last 5 starts).</sys:String>
+    <sys:String x:Key="Boot.None">No startup times recorded yet. Windows measures after every full restart.</sys:String>
+    <sys:String x:Key="Boot.Unavailable">Startup times cannot be read on this PC.</sys:String>
+    <sys:String x:Key="Boot.Hint">Windows measures startup time itself. With Fast Startup only a real restart counts, not shutting down and turning on.</sys:String>
+    <sys:String x:Key="Help.Request.Title">Support request</sys:String>
+    <sys:String x:Key="Help.Request.Text">Briefly describe your problem. The app creates a support package on the desktop and opens a ready email to support@munz-its.de in your mail program. Attach the package there.</sys:String>
+    <sys:String x:Key="Help.Request.Placeholder">What happened? What did you do before?</sys:String>
+    <sys:String x:Key="Help.Request.Send">Prepare request</sys:String>
+    <sys:String x:Key="Help.Request.AttachHint">Support package attached:</sys:String>
+    <sys:String x:Key="Help.Request.Opened">Email opened. Please attach the file {0} from the desktop and send.</sys:String>
 </ResourceDictionary>

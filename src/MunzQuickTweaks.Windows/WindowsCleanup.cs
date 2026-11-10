@@ -11,6 +11,9 @@ public enum CleanupTarget
     UpdateCache,
     ErrorReports,
     ThumbnailCache,
+    ShaderCache,
+    BrowserCache,
+    AppCache,
     RecycleBin,
 }
 
@@ -43,8 +46,66 @@ public sealed partial class WindowsCleanup
         {
             (Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Microsoft", "Windows", "Explorer"), TimeSpan.Zero, "thumbcache_*.db"),
         },
+        // Grafiktreiber bauen Shader beim nächsten Spielstart neu, das erste Laden dauert dann etwas länger
+        CleanupTarget.ShaderCache => new[]
+        {
+            Local("D3DSCache"), Local("NVIDIA", "DXCache"), Local("NVIDIA", "GLCache"), Local("NVIDIA Corporation", "NV_Cache"),
+            Local("AMD", "DxCache"), Local("AMD", "DxcCache"), Local("AMD", "VkCache"), Local("AMD", "GLCache"),
+            Local("Intel", "ShaderCache"),
+        },
+        CleanupTarget.BrowserCache => BrowserCaches().ToArray(),
+        CleanupTarget.AppCache => new[]
+        {
+            Roaming("discord", "Cache"), Roaming("discord", "Code Cache"), Roaming("discord", "GPUCache"),
+            Local("Steam", "htmlcache"),
+            Local("Spotify", "Data"),
+            Roaming("Microsoft", "Teams", "Cache"),
+        },
         _ => Array.Empty<(string, TimeSpan, string)>(),
     };
+
+    private static (string, TimeSpan, string) Local(params string[] parts) =>
+        (Path.Combine(new[] { Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) }.Concat(parts).ToArray()), TimeSpan.Zero, "*");
+
+    private static (string, TimeSpan, string) Roaming(params string[] parts) =>
+        (Path.Combine(new[] { Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) }.Concat(parts).ToArray()), TimeSpan.Zero, "*");
+
+    /// <summary>Cache aller Profile von Chrome, Edge, Brave und Firefox. Lesezeichen, Passwörter und Verlauf bleiben unberührt.</summary>
+    private static IEnumerable<(string, TimeSpan, string)> BrowserCaches()
+    {
+        var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        foreach (var userData in new[]
+                 {
+                     Path.Combine(local, "Google", "Chrome", "User Data"),
+                     Path.Combine(local, "Microsoft", "Edge", "User Data"),
+                     Path.Combine(local, "BraveSoftware", "Brave-Browser", "User Data"),
+                 })
+        {
+            foreach (var profile in SafeDirectories(userData).Where(d => Path.GetFileName(d) is "Default" || Path.GetFileName(d).StartsWith("Profile ", StringComparison.Ordinal)))
+            {
+                yield return (Path.Combine(profile, "Cache", "Cache_Data"), TimeSpan.Zero, "*");
+                yield return (Path.Combine(profile, "Code Cache"), TimeSpan.Zero, "*");
+                yield return (Path.Combine(profile, "GPUCache"), TimeSpan.Zero, "*");
+            }
+        }
+
+        foreach (var profile in SafeDirectories(Path.Combine(local, "Mozilla", "Firefox", "Profiles")))
+        {
+            yield return (Path.Combine(profile, "cache2"), TimeSpan.Zero, "*");
+        }
+    }
+
+    private static IEnumerable<string> SafeDirectories(string folder)
+    {
+        try
+        {
+            return Directory.Exists(folder) ? Directory.GetDirectories(folder) : Array.Empty<string>();
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            return Array.Empty<string>();
+        }
+    }
 
     public long Measure(CleanupTarget target)
     {
