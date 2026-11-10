@@ -102,6 +102,7 @@ public partial class App : Application
                 services.AddSingleton<BenchmarkViewModel>();
                 services.AddSingleton<PresetsViewModel>();
                 services.AddSingleton<NetworkViewModel>();
+                services.AddSingleton<InstallerViewModel>();
                 services.AddSingleton<HealthViewModel>();
                 services.AddSingleton<ProfileService>();
                 services.AddSingleton(new ChangeLedger(Path.Combine(AppPaths.StateDirectory, "ledger.json")));
@@ -139,7 +140,100 @@ public partial class App : Application
             return;
         }
 
-        var window = _host.Services.GetRequiredService<MainWindow>();
+        // Unsichtbare Prüfung nach dem Anmelden (geplante Aufgabe): MunzQuickTweaks.exe --check-reset
+        if (e.Args.Any(a => string.Equals(a, MunzQuickTweaks.Windows.ResetCheckTask.Argument, StringComparison.OrdinalIgnoreCase)))
+        {
+            RunResetCheck();
+            return;
+        }
+
+        EnsureResetTask(settings.Current.CheckResetAfterUpdates);
+        ShowMain(reapply: false);
+    }
+
+    /// <summary>Geplante Aufgabe anlegen, Pfad aktualisieren oder entfernen. Fehler nur ins Protokoll.</summary>
+    public static void EnsureResetTask(bool enabled)
+    {
+        try
+        {
+            if (Environment.ProcessPath is { } exe)
+            {
+                MunzQuickTweaks.Windows.ResetCheckTask.Ensure(enabled, exe);
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Aufgabe für die Update-Prüfung nicht eingerichtet");
+        }
+    }
+
+    private void ShowMain(bool reapply)
+    {
+        var window = _host!.Services.GetRequiredService<MainWindow>();
+        MainWindow = window;
+        ShutdownMode = ShutdownMode.OnMainWindowClose;
+        window.Show();
+        if (reapply)
+        {
+            // Nach dem Startbildschirm direkt die Rückfrage zum erneuten Anwenden zeigen
+            var dashboard = _host.Services.GetRequiredService<DashboardViewModel>();
+            var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
+            timer.Tick += (_, _) =>
+            {
+                timer.Stop();
+                _ = dashboard.ReapplyResetCommand.ExecuteAsync(null);
+            };
+            timer.Start();
+        }
+    }
+
+    private void RunResetCheck()
+    {
+        var tweaks = _host!.Services.GetRequiredService<TweakService>();
+        var notice = new ResetNotice(Path.Combine(AppPaths.StateDirectory, "resetnotice.json"));
+        List<string> ids;
+        try
+        {
+            ids = tweaks.FindResetByWindows().Select(t => t.Id).ToList();
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Update-Prüfung fehlgeschlagen");
+            Shutdown();
+            return;
+        }
+
+        Log.Information("Update-Prüfung: {Count} Tweaks zurückgesetzt", ids.Count);
+        if (!notice.ShouldNotify(ids))
+        {
+            if (ids.Count == 0)
+            {
+                notice.Remember(ids);
+            }
+
+            Shutdown();
+            return;
+        }
+
+        notice.Remember(ids);
+        var loc = _host.Services.GetRequiredService<LocalizationService>();
+        var window = new Dialogs.ResetNoticeWindow(
+            loc.Get("Reset.Notice.Heading"),
+            string.Format(System.Globalization.CultureInfo.CurrentCulture, loc.Get("Reset.Notice.Body"), ids.Count),
+            loc.Get("Reset.Notice.Apply"),
+            loc.Get("RestartBar.Later"));
+        ShutdownMode = ShutdownMode.OnExplicitShutdown;
+        window.Closed += (_, _) =>
+        {
+            if (window.ApplyChosen)
+            {
+                ShowMain(reapply: true);
+            }
+            else
+            {
+                Shutdown();
+            }
+        };
         MainWindow = window;
         window.Show();
     }

@@ -35,6 +35,9 @@
         <DataTemplate DataType="{x:Type vm:PowerViewModel}">
             <views:PowerView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:InstallerViewModel}">
+            <views:InstallerView />
+        </DataTemplate>
         <DataTemplate DataType="{x:Type vm:NetworkViewModel}">
             <views:NetworkView />
         </DataTemplate>

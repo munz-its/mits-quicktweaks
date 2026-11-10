@@ -111,3 +111,65 @@ public sealed class HealthAssessmentTests
         Assert.Equal((null, 25.0), BootTimes.Compare(boots, new DateTime(2026, 10, 1)));
     }
 }
+
+public sealed class InstallCatalogTests
+{
+    [Fact]
+    public void Ids_are_unique_and_every_group_has_apps()
+    {
+        Assert.Equal(InstallCatalog.All.Count, InstallCatalog.All.Select(a => a.WingetId).Distinct(StringComparer.OrdinalIgnoreCase).Count());
+        Assert.All(Enum.GetValues<InstallGroup>(), g => Assert.Contains(InstallCatalog.All, a => a.Group == g));
+        Assert.InRange(InstallCatalog.All.Count, 35, 60);
+    }
+
+    [Fact]
+    public void Export_is_parsed()
+    {
+        const string json = """
+        { "Sources": [ { "Packages": [ { "PackageIdentifier": "Valve.Steam" }, { "PackageIdentifier": "7zip.7zip" } ], "SourceDetails": {} } ] }
+        """;
+        var ids = InstallCatalog.ParseExport(json);
+        Assert.Contains("valve.steam", ids);
+        Assert.Equal(2, ids.Count);
+        Assert.Empty(InstallCatalog.ParseExport("kaputt"));
+    }
+
+    [Fact]
+    public void Exit_codes_are_interpreted()
+    {
+        Assert.True(InstallCatalog.Interpret(0, string.Empty).Success);
+        var already = InstallCatalog.Interpret(unchecked((int)0x8A15002B), string.Empty);
+        Assert.True(already.Success && already.AlreadyInstalled);
+        var failed = InstallCatalog.Interpret(unchecked((int)0x8A150014), "Suche...\nKein Paket gefunden\n");
+        Assert.False(failed.Success);
+        Assert.Contains("Kein Paket gefunden", failed.Error);
+    }
+}
+
+public sealed class ResetNoticeTests : IDisposable
+{
+    private readonly string _dir = Path.Combine(Path.GetTempPath(), "mqt-notice-" + Guid.NewGuid().ToString("N"));
+
+    [Fact]
+    public void Notifies_once_per_set_and_again_after_change()
+    {
+        var notice = new MunzQuickTweaks.Core.Safety.ResetNotice(Path.Combine(_dir, "n.json"));
+        Assert.False(notice.ShouldNotify(Array.Empty<string>()));
+        Assert.True(notice.ShouldNotify(new[] { "b", "a" }));
+        notice.Remember(new[] { "a", "b" });
+        Assert.False(notice.ShouldNotify(new[] { "b", "a" }));
+        Assert.True(notice.ShouldNotify(new[] { "a", "b", "c" }));
+
+        // Nach erneutem Anwenden ist die Liste leer, dann soll derselbe Satz wieder gemeldet werden
+        notice.Remember(Array.Empty<string>());
+        Assert.True(notice.ShouldNotify(new[] { "a", "b" }));
+    }
+
+    public void Dispose()
+    {
+        if (Directory.Exists(_dir))
+        {
+            Directory.Delete(_dir, recursive: true);
+        }
+    }
+}

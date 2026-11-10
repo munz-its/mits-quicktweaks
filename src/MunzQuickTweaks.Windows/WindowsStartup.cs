@@ -207,7 +207,9 @@ public sealed class WindowsStartup : IStartupManager
             {
                 using (task)
                 {
-                    if (task.Path.StartsWith(@"\Microsoft\", StringComparison.OrdinalIgnoreCase))
+                    // Eigene Prüfaufgabe der App nicht als Autostart anzeigen
+                    if (task.Path.StartsWith(@"\Microsoft\", StringComparison.OrdinalIgnoreCase)
+                        || task.Path.StartsWith(@"\" + ResetCheckTask.Folder + @"\", StringComparison.OrdinalIgnoreCase))
                     {
                         continue;
                     }

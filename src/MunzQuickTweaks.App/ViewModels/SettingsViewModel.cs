@@ -19,6 +19,7 @@ public sealed partial class SettingsViewModel : PageViewModel
     {
         _updates = updates;
         _checkForUpdates = settings.Current.CheckForUpdates;
+        _checkResetAfterUpdates = settings.Current.CheckResetAfterUpdates;
         _settings = settings;
         _localization = localization;
         _tweaks = tweaks;
@@ -43,6 +44,16 @@ public sealed partial class SettingsViewModel : PageViewModel
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(CheckNowCommand))]
     private bool _isChecking;
+
+    [ObservableProperty]
+    private bool _checkResetAfterUpdates;
+
+    partial void OnCheckResetAfterUpdatesChanged(bool value)
+    {
+        _settings.Current.CheckResetAfterUpdates = value;
+        _settings.Save();
+        App.EnsureResetTask(value);
+    }
 
     partial void OnCheckForUpdatesChanged(bool value)
     {

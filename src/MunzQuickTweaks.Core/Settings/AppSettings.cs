@@ -18,4 +18,7 @@ public sealed class AppSettings
 
     /// <summary>Beim Start auf munz-its.de nach einer neuen Version sehen.</summary>
     public bool CheckForUpdates { get; set; } = true;
+
+    /// <summary>Nach dem Anmelden prüfen, ob ein Windows-Update Tweaks zurückgesetzt hat.</summary>
+    public bool CheckResetAfterUpdates { get; set; } = true;
 }

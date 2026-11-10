@@ -62,6 +62,22 @@
             </StackPanel>
         </Border>
 
+        <!-- Prüfung nach Windows-Updates -->
+        <Border Style="{StaticResource Card}" Margin="0,0,0,16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Margin="0,0,24,0">
+                    <TextBlock Text="{DynamicResource Reset.Setting}" Style="{StaticResource H2}" FontSize="16" />
+                    <TextBlock Text="{DynamicResource Reset.SettingHint}" Style="{StaticResource MutedText}" Margin="0,4,0,0" TextWrapping="Wrap" />
+                </StackPanel>
+                <CheckBox Grid.Column="1" Style="{StaticResource Toggle}" IsChecked="{Binding CheckResetAfterUpdates}" VerticalAlignment="Center"
+                          AutomationProperties.Name="{DynamicResource Reset.Setting}" />
+            </Grid>
+        </Border>
+
         <!-- Tweak-Auswahl übertragen -->
         <Border Style="{StaticResource Card}" Margin="0,0,0,16">
             <StackPanel>

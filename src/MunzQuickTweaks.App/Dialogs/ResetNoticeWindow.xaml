@@ -1,0 +1,21 @@
+<Window x:Class="MunzQuickTweaks.App.Dialogs.ResetNoticeWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="clr-namespace:MunzQuickTweaks.App.Controls"
+        Title="Munz Quick Tweaks" Width="420" SizeToContent="Height" WindowStyle="None" ResizeMode="NoResize"
+        AllowsTransparency="True" Background="Transparent" Topmost="True" ShowInTaskbar="True" ShowActivated="True">
+    <Border Background="{StaticResource Bg2}" BorderBrush="{StaticResource Blue}" BorderThickness="1" CornerRadius="12" Padding="20,18" Margin="8">
+        <StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                <c:PixelLogo Width="24" Height="24" Margin="0,0,10,0" />
+                <TextBlock Text="Munz Quick Tweaks" Style="{StaticResource Label}" VerticalAlignment="Center" />
+            </StackPanel>
+            <TextBlock x:Name="Heading" Style="{StaticResource H2}" FontSize="16" TextWrapping="Wrap" />
+            <TextBlock x:Name="Body" Style="{StaticResource Body2}" Margin="0,6,0,14" TextWrapping="Wrap" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button x:Name="LaterButton" Style="{StaticResource SecondaryButton}" Margin="0,0,10,0" Click="OnLater" />
+                <Button x:Name="ApplyButton" Style="{StaticResource PrimaryButton}" Click="OnApply" />
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</Window>
