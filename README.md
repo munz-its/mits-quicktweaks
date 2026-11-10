@@ -83,8 +83,6 @@ Selbsttest: `MunzQuickTweaks.exe --selftest` oder `tools/selftest/Selbsttest sta
 3. Nach `main` pushen. GitHub Actions baut die exe und legt das Release an, sobald es für diese Version noch keins gibt.
 4. `version.json` auf munz-its.de anpassen, damit bestehende Installationen das Update melden.
 
-Entwicklung läuft auf dem Branch `dev`.
-
 ## Speicherorte
 
 - Einstellungen: `%LocalAppData%\MunzQuickTweaks\settings.json`
