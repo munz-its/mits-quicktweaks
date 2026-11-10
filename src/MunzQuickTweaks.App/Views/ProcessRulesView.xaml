@@ -88,5 +88,52 @@
                 </ItemsControl>
             </StackPanel>
         </Border>
+        <!-- Grafikkarte pro Programm -->
+        <Border Style="{StaticResource Card}" Margin="0,16,0,0">
+            <StackPanel>
+                <TextBlock Text="{DynamicResource Gpu.Title}" Style="{StaticResource H2}" FontSize="16" />
+                <TextBlock Text="{DynamicResource Gpu.Text}" Style="{StaticResource Body2}" Margin="0,6,0,14" TextWrapping="Wrap" />
+                <TextBlock Text="{DynamicResource Tweaks.ForeignAccount}" Foreground="{StaticResource Warn}" TextWrapping="Wrap">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock" BasedOn="{StaticResource TextBase}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding GpuAllowed}" Value="True">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+                <StackPanel IsEnabled="{Binding GpuAllowed}">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                        <TextBox Width="420" Style="{StaticResource SearchBox}" Text="{Binding GpuExe, UpdateSourceTrigger=PropertyChanged}" Tag="{DynamicResource Gpu.ExeHint}"
+                                 AutomationProperties.Name="{DynamicResource Gpu.ExeHint}" Margin="0,0,10,0" />
+                        <Button Style="{StaticResource SecondaryButton}" Content="{DynamicResource Process.Browse}" Command="{Binding BrowseGpuCommand}" />
+                    </StackPanel>
+                    <WrapPanel Margin="0,0,0,12">
+                        <RadioButton Style="{StaticResource Chip}" GroupName="GpuChoice" Content="{DynamicResource Gpu.High}" IsChecked="{Binding GpuHigh}" />
+                        <RadioButton Style="{StaticResource Chip}" GroupName="GpuChoice" Content="{DynamicResource Gpu.Low}" IsChecked="{Binding GpuLow}" />
+                    </WrapPanel>
+                    <Button Style="{StaticResource PrimaryButton}" HorizontalAlignment="Left" Content="{DynamicResource Process.Add}" Command="{Binding AddGpuCommand}" />
+                    <ItemsControl ItemsSource="{Binding GpuRules}" Focusable="False" Margin="0,16,0,0">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="180" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding Name}" ToolTip="{Binding Path}" FontFamily="{StaticResource FontMono}" FontSize="13" Foreground="{StaticResource Text}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Grid.Column="1" Text="{Binding ChoiceText}" Style="{StaticResource TextBase}" VerticalAlignment="Center" />
+                                    <Button Grid.Column="2" Style="{StaticResource SecondaryButton}" Padding="12,6" FontSize="12" Content="{DynamicResource Process.Remove}"
+                                            Command="{Binding DataContext.RemoveGpuCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" />
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </StackPanel>
+        </Border>
     </StackPanel>
 </UserControl>

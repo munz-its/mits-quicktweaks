@@ -23,6 +23,9 @@ public interface IRegistry
 
     /// <summary>Namen der direkten Unterschlüssel. Leer, wenn der Schlüssel fehlt.</summary>
     IReadOnlyList<string> SubKeys(RegistryHive hive, string key);
+
+    /// <summary>Namen aller Werte eines Schlüssels. Leer, wenn der Schlüssel fehlt.</summary>
+    IReadOnlyList<string> ValueNames(RegistryHive hive, string key);
 }
 
 /// <summary>Benachrichtigt Windows nach Änderungen, damit sie ohne Neustart greifen.</summary>

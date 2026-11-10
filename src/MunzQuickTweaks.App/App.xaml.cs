@@ -101,6 +101,8 @@ public partial class App : Application
                 services.AddSingleton<PowerViewModel>();
                 services.AddSingleton<BenchmarkViewModel>();
                 services.AddSingleton<PresetsViewModel>();
+                services.AddSingleton<NetworkViewModel>();
+                services.AddSingleton<HealthViewModel>();
                 services.AddSingleton<ProfileService>();
                 services.AddSingleton(new ChangeLedger(Path.Combine(AppPaths.StateDirectory, "ledger.json")));
                 services.AddSingleton<DiskViewModel>();

@@ -23,8 +23,14 @@ public sealed class LedgerData
 
     public bool OneDriveUninstalled { get; set; }
 
+    /// <summary>Grafikkarten-Wahl pro Programm: Pfad und vorheriger Rohwert (null = gab es nicht).</summary>
+    public Dictionary<string, string?> Gpu { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>DNS pro Adapter (GUID): vorherige Server, leer = automatisch.</summary>
+    public Dictionary<string, List<string>> Dns { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+
     public bool IsEmpty => OriginalPlan is null && OriginalOverlay is null && Startup.Count == 0 && RemovedApps.Count == 0
-                           && Processes.Count == 0 && !OneDriveUninstalled;
+                           && Processes.Count == 0 && !OneDriveUninstalled && Gpu.Count == 0 && Dns.Count == 0;
 }
 
 /// <summary>
@@ -74,6 +80,14 @@ public sealed class ChangeLedger
 
     public void RecordOneDrive(bool uninstalled) => Update(d => d.OneDriveUninstalled = uninstalled);
 
+    public void RecordGpu(string exePath, string? original) => Update(d => d.Gpu.TryAdd(exePath, original));
+
+    public void RecordDns(string adapterGuid, IReadOnlyList<string> original) => Update(d => d.Dns.TryAdd(adapterGuid, original.ToList()));
+
+    public void ClearGpu() => Update(d => d.Gpu.Clear());
+
+    public void ClearDns() => Update(d => d.Dns.Clear());
+
     /// <summary>Nach dem Zurücksetzen: erledigte Bereiche leeren.</summary>
     public void Clear(bool power, bool startup, bool apps, bool processes, bool oneDrive) => Update(d =>
     {
@@ -111,6 +125,8 @@ public sealed class ChangeLedger
 
             var data = JsonSerializer.Deserialize<LedgerData>(File.ReadAllText(_path), Options) ?? new LedgerData();
             data.Processes = new Dictionary<string, ProcessOriginal>(data.Processes, StringComparer.OrdinalIgnoreCase);
+            data.Gpu = new Dictionary<string, string?>(data.Gpu, StringComparer.OrdinalIgnoreCase);
+            data.Dns = new Dictionary<string, List<string>>(data.Dns, StringComparer.OrdinalIgnoreCase);
             return data;
         }
         catch (Exception ex) when (ex is JsonException or IOException)

@@ -64,6 +64,9 @@ internal sealed class FakeRegistry : IRegistry
             .ToList();
     }
 
+    public IReadOnlyList<string> ValueNames(RegistryHive hive, string key) =>
+        Values(hive, key, create: false)?.Keys.ToList() ?? new List<string>();
+
     private Dictionary<string, RegistryValue>? Values(RegistryHive hive, string key, bool create)
     {
         var path = Path(hive, key);
@@ -557,6 +560,8 @@ internal sealed class ThrowingRegistry : IRegistry
     public void DeleteKeyIfEmpty(RegistryHive hive, string key) { }
 
     public IReadOnlyList<string> SubKeys(RegistryHive hive, string key) => Array.Empty<string>();
+
+    public IReadOnlyList<string> ValueNames(RegistryHive hive, string key) => Array.Empty<string>();
 }
 
 public sealed class SelfTestRobustnessTests : IDisposable

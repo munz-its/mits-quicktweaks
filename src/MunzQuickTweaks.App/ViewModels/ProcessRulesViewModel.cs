@@ -12,6 +12,8 @@ namespace MunzQuickTweaks.App.ViewModels;
 
 public sealed record ProcessRuleRow(string Exe, string CpuText, string IoText);
 
+public sealed record GpuRuleRow(string Path, string Name, string ChoiceText);
+
 /// <summary>Feste Priorität für Programme bei jedem Start, z. B. Spiele höher, Updater niedriger.</summary>
 public sealed partial class ProcessRulesViewModel : PageViewModel
 {
@@ -21,9 +23,11 @@ public sealed partial class ProcessRulesViewModel : PageViewModel
     private readonly LocalizationService _localization;
     private readonly ILogger<ProcessRulesViewModel> _log;
 
-    public ProcessRulesViewModel(IRegistry registry, IRegistryBackup backup, HistoryStore history, LocalizationService localization, ChangeLedger ledger, ILogger<ProcessRulesViewModel> log)
+    public ProcessRulesViewModel(IRegistry registry, IRegistryBackup backup, HistoryStore history, LocalizationService localization, ChangeLedger ledger, TweakService tweaks, ILogger<ProcessRulesViewModel> log)
         : base("Nav.Processes")
     {
+        _gpu = new GpuPreferences(registry);
+        _tweaks = tweaks;
         _rules = new ProcessRules(registry);
         _ledger = ledger;
         _backup = backup;
@@ -35,6 +39,100 @@ public sealed partial class ProcessRulesViewModel : PageViewModel
     private readonly ChangeLedger _ledger;
 
     public ObservableCollection<ProcessRuleRow> Rules { get; } = new();
+
+    private readonly GpuPreferences _gpu;
+    private readonly TweakService _tweaks;
+
+    public ObservableCollection<GpuRuleRow> GpuRules { get; } = new();
+
+    public bool HasGpuRules => GpuRules.Count > 0;
+
+    /// <summary>Grafikkarten-Wahl gehört zum Benutzerkonto: bei fremdem Admin-Konto gesperrt.</summary>
+    public bool GpuAllowed => !_tweaks.IsForeignAccount;
+
+    [ObservableProperty]
+    private string _gpuExe = string.Empty;
+
+    [ObservableProperty]
+    private bool _gpuHigh = true;
+
+    public bool GpuLow
+    {
+        get => !GpuHigh;
+        set => GpuHigh = !value;
+    }
+
+    partial void OnGpuHighChanged(bool value) => OnPropertyChanged(nameof(GpuLow));
+
+    private void LoadGpu()
+    {
+        GpuRules.Clear();
+        if (!GpuAllowed)
+        {
+            return;
+        }
+
+        foreach (var rule in _gpu.List())
+        {
+            GpuRules.Add(new GpuRuleRow(rule.ExePath, Path.GetFileName(rule.ExePath),
+                _localization.Get(rule.Choice == GpuChoice.HighPerformance ? "Gpu.High" : "Gpu.Low")));
+        }
+
+        OnPropertyChanged(nameof(HasGpuRules));
+    }
+
+    [RelayCommand]
+    private void BrowseGpu()
+    {
+        var dialog = new Microsoft.Win32.OpenFileDialog { Filter = "Programme (*.exe)|*.exe", CheckFileExists = true };
+        if (dialog.ShowDialog() == true)
+        {
+            GpuExe = dialog.FileName;
+        }
+    }
+
+    [RelayCommand]
+    private void AddGpu()
+    {
+        if (!GpuAllowed || string.IsNullOrWhiteSpace(GpuExe))
+        {
+            return;
+        }
+
+        var path = GpuExe.Trim();
+        try
+        {
+            _ledger.RecordGpu(path, _gpu.RawValue(path));
+            _gpu.Set(path, GpuHigh ? GpuChoice.HighPerformance : GpuChoice.PowerSaving);
+            _history.Add(HistoryAction.ProcessRuleSet, "gpu:" + Path.GetFileName(path), true, GpuHigh ? "Leistung" : "Stromsparend");
+            Show(false, string.Format(System.Globalization.CultureInfo.CurrentCulture, _localization.Get("Gpu.Saved"), Path.GetFileName(path)));
+            GpuExe = string.Empty;
+        }
+        catch (Exception ex) when (ex is UnauthorizedAccessException or IOException or System.Security.SecurityException or ArgumentException)
+        {
+            Show(true, $"{_localization.Get("Tweak.Failed")} {ex.Message}");
+        }
+
+        LoadGpu();
+    }
+
+    [RelayCommand]
+    private void RemoveGpu(GpuRuleRow row)
+    {
+        try
+        {
+            _ledger.RecordGpu(row.Path, _gpu.RawValue(row.Path));
+            _gpu.Remove(row.Path);
+            _history.Add(HistoryAction.ProcessRuleRemoved, "gpu:" + row.Name, true, null);
+            Show(false, string.Format(System.Globalization.CultureInfo.CurrentCulture, _localization.Get("Process.Removed"), row.Name));
+        }
+        catch (Exception ex) when (ex is UnauthorizedAccessException or IOException or System.Security.SecurityException or ArgumentException)
+        {
+            Show(true, $"{_localization.Get("Tweak.Failed")} {ex.Message}");
+        }
+
+        LoadGpu();
+    }
 
     public bool HasRules => Rules.Count > 0;
 
@@ -65,6 +163,7 @@ public sealed partial class ProcessRulesViewModel : PageViewModel
     public override Task OnNavigatedToAsync()
     {
         Status = string.Empty;
+        LoadGpu();
         return LoadAsync();
     }
 

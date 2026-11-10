@@ -21,6 +21,7 @@ public sealed class ProfileService
     private readonly IAppxManager _appx;
     private readonly ChangeLedger _ledger;
     private readonly ProcessRules _processes;
+    private readonly IRegistry _registry;
     private readonly GameModeController _gameMode;
     private readonly HistoryStore _history;
     private readonly LocalizationService _localization;
@@ -36,6 +37,7 @@ public sealed class ProfileService
         _appx = appx;
         _ledger = ledger;
         _processes = new ProcessRules(registry);
+        _registry = registry;
         _gameMode = gameMode;
         _history = history;
         _localization = localization;
@@ -217,6 +219,14 @@ public sealed class ProfileService
         sections.Add(new PreviewSection("processes", T("Nav.Processes"), null,
             processes.Select(p => new PreviewItem(p.Key, p))));
 
+        sections.Add(new PreviewSection("gpu", T("Gpu.Title"), null,
+            ledger.Gpu.Select(g => new PreviewItem(Path.GetFileName(g.Key), g))));
+
+        if (ledger.Dns.Count > 0)
+        {
+            sections.Add(new PreviewSection("dns", T("Net.DnsTitle"), null, new[] { new PreviewItem(T("Preview.DnsRestore"), "dns") }));
+        }
+
         if (ledger.OneDriveUninstalled)
         {
             sections.Add(new PreviewSection("onedrive", "OneDrive", T("Preview.OneDriveHint"), new[] { new PreviewItem(T("Apps.OneDrive.Install"), "onedrive") }));
@@ -311,6 +321,55 @@ public sealed class ProfileService
                 processesDone = false;
                 Count(false);
             }
+        }
+
+        var gpuDone = true;
+        var gpuSection = model.Section("gpu");
+        var gpu = new GpuPreferences(_registry);
+        foreach (var rule in gpuSection?.Selected<KeyValuePair<string, string?>>() ?? Enumerable.Empty<KeyValuePair<string, string?>>())
+        {
+            try
+            {
+                gpu.Restore(rule.Key, rule.Value);
+                Count(true);
+            }
+            catch (Exception ex) when (ex is UnauthorizedAccessException or IOException or System.Security.SecurityException)
+            {
+                _log.LogWarning(ex, "Grafikkarten-Wahl {Path} nicht zurückgesetzt", rule.Key);
+                gpuDone = false;
+                Count(false);
+            }
+        }
+
+        if (gpuDone && gpuSection is not null && gpuSection.Selected<KeyValuePair<string, string?>>().Count() == ledger.Gpu.Count)
+        {
+            _ledger.ClearGpu();
+        }
+
+        if (model.Section("dns")?.Selected<string>().Any() == true)
+        {
+            progress(T("Net.DnsTitle"));
+            var dnsOk = await Task.Run(() =>
+            {
+                var ok = true;
+                foreach (var adapter in Windows.WindowsNetwork.ListAdapters())
+                {
+                    if (ledger.Dns.TryGetValue(adapter.Guid, out var original))
+                    {
+                        var result = Windows.WindowsNetwork.SetDns(adapter, original);
+                        _history.Add(HistoryAction.AppAction, "dns.restore", result.Success, result.Error);
+                        ok &= result.Success;
+                    }
+                }
+
+                return ok;
+            });
+            if (dnsOk)
+            {
+                _ledger.ClearDns();
+            }
+
+            Count(dnsOk);
         }
 
         var oneDriveDone = false;

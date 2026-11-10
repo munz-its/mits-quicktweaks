@@ -82,6 +82,13 @@ public sealed class WindowsRegistry : IRegistry
         root.DeleteSubKey(key, throwOnMissingSubKey: false);
     }
 
+    public IReadOnlyList<string> ValueNames(CoreHive hive, string key)
+    {
+        using var root = OpenRoot(hive);
+        using var sub = root.OpenSubKey(key);
+        return sub?.GetValueNames() ?? Array.Empty<string>();
+    }
+
     public IReadOnlyList<string> SubKeys(CoreHive hive, string key)
     {
         using var root = OpenRoot(hive);
