@@ -197,6 +197,17 @@ public class StringResourceTests
         Assert.Equal(Keys("Theme.xaml").OrderBy(k => k), Keys("ThemeApple.xaml").OrderBy(k => k));
     }
 
+    // Ein <StaticResource>-Element als Eintrag bricht das Nachladen im Wörterbuch: spätere Schlüssel werden nicht mehr gefunden
+    [Fact]
+    public void Themes_contain_no_static_resource_entries()
+    {
+        var themes = Path.Combine(FindRepoRoot(), "src", "MunzQuickTweaks.App", "Themes");
+        foreach (var file in Directory.GetFiles(themes, "*.xaml"))
+        {
+            Assert.DoesNotContain("<StaticResource ", File.ReadAllText(file), StringComparison.Ordinal);
+        }
+    }
+
     private static HashSet<string> ReadKeys(string fileName)
     {
         var path = Path.Combine(FindRepoRoot(), "src", "MunzQuickTweaks.App", "Resources", fileName);

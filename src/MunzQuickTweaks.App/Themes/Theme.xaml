@@ -34,7 +34,7 @@
     <SolidColorBrush x:Key="BlueSoft" Color="#1F5EFF" Opacity="0.14" />
     <SolidColorBrush x:Key="HoverSoft" Color="#FFFFFF" Opacity="0.05" />
     <!-- Unterschiede der Designs, die das Hauptfenster liest (Munz-Design) -->
-    <StaticResource x:Key="NavPillBrush" ResourceKey="BlueSoft" />
+    <SolidColorBrush x:Key="NavPillBrush" Color="#1F5EFF" Opacity="0.14" />
     <Thickness x:Key="ContentMargin">40,8,40,40</Thickness>
 
     <!-- Schriften aus der Landingpage (SIL Open Font License, siehe Assets/Fonts) -->

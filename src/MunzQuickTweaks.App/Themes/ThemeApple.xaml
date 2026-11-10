@@ -34,7 +34,7 @@
     <SolidColorBrush x:Key="BlueSoft" Color="#1F5EFF" Opacity="0.14" />
     <SolidColorBrush x:Key="HoverSoft" Color="#FFFFFF" Opacity="0.06" />
     <!-- Unterschiede der Designs, die das Hauptfenster liest (Liquid Glass) -->
-    <StaticResource x:Key="NavPillBrush" ResourceKey="Blue" />
+    <SolidColorBrush x:Key="NavPillBrush" Color="#1F5EFF" />
     <Thickness x:Key="ContentMargin">40,76,40,40</Thickness>
 
     <!-- Schriften aus der Landingpage (SIL Open Font License, siehe Assets/Fonts) -->

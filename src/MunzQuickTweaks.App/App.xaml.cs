@@ -279,9 +279,17 @@ public partial class App : Application
     private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
         CrashLog.Write("Fehler in der Oberfläche", e.Exception);
-        MessageBox.Show(
-            $"Es ist ein unerwarteter Fehler aufgetreten.\n\n{e.Exception.GetBaseException().Message}\n\nDetails stehen in:\n{CrashLog.FilePath}",
-            "Munz Quick Tweaks", MessageBoxButton.OK, MessageBoxImage.Error);
+        var text = $"Es ist ein unerwarteter Fehler aufgetreten.\n\n{e.Exception.GetBaseException().Message}\n\nDetails stehen in:\n{CrashLog.FilePath}";
+
+        // Meldung immer sichtbar: am sichtbaren Hauptfenster, sonst im Vordergrund des Desktops
+        if (MainWindow is { IsVisible: true } owner)
+        {
+            MessageBox.Show(owner, text, "Munz Quick Tweaks", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        else
+        {
+            MessageBox.Show(text, "Munz Quick Tweaks", MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
+        }
         e.Handled = true;
     }
 }
