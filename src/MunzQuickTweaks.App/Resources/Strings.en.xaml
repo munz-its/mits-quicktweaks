@@ -558,4 +558,6 @@ Winsock and TCP/IP are set back to factory defaults. You need to restart the PC 
     <sys:String x:Key="Reset.Notice.Heading">A Windows update reset tweaks</sys:String>
     <sys:String x:Key="Reset.Notice.Body">Affected: {0} tweaks. Re-apply them with one click.</sys:String>
     <sys:String x:Key="Reset.Notice.Apply">Re-apply</sys:String>
+    <sys:String x:Key="Settings.Glass">Glass effects</sys:String>
+    <sys:String x:Key="Settings.GlassHint">Liquid Glass with blur and refraction. Turn off on weak PCs or in virtual machines if scrolling stutters. Applies after restarting the app.</sys:String>
 </ResourceDictionary>

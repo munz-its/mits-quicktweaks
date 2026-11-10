@@ -214,8 +214,9 @@ public partial class MainWindow : Window
             DwmSetWindowAttribute(hwnd, DwmUseImmersiveDarkMode, ref dark, sizeof(int));
             var round = 2;
             DwmSetWindowAttribute(hwnd, DwmWindowCornerPreference, ref round, sizeof(int));
-            var mica = 2;
-            if (DwmSetWindowAttribute(hwnd, DwmSystemBackdropType, ref mica, sizeof(int)) != 0)
+            // Acrylic (3): zeichnet Desktop und Fenster dahinter live weich, mehr Glas als Mica
+            var acrylic = 3;
+            if (DwmSetWindowAttribute(hwnd, DwmSystemBackdropType, ref acrylic, sizeof(int)) != 0)
             {
                 return;
             }
@@ -228,7 +229,7 @@ public partial class MainWindow : Window
 
             WindowChrome.GetWindowChrome(this).GlassFrameThickness = new Thickness(-1);
             Background = Brushes.Transparent;
-            SidebarBg.Background = new SolidColorBrush(Color.FromArgb(0x59, 0x14, 0x15, 0x18));
+            SidebarBg.Background = new SolidColorBrush(Color.FromArgb(0x38, 0x14, 0x15, 0x18));
             RootBorder.BorderThickness = new Thickness(0);
             if (Splash.Background is SolidColorBrush)
             {
@@ -252,6 +253,12 @@ public partial class MainWindow : Window
     private void UpdateMaximizedMargin()
     {
         RootBorder.Margin = WindowState == WindowState.Maximized ? new Thickness(7) : new Thickness(0);
+    }
+
+    /// <summary>Großer Titel scrollt weg, der kleine Titel in der Glasleiste blendet passend ein.</summary>
+    private void OnContentScrolled(object sender, ScrollChangedEventArgs e)
+    {
+        TopTitle.Opacity = Math.Clamp((e.VerticalOffset - 40) / 40, 0, 1);
     }
 
     private void OnMinimize(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;

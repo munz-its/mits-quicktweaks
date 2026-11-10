@@ -21,4 +21,7 @@ public sealed class AppSettings
 
     /// <summary>Nach dem Anmelden prüfen, ob ein Windows-Update Tweaks zurückgesetzt hat.</summary>
     public bool CheckResetAfterUpdates { get; set; } = true;
+
+    /// <summary>Liquid-Glass-Effekte (Weichzeichnen, Lichtbrechung). Aus für schwache PCs und VMs.</summary>
+    public bool GlassEnabled { get; set; } = true;
 }

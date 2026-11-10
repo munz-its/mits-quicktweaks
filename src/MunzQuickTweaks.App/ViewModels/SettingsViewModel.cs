@@ -20,6 +20,7 @@ public sealed partial class SettingsViewModel : PageViewModel
         _updates = updates;
         _checkForUpdates = settings.Current.CheckForUpdates;
         _checkResetAfterUpdates = settings.Current.CheckResetAfterUpdates;
+        _glassEnabled = settings.Current.GlassEnabled;
         _settings = settings;
         _localization = localization;
         _tweaks = tweaks;
@@ -47,6 +48,15 @@ public sealed partial class SettingsViewModel : PageViewModel
 
     [ObservableProperty]
     private bool _checkResetAfterUpdates;
+
+    [ObservableProperty]
+    private bool _glassEnabled;
+
+    partial void OnGlassEnabledChanged(bool value)
+    {
+        _settings.Current.GlassEnabled = value;
+        _settings.Save();
+    }
 
     partial void OnCheckResetAfterUpdatesChanged(bool value)
     {

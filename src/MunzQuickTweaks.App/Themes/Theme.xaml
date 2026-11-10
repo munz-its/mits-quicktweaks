@@ -35,12 +35,13 @@
     <SolidColorBrush x:Key="HoverSoft" Color="#FFFFFF" Opacity="0.06" />
 
     <!-- Schriften aus der Landingpage (SIL Open Font License, siehe Assets/Fonts) -->
-    <!-- Apple-Variante: durchgehend die Systemschrift, wie es Apple für Apps empfiehlt -->
-    <FontFamily x:Key="FontSans">Segoe UI Variable Text, Segoe UI</FontFamily>
-    <FontFamily x:Key="FontDisplay">Segoe UI Variable Display, Segoe UI</FontFamily>
+    <!-- Apple-Variante: eine Schriftfamilie für alles, wie SF Pro bei Apple -->
+    <!-- Inter (SIL Open Font License, Assets/Fonts/OFL-Inter.txt): kommt SF Pro am nächsten. Inter Display für große Titel -->
+    <FontFamily x:Key="FontSans">pack://application:,,,/Assets/Fonts/#Inter</FontFamily>
+    <FontFamily x:Key="FontDisplay">pack://application:,,,/Assets/Fonts/#Inter Display</FontFamily>
     <FontFamily x:Key="FontMono">Cascadia Mono, Consolas</FontFamily>
     <!-- Fließtext in der Windows-Systemschrift: optisch für kleine Größen gebaut, besser lesbar. Titel bleiben in der Munz-Schrift. -->
-    <FontFamily x:Key="FontText">Segoe UI Variable Text, Segoe UI</FontFamily>
+    <FontFamily x:Key="FontText">pack://application:,,,/Assets/Fonts/#Inter</FontFamily>
 
     <!-- Texte -->
     <Style x:Key="TextBase" TargetType="TextBlock">

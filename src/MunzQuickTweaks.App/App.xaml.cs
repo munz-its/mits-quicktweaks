@@ -129,6 +129,7 @@ public partial class App : Application
 
         var settings = _host.Services.GetRequiredService<SettingsService>();
         Controls.UiMotion.Enabled = settings.Current.AnimationsEnabled;
+        Controls.GlassPanel.Enabled = settings.Current.GlassEnabled;
         _host.Services.GetRequiredService<LocalizationService>().Apply(settings.Current.Language);
 
         // Versteckter Testmodus für Test-VMs: MunzQuickTweaks.exe --selftest

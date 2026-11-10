@@ -160,25 +160,11 @@
                 </ScrollViewer>
             </DockPanel>
 
-            <!-- Titelleiste rechts -->
-            <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Style="{StaticResource CaptionButton}" Click="OnMinimize" ToolTip="{DynamicResource Caption.Minimize}"
-                        WindowChrome.IsHitTestVisibleInChrome="True">
-                    <Rectangle Width="10" Height="1" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
-                </Button>
-                <Button Style="{StaticResource CaptionButton}" Click="OnMaximize" ToolTip="{DynamicResource Caption.Maximize}"
-                        WindowChrome.IsHitTestVisibleInChrome="True">
-                    <Rectangle Width="10" Height="10" StrokeThickness="1" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
-                </Button>
-                <Button Style="{StaticResource CloseButton}" Click="OnClose" ToolTip="{DynamicResource Caption.Close}"
-                        WindowChrome.IsHitTestVisibleInChrome="True">
-                    <Path Data="M0,0 L10,10 M10,0 L0,10" StrokeThickness="1" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
-                </Button>
-            </StackPanel>
 
             <!-- Inhalt -->
-            <ScrollViewer Grid.Row="1" Grid.Column="1" VerticalScrollBarVisibility="Auto" Focusable="False">
-                <Grid Margin="40,8,40,40" MaxWidth="980" HorizontalAlignment="Stretch">
+            <!-- Inhalt läuft unter der Glasleiste oben durch -->
+            <ScrollViewer x:Name="ContentScroller" Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" VerticalScrollBarVisibility="Auto" Focusable="False" ScrollChanged="OnContentScrolled">
+                <Grid Margin="40,76,40,40" MaxWidth="980" HorizontalAlignment="Stretch">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
@@ -236,6 +222,29 @@
                     </ContentControl>
                 </Grid>
             </ScrollViewer>
+
+            <!-- Liquid Glass: schwebende Leiste, zeigt den Inhalt darunter gebrochen und weichgezeichnet. Der kleine Titel erscheint beim Scrollen -->
+            <c:GlassPanel x:Name="TopGlass" Grid.Row="0" Grid.Column="1" VerticalAlignment="Top" Height="44" Margin="16,8,156,0"
+                          CornerRadius="22" Blur="24" Refraction="12" Tint="#4D1E1F23" Source="{Binding ElementName=ContentScroller}">
+                <TextBlock x:Name="TopTitle" Text="{Binding CurrentPage.Heading}" Style="{StaticResource TextBase}" FontWeight="SemiBold" FontSize="14"
+                           VerticalAlignment="Center" Margin="20,0" Opacity="0" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" IsHitTestVisible="False" />
+            </c:GlassPanel>
+
+            <!-- Titelleiste rechts -->
+            <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Style="{StaticResource CaptionButton}" Click="OnMinimize" ToolTip="{DynamicResource Caption.Minimize}"
+                        WindowChrome.IsHitTestVisibleInChrome="True">
+                    <Rectangle Width="10" Height="1" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                </Button>
+                <Button Style="{StaticResource CaptionButton}" Click="OnMaximize" ToolTip="{DynamicResource Caption.Maximize}"
+                        WindowChrome.IsHitTestVisibleInChrome="True">
+                    <Rectangle Width="10" Height="10" StrokeThickness="1" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                </Button>
+                <Button Style="{StaticResource CloseButton}" Click="OnClose" ToolTip="{DynamicResource Caption.Close}"
+                        WindowChrome.IsHitTestVisibleInChrome="True">
+                    <Path Data="M0,0 L10,10 M10,0 L0,10" StrokeThickness="1" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                </Button>
+            </StackPanel>
 
             <!-- Startbildschirm mit Logo-Aufbau, verschwindet nach maximal 1,5 Sekunden -->
             <Grid x:Name="Splash" Grid.RowSpan="2" Grid.ColumnSpan="2" Background="{StaticResource Bg}">

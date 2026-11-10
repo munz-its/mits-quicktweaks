@@ -1,6 +1,8 @@
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Media.Imaging;
 
 namespace MunzQuickTweaks.App.Dialogs;
 
@@ -35,6 +37,7 @@ public partial class PreviewWindow : Window
         var owner = Application.Current?.MainWindow;
         var window = new PreviewWindow(model) { Owner = owner };
         window.CoverOwner(owner);
+        window.UseSnapshotOf(owner);
         return window.ShowDialog() == true && model.Sections.Any(s => s.Items.Any(i => i.IsChecked) && s.IsEnabled);
     }
 
@@ -61,6 +64,46 @@ public partial class PreviewWindow : Window
         Height = area.Height;
         Sheet.MaxHeight = Math.Max(320, area.Height - 72);
         Sheet.Width = Math.Min(620, area.Width - 48);
+    }
+
+    /// <summary>Schnappschuss der App für das Glas im Blatt. Die App ändert sich nicht, solange das Blatt offen ist.</summary>
+    private void UseSnapshotOf(Window? owner)
+    {
+        if (owner is null || !Controls.GlassPanel.Enabled || owner.ActualWidth < 1)
+        {
+            return;
+        }
+
+        try
+        {
+            var dpi = VisualTreeHelper.GetDpi(owner);
+            var bitmap = new RenderTargetBitmap(
+                (int)Math.Ceiling(owner.ActualWidth * dpi.DpiScaleX), (int)Math.Ceiling(owner.ActualHeight * dpi.DpiScaleY),
+                dpi.PixelsPerInchX, dpi.PixelsPerInchY, PixelFormats.Pbgra32);
+            bitmap.Render(owner);
+            bitmap.Freeze();
+            SheetGlass.Backdrop = bitmap;
+            Sheet.LayoutUpdated += PlaceGlass;
+        }
+        catch (Exception ex) when (ex is OutOfMemoryException or ArgumentException or InvalidOperationException)
+        {
+            // Ohne Schnappschuss bleibt das Blatt eine getönte Fläche
+        }
+    }
+
+    private void PlaceGlass(object? sender, EventArgs e)
+    {
+        if (Sheet.ActualWidth < 1)
+        {
+            return;
+        }
+
+        Sheet.LayoutUpdated -= PlaceGlass;
+
+        // Position ohne die Einblend-Verschiebung: so liegt das Glas genau über der Stelle, an der das Blatt landet
+        var left = (ActualWidth - Sheet.ActualWidth) / 2;
+        var top = Sheet.Margin.Top;
+        SheetGlass.SetBackdropArea(new Rect(left, top, Sheet.ActualWidth, Sheet.ActualHeight));
     }
 
     private void AnimateIn()

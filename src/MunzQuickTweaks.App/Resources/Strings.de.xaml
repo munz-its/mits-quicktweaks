@@ -558,4 +558,6 @@ Winsock und TCP/IP werden auf den Werkszustand gesetzt. Danach musst du den PC n
     <sys:String x:Key="Reset.Notice.Heading">Windows-Update hat Tweaks zurückgesetzt</sys:String>
     <sys:String x:Key="Reset.Notice.Body">Betroffen: {0} Tweaks. Mit einem Klick wendest du sie wieder an.</sys:String>
     <sys:String x:Key="Reset.Notice.Apply">Wieder anwenden</sys:String>
+    <sys:String x:Key="Settings.Glass">Glaseffekte</sys:String>
+    <sys:String x:Key="Settings.GlassHint">Liquid Glass mit Weichzeichnen und Lichtbrechung. Auf schwachen PCs oder in virtuellen Maschinen abschalten, wenn das Scrollen ruckelt. Gilt nach einem Neustart der App.</sys:String>
 </ResourceDictionary>
