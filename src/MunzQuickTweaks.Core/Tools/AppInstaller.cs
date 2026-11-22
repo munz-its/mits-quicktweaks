@@ -131,3 +131,118 @@ public static class InstallCatalog
         return new InstallResult(false, false, $"Code 0x{exitCode:X8}" + (line is null ? string.Empty : $": {line}"));
     }
 }
+
+/// <summary>Installiertes Programm, für das winget eine neuere Version kennt.</summary>
+public sealed record UpgradablePackage(string Name, string Id, string Version, string Available);
+
+/// <summary>
+/// Liest die Tabelle von "winget upgrade". Die Spaltenköpfe sind übersetzt, darum zählt nur ihre Position:
+/// Name, Kennung, Version, Verfügbar, Quelle. Gekürzte Kennungen ("…") werden über die vollständige Liste aus "winget export" aufgelöst.
+/// </summary>
+public static class UpgradeParser
+{
+    /// <summary>winget aktualisiert sich nicht selbst aus der App heraus, sonst bricht der laufende Vorgang ab.</summary>
+    public static readonly IReadOnlySet<string> Excluded = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    {
+        "Microsoft.AppInstaller",
+        "Microsoft.DesktopAppInstaller",
+    };
+
+    public static IReadOnlyList<UpgradablePackage> Parse(string output, IReadOnlyCollection<string>? knownIds = null)
+    {
+        var result = new List<UpgradablePackage>();
+
+        // Fortschrittsanzeige von winget arbeitet mit \r. Pro Zeile zählt nur der letzte Abschnitt
+        var lines = output.Replace("\r\n", "\n", StringComparison.Ordinal)
+            .Split('\n')
+            .Select(l => l.Contains('\r') ? l[(l.LastIndexOf('\r') + 1)..] : l)
+            .ToList();
+
+        var separator = lines.FindIndex(l => l.Trim().Length >= 10 && l.Trim().All(c => c == '-'));
+        if (separator < 1)
+        {
+            return result;
+        }
+
+        var header = lines[separator - 1];
+        var starts = ColumnStarts(header);
+        if (starts.Count < 4)
+        {
+            return result;
+        }
+
+        for (var i = separator + 1; i < lines.Count; i++)
+        {
+            var line = lines[i];
+            if (string.IsNullOrWhiteSpace(line))
+            {
+                break; // Ende der ersten Tabelle, danach folgen Hinweise oder eine zweite Liste
+            }
+
+            if (line.Length < starts[3])
+            {
+                continue; // Fußzeile wie "3 Aktualisierungen verfügbar."
+            }
+
+            var name = Cell(line, starts, 0);
+            var id = Cell(line, starts, 1);
+            var version = Cell(line, starts, 2);
+            var available = Cell(line, starts, 3);
+            if (id.Length == 0 || available.Length == 0 || id.Contains(' ', StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            if (id.EndsWith('…') && knownIds is not null)
+            {
+                var prefix = id.TrimEnd('…');
+                var matches = knownIds.Where(k => k.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)).Take(2).ToList();
+                if (matches.Count != 1)
+                {
+                    continue; // nicht eindeutig: lieber weglassen als das falsche Programm aktualisieren
+                }
+
+                id = matches[0];
+            }
+            else if (id.EndsWith('…'))
+            {
+                continue;
+            }
+
+            if (Excluded.Contains(id))
+            {
+                continue;
+            }
+
+            result.Add(new UpgradablePackage(name.TrimEnd('…').Trim(), id, version, available));
+        }
+
+        return result;
+    }
+
+    private static List<int> ColumnStarts(string header)
+    {
+        var starts = new List<int>();
+        for (var i = 0; i < header.Length; i++)
+        {
+            if (header[i] != ' ' && (i == 0 || header[i - 1] == ' '))
+            {
+                starts.Add(i);
+            }
+        }
+
+        return starts;
+    }
+
+    private static string Cell(string line, List<int> starts, int column)
+    {
+        var start = starts[column];
+        if (start >= line.Length)
+        {
+            return string.Empty;
+        }
+
+        var end = column + 1 < starts.Count ? Math.Min(starts[column + 1], line.Length) : line.Length;
+        return line[start..end].Trim();
+    }
+}

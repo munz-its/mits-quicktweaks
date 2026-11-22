@@ -1,0 +1,245 @@
+<UserControl x:Class="MunzQuickTweaks.App.Views.SetupView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:v="clr-namespace:MunzQuickTweaks.App.Views">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+
+        <!-- Ergebniskacheln wie auf der Benchmark-Seite -->
+        <DataTemplate x:Key="BenchRows">
+            <ItemsControl ItemsSource="{Binding Benchmark.Rows}" Focusable="False">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Background="{StaticResource Bg3}" CornerRadius="10" Width="190" Margin="0,0,10,10" Padding="14,12">
+                            <StackPanel>
+                                <TextBlock Text="{Binding Label}" Style="{StaticResource MutedText}" FontSize="12" />
+                                <TextBlock Text="{Binding Value}" FontFamily="{StaticResource FontMono}" FontSize="18" Foreground="{StaticResource Text}" Margin="0,4,0,2" />
+                                <TextBlock Text="{Binding Change}" FontFamily="{StaticResource FontMono}" FontSize="12">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Foreground" Value="{StaticResource Muted}" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsBetter}" Value="True">
+                                                    <Setter Property="Foreground" Value="{StaticResource Ok}" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IsWorse}" Value="True">
+                                                    <Setter Property="Foreground" Value="{StaticResource Danger}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </DataTemplate>
+
+        <Style x:Key="StatusText" TargetType="TextBlock" BasedOn="{StaticResource TextBase}">
+            <Setter Property="Foreground" Value="{StaticResource BlueXl}" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="Margin" Value="0,12,0,0" />
+            <Style.Triggers>
+                <Trigger Property="Text" Value="">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <StackPanel MaxWidth="900" HorizontalAlignment="Left">
+        <TextBlock Text="{DynamicResource Desc.Setup}" Style="{StaticResource Body2}" TextWrapping="Wrap" Margin="0,0,0,20" />
+
+        <!-- Schrittleiste -->
+        <ItemsControl ItemsSource="{Binding Steps}" Focusable="False" Margin="0,0,0,20">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Button Cursor="Hand" Margin="0,0,8,8" Focusable="True"
+                            Command="{Binding DataContext.GoToCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="Bd" Background="{StaticResource Bg2}" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="999" Padding="6,5,14,5">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Border x:Name="Num" Width="24" Height="24" CornerRadius="12" Background="{StaticResource Bg3}" Margin="0,0,8,0">
+                                            <TextBlock x:Name="NumText" Text="{Binding Number}" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource Muted}"
+                                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Border>
+                                        <TextBlock x:Name="Title" Text="{Binding Title}" Style="{StaticResource TextBase}" FontSize="13" Foreground="{StaticResource Muted}" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <DataTrigger Binding="{Binding IsDone}" Value="True">
+                                        <Setter TargetName="Num" Property="Background" Value="{StaticResource Ok}" />
+                                        <Setter TargetName="NumText" Property="Text" Value="✓" />
+                                        <Setter TargetName="NumText" Property="Foreground" Value="White" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                                        <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource Blue}" />
+                                        <Setter TargetName="Bd" Property="Background" Value="{StaticResource BlueSoft}" />
+                                        <Setter TargetName="Num" Property="Background" Value="{StaticResource Blue}" />
+                                        <Setter TargetName="NumText" Property="Foreground" Value="White" />
+                                        <Setter TargetName="Title" Property="Foreground" Value="{StaticResource Text}" />
+                                    </DataTrigger>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource Blue}" />
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <!-- Schritt 1: Benchmark vorher -->
+        <Border Style="{StaticResource Card}" Visibility="{Binding IsStep0, Converter={StaticResource BoolToVis}}">
+            <StackPanel>
+                <TextBlock Text="{DynamicResource Setup.Step0.Title}" Style="{StaticResource H2}" Margin="0,0,0,8" />
+                <TextBlock Text="{DynamicResource Setup.Step0.Text}" Style="{StaticResource Body2}" TextWrapping="Wrap" Margin="0,0,0,16" />
+                <StackPanel Orientation="Horizontal">
+                    <Button Style="{StaticResource PrimaryButton}" Content="{DynamicResource Setup.Measure}" Command="{Binding RunBenchmarkCommand}"
+                            IsEnabled="{Binding Benchmark.IsIdle}" Margin="0,0,10,0" />
+                    <Button Style="{StaticResource SecondaryButton}" Content="{DynamicResource Bench.Cancel}" Command="{Binding Benchmark.CancelCommand}"
+                            Visibility="{Binding Benchmark.IsRunning, Converter={StaticResource BoolToVis}}" />
+                </StackPanel>
+                <TextBlock Text="{Binding Benchmark.Progress}" Style="{StaticResource StatusText}" />
+                <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource BenchRows}" Margin="0,14,0,0"
+                                  Visibility="{Binding Benchmark.HasResult, Converter={StaticResource BoolToVis}}" />
+            </StackPanel>
+        </Border>
+
+        <!-- Schritt 2: Voreinstellung -->
+        <Border Style="{StaticResource Card}" Visibility="{Binding IsStep1, Converter={StaticResource BoolToVis}}">
+            <StackPanel>
+                <TextBlock Text="{DynamicResource Setup.Step1.Title}" Style="{StaticResource H2}" Margin="0,0,0,8" />
+                <TextBlock Text="{DynamicResource Setup.Step1.Text}" Style="{StaticResource Body2}" TextWrapping="Wrap" Margin="0,0,0,16" />
+                <ItemsControl ItemsSource="{Binding Profiles}" Focusable="False" Margin="0,0,0,8">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Columns="2" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button Cursor="Hand" Margin="0,0,10,10" HorizontalContentAlignment="Stretch"
+                                    Command="{Binding DataContext.SelectProfileCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="Bd" Background="{StaticResource Bg3}" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="10" Padding="14,12">
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Name}" Style="{StaticResource TextBase}" FontWeight="SemiBold" Foreground="{StaticResource Text}" />
+                                                <TextBlock Text="{Binding Hint}" Style="{StaticResource MutedText}" FontSize="12" TextWrapping="Wrap" Margin="0,3,0,0" />
+                                            </StackPanel>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource Blue}" />
+                                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource BlueSoft}" />
+                                                <Setter TargetName="Bd" Property="BorderThickness" Value="2" />
+                                            </DataTrigger>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource Blue}" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <Button Style="{StaticResource PrimaryButton}" HorizontalAlignment="Left" Content="{DynamicResource Setup.ApplyProfile}" Command="{Binding ApplyProfileCommand}" />
+                <TextBlock Text="{Binding ProfileStatus}" Style="{StaticResource StatusText}" />
+            </StackPanel>
+        </Border>
+
+        <!-- Schritt 3: Vorinstallierte Apps -->
+        <Border Style="{StaticResource Card}" Visibility="{Binding IsStep2, Converter={StaticResource BoolToVis}}">
+            <StackPanel>
+                <TextBlock Text="{DynamicResource Setup.Step2.Title}" Style="{StaticResource H2}" Margin="0,0,0,8" />
+                <TextBlock Text="{DynamicResource Setup.Step2.Text}" Style="{StaticResource Body2}" TextWrapping="Wrap" Margin="0,0,0,16" />
+                <Button Style="{StaticResource PrimaryButton}" HorizontalAlignment="Left" Content="{DynamicResource Setup.RemoveApps}" Command="{Binding RemoveAppsCommand}" />
+                <TextBlock Text="{Binding AppsStatus}" Style="{StaticResource StatusText}" />
+            </StackPanel>
+        </Border>
+
+        <!-- Schritt 4: Programme (dieselbe Ansicht wie die Seite Programme) -->
+        <StackPanel Visibility="{Binding IsStep3, Converter={StaticResource BoolToVis}}">
+            <TextBlock Text="{DynamicResource Setup.Step3.Title}" Style="{StaticResource H2}" Margin="0,0,0,8" />
+            <TextBlock Text="{DynamicResource Setup.Step3.Text}" Style="{StaticResource Body2}" TextWrapping="Wrap" Margin="0,0,0,16" />
+            <v:InstallerView DataContext="{Binding Installer}" />
+        </StackPanel>
+
+        <!-- Schritt 5: Benchmark nachher und Zusammenfassung -->
+        <StackPanel Visibility="{Binding IsStep4, Converter={StaticResource BoolToVis}}">
+            <Border Style="{StaticResource Card}" Margin="0,0,0,16">
+                <StackPanel>
+                    <TextBlock Text="{DynamicResource Setup.Step4.Title}" Style="{StaticResource H2}" Margin="0,0,0,8" />
+                    <TextBlock Text="{DynamicResource Setup.Step4.Text}" Style="{StaticResource Body2}" TextWrapping="Wrap" Margin="0,0,0,16" />
+                    <StackPanel Orientation="Horizontal">
+                        <Button Style="{StaticResource PrimaryButton}" Content="{DynamicResource Setup.MeasureAfter}" Command="{Binding RunBenchmarkCommand}"
+                                IsEnabled="{Binding Benchmark.IsIdle}" Margin="0,0,10,0" />
+                        <Button Style="{StaticResource SecondaryButton}" Content="{DynamicResource Bench.Cancel}" Command="{Binding Benchmark.CancelCommand}"
+                                Visibility="{Binding Benchmark.IsRunning, Converter={StaticResource BoolToVis}}" />
+                    </StackPanel>
+                    <TextBlock Text="{Binding Benchmark.Progress}" Style="{StaticResource StatusText}" />
+                    <TextBlock Text="{Binding Benchmark.CompareText}" Style="{StaticResource MutedText}" FontSize="12" Margin="0,10,0,0" TextWrapping="Wrap" />
+                    <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource BenchRows}" Margin="0,10,0,0"
+                                      Visibility="{Binding Benchmark.HasResult, Converter={StaticResource BoolToVis}}" />
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <TextBlock Text="{DynamicResource Setup.SummaryTitle}" Style="{StaticResource H2}" Margin="0,0,0,10" />
+                    <ItemsControl ItemsSource="{Binding Summary}" Focusable="False" Margin="0,0,0,14">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <DockPanel Margin="0,0,0,6">
+                                    <TextBlock DockPanel.Dock="Left" Text="•" Foreground="{StaticResource Blue}" Margin="0,0,8,0" Style="{StaticResource TextBase}" />
+                                    <TextBlock Text="{Binding}" Style="{StaticResource TextBase}" TextWrapping="Wrap" />
+                                </DockPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <WrapPanel>
+                        <Button Style="{StaticResource PrimaryButton}" Content="{DynamicResource Report.Button}" Command="{Binding CreateReportCommand}" Margin="0,0,10,8" />
+                        <Button Style="{StaticResource SecondaryButton}" Content="{DynamicResource Profile.Export}" Command="{Binding Presets.ExportCommand}" Margin="0,0,10,8" />
+                        <Button Style="{StaticResource SecondaryButton}" Content="{DynamicResource Setup.Restart}" Command="{Binding RestartCommand}" Margin="0,0,10,8" />
+                    </WrapPanel>
+                    <TextBlock Text="{Binding ReportStatus}" Style="{StaticResource StatusText}" />
+                    <TextBlock Text="{Binding Presets.Status}" Style="{StaticResource StatusText}" />
+                </StackPanel>
+            </Border>
+        </StackPanel>
+
+        <!-- Navigation -->
+        <DockPanel Margin="0,20,0,0">
+            <TextBlock DockPanel.Dock="Left" Text="{Binding StepText}" Style="{StaticResource MutedText}" VerticalAlignment="Center" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Style="{StaticResource SecondaryButton}" Content="{DynamicResource Setup.Back}" Command="{Binding BackCommand}" Margin="0,0,10,0" />
+                <Button Content="{DynamicResource Setup.Next}" Command="{Binding NextCommand}">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsLast}" Value="True">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </StackPanel>
+        </DockPanel>
+    </StackPanel>
+</UserControl>

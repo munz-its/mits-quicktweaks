@@ -22,9 +22,12 @@ public sealed partial class DashboardViewModel : PageViewModel
 
     private readonly BatchApplyService _batch;
 
-    public DashboardViewModel(SystemInfoProvider provider, TweakService tweaks, IRestorePointService restorePoints, LocalizationService localization, HistoryStore history, BatchApplyService batch, ProfileService profiles)
+    public DashboardViewModel(SystemInfoProvider provider, TweakService tweaks, IRestorePointService restorePoints, LocalizationService localization, HistoryStore history, BatchApplyService batch, ProfileService profiles,
+        ReportService reports, SettingsService settings)
         : base("Nav.Dashboard")
     {
+        _reports = reports;
+        _settings = settings;
         _batch = batch;
         _profiles = profiles;
         _provider = provider;
@@ -35,6 +38,52 @@ public sealed partial class DashboardViewModel : PageViewModel
     }
 
     private readonly ProfileService _profiles;
+    private readonly ReportService _reports;
+    private readonly SettingsService _settings;
+
+    /// <summary>Nur solange noch nie ein Tweak angewendet wurde und der Hinweis nicht weggeklickt ist.</summary>
+    [ObservableProperty]
+    private bool _showSetupHint;
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(CreateReportCommand))]
+    private bool _isCreatingReport;
+
+    [ObservableProperty]
+    private string _reportStatus = string.Empty;
+
+    [RelayCommand]
+    private void OpenSetup() => NavigateRequested?.Invoke("Nav.Setup");
+
+    [RelayCommand]
+    private void DismissSetupHint()
+    {
+        ShowSetupHint = false;
+        _settings.Current.SetupHintDismissed = true;
+        _settings.Save();
+    }
+
+    private bool CanCreateReport() => !IsCreatingReport;
+
+    [RelayCommand(CanExecute = nameof(CanCreateReport))]
+    private async Task CreateReportAsync()
+    {
+        IsCreatingReport = true;
+        ReportStatus = _localization.Get("Report.Creating");
+        try
+        {
+            var path = await _reports.CreateAndOpenAsync();
+            ReportStatus = string.Format(System.Globalization.CultureInfo.CurrentCulture, _localization.Get("Report.Saved"), Path.GetFileName(path));
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            ReportStatus = $"{_localization.Get("Tweak.Failed")} {ex.Message}";
+        }
+        finally
+        {
+            IsCreatingReport = false;
+        }
+    }
 
     public override string HeadingKey => "Dashboard.Heading";
 
@@ -235,6 +284,7 @@ public sealed partial class DashboardViewModel : PageViewModel
     {
         // Zähler bei jedem Öffnen aktualisieren, Systemdaten nur einmal lesen
         await RefreshCountsAsync();
+        ShowSetupHint = !_settings.Current.SetupHintDismissed && _tweaks.Engine.Journal.All.Count == 0;
 
         if (_loaded)
         {

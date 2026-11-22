@@ -12,6 +12,9 @@ public enum ProfileKind
     Office,
     MaxPerformance,
     ResetAll,
+
+    /// <summary>Aus einer Profildatei importiert.</summary>
+    Custom,
 }
 
 /// <summary>
@@ -25,6 +28,9 @@ public sealed record TweakProfile(ProfileKind Kind, IReadOnlyList<string> TweakI
     public IReadOnlyList<string> StartupApps { get; init; } = Array.Empty<string>();
 
     public IReadOnlyList<DebloatGroup> Debloat { get; init; } = Array.Empty<DebloatGroup>();
+
+    /// <summary>Einzelne Apps (Paketnamen aus dem Debloat-Katalog), z. B. aus einer Profildatei.</summary>
+    public IReadOnlyList<string> DebloatApps { get; init; } = Array.Empty<string>();
 }
 
 public static class ProfileCatalog

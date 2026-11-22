@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Logging;
 using MunzQuickTweaks.App.Services;
 using MunzQuickTweaks.Core.Modules;
 using MunzQuickTweaks.Core.Tweaks;
@@ -41,10 +42,15 @@ public sealed partial class PresetsViewModel : PageViewModel
     private readonly ProfileService _profiles;
     private readonly TweakService _tweaks;
     private readonly LocalizationService _localization;
+    private readonly UpdateService _app;
+    private readonly Microsoft.Extensions.Logging.ILogger<PresetsViewModel> _log;
 
-    public PresetsViewModel(ProfileService profiles, TweakService tweaks, LocalizationService localization)
+    public PresetsViewModel(ProfileService profiles, TweakService tweaks, LocalizationService localization, UpdateService app,
+        Microsoft.Extensions.Logging.ILogger<PresetsViewModel> log)
         : base("Nav.Presets")
     {
+        _app = app;
+        _log = log;
         _profiles = profiles;
         _tweaks = tweaks;
         _localization = localization;
@@ -65,7 +71,7 @@ public sealed partial class PresetsViewModel : PageViewModel
     public ObservableCollection<PresetCard> Cards { get; }
 
     [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(ApplyCommand))]
+    [NotifyCanExecuteChangedFor(nameof(ApplyCommand), nameof(ExportCommand), nameof(ImportCommand))]
     private bool _isBusy;
 
     [ObservableProperty]
@@ -103,6 +109,107 @@ public sealed partial class PresetsViewModel : PageViewModel
     }
 
     private bool CanApply() => !IsBusy;
+
+    private string FileFilter => $"{_localization.Get("Profile.FileType")} (*{ProfileFile.Extension})|*{ProfileFile.Extension}";
+
+    /// <summary>Aktuellen Stand als .mqtprofile speichern, z. B. um ihn auf andere PCs zu übertragen.</summary>
+    [RelayCommand(CanExecute = nameof(CanApply))]
+    private async Task ExportAsync()
+    {
+        var dialog = new Microsoft.Win32.SaveFileDialog
+        {
+            Filter = FileFilter,
+            DefaultExt = ProfileFile.Extension,
+            AddExtension = true,
+            FileName = ProfileFile.SafeFileName(string.Format(CultureInfo.CurrentCulture, _localization.Get("Profile.DefaultName"), Environment.MachineName)),
+            InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory),
+        };
+        if (dialog.ShowDialog() != true)
+        {
+            return;
+        }
+
+        IsBusy = true;
+        try
+        {
+            var profile = await _profiles.ExportCurrentAsync(Path.GetFileNameWithoutExtension(dialog.FileName), _app.CurrentVersion);
+            if (profile.IsEmpty)
+            {
+                Status = _localization.Get("Profile.ExportEmpty");
+                return;
+            }
+
+            await File.WriteAllTextAsync(dialog.FileName, profile.Serialize());
+            _log.LogInformation("Profil exportiert: {Tweaks} Tweaks, {Apps} Apps, {Startup} Autostart", profile.Tweaks.Count, profile.RemoveApps.Count, profile.DisableStartup.Count);
+            Status = string.Format(CultureInfo.CurrentCulture, _localization.Get("Profile.Exported"), Path.GetFileName(dialog.FileName),
+                profile.Tweaks.Count + profile.RemoveApps.Count + profile.DisableStartup.Count + (profile.PowerMode is null ? 0 : 1));
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            Status = $"{_localization.Get("Tweak.Failed")} {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    /// <summary>Profil aus einer Datei: erst Vorschau mit Häkchen, dann anwenden.</summary>
+    [RelayCommand(CanExecute = nameof(CanApply))]
+    private async Task ImportAsync()
+    {
+        var dialog = new Microsoft.Win32.OpenFileDialog
+        {
+            Filter = FileFilter,
+            InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory),
+        };
+        if (dialog.ShowDialog() != true)
+        {
+            return;
+        }
+
+        await ImportFileAsync(dialog.FileName);
+    }
+
+    public async Task ImportFileAsync(string path)
+    {
+        IsBusy = true;
+        try
+        {
+            if (new FileInfo(path).Length > ProfileFile.MaxBytes)
+            {
+                Status = _localization.Get("Profile.ImportInvalid");
+                return;
+            }
+
+            var (file, error) = ProfileFile.Parse(await File.ReadAllTextAsync(path));
+            if (file is null)
+            {
+                Status = _localization.Get(error == ProfileFileError.TooNew ? "Profile.ImportTooNew" : "Profile.ImportInvalid");
+                return;
+            }
+
+            var (profile, unknown) = file.ToProfile(_tweaks.Tweaks.Select(t => t.Id));
+            var name = file.Name.Length > 0 ? file.Name : Path.GetFileNameWithoutExtension(path);
+            var intro = _localization.Get("Profile.ImportIntro");
+            if (unknown > 0)
+            {
+                intro += " " + string.Format(CultureInfo.CurrentCulture, _localization.Get("Profile.ImportUnknown"), unknown);
+            }
+
+            _log.LogInformation("Profil importiert: {Name}, {Tweaks} Tweaks, {Unknown} unbekannt", name, profile.TweakIds.Count, unknown);
+            Status = await _profiles.RunImportedAsync(profile, name, intro, text => Status = text);
+            await RefreshAsync();
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            Status = $"{_localization.Get("Tweak.Failed")} {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
 
     [RelayCommand(CanExecute = nameof(CanApply))]
     private async Task ApplyAsync(PresetCard card)

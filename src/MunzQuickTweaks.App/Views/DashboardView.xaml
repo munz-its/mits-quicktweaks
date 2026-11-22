@@ -57,6 +57,21 @@
             <TextBlock Text="{DynamicResource Dashboard.Intro}" Style="{StaticResource Body2}" MaxWidth="640" HorizontalAlignment="Left" />
         </DockPanel>
 
+        <!-- Erster Start: Hinweis auf den Einrichtungs-Assistenten -->
+        <Border Style="{StaticResource Card}" BorderBrush="{StaticResource Blue}" BorderThickness="1" Margin="0,0,0,20"
+                Visibility="{Binding ShowSetupHint, Converter={StaticResource BoolToVis}}">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Style="{StaticResource SecondaryButton}" Content="{DynamicResource Setup.HintLater}" Command="{Binding DismissSetupHintCommand}" Margin="0,0,10,0" />
+                    <Button Style="{StaticResource PrimaryButton}" Content="{DynamicResource Setup.HintStart}" Command="{Binding OpenSetupCommand}" />
+                </StackPanel>
+                <StackPanel Margin="0,0,16,0">
+                    <TextBlock Text="{DynamicResource Setup.HintTitle}" Style="{StaticResource H2}" FontSize="16" />
+                    <TextBlock Text="{DynamicResource Setup.HintText}" Style="{StaticResource Body2}" TextWrapping="Wrap" Margin="0,4,0,0" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
         <!-- Hinweis bei nicht unterstützter Windows-Version -->
         <Border Background="#1AFFB547" BorderBrush="{StaticResource Warn}" BorderThickness="1" CornerRadius="10"
                 Padding="16,12" Margin="0,0,0,20"
@@ -185,7 +200,22 @@
             <!-- Dein System -->
             <Border Style="{StaticResource Card}">
                 <StackPanel>
-                    <TextBlock Text="{DynamicResource Dashboard.System}" Style="{StaticResource H2}" Margin="0,0,0,12" />
+                    <DockPanel Margin="0,0,0,12">
+                        <Button DockPanel.Dock="Right" Style="{StaticResource SecondaryButton}" Padding="12,6" FontSize="13" VerticalAlignment="Center"
+                                Content="{DynamicResource Report.Button}" Command="{Binding CreateReportCommand}" />
+                        <TextBlock Text="{DynamicResource Dashboard.System}" Style="{StaticResource H2}" VerticalAlignment="Center" />
+                    </DockPanel>
+                    <TextBlock Text="{Binding ReportStatus}" FontSize="12" TextWrapping="Wrap" Margin="0,-6,0,10">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock" BasedOn="{StaticResource MutedText}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ReportStatus}" Value="">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
                     <TextBlock Text="{DynamicResource Dashboard.Loading}" Style="{StaticResource MutedText}"
                                Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}" />
                     <StackPanel>

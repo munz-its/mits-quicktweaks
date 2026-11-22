@@ -57,7 +57,15 @@ public sealed class ProfileService
         }
 
         var profile = ProfileCatalog.Get(kind, _tweaks.Tweaks);
-        var name = T($"Profile.{kind}");
+        return await RunAsync(profile, T($"Profile.{kind}"), T($"Profile.{kind}.Long"), kind.ToString(), progress);
+    }
+
+    /// <summary>Profil aus einer Datei anwenden, mit derselben Vorschau wie die festen Voreinstellungen.</summary>
+    public Task<string> RunImportedAsync(TweakProfile profile, string name, string intro, Action<string> progress) =>
+        RunAsync(profile, name, intro, "import", progress);
+
+    private async Task<string> RunAsync(TweakProfile profile, string name, string intro, string tag, Action<string> progress)
+    {
         var lang = _localization.CurrentLanguage;
 
         var (todo, startup, apps, modeNeeded) = await Task.Run(() =>
@@ -69,7 +77,9 @@ public sealed class ProfileService
                 .SelectMany(app => AppCatalog.MatchStartup(app, entries).Where(e => e.Enabled).Select(e => (App: app, Entry: e)))
                 .ToList();
             var installed = SafeInstalled();
-            var appTodo = DebloatCatalog.Match(installed).Where(m => profile.Debloat.Contains(m.App.Group)).ToList();
+            var appTodo = DebloatCatalog.Match(installed)
+                .Where(m => profile.Debloat.Contains(m.App.Group) || profile.DebloatApps.Contains(m.App.Package, StringComparer.OrdinalIgnoreCase))
+                .ToList();
             var mode = profile.Mode is { } m && SafeGetMode() != m;
             return (tweaks, startupTodo, appTodo, mode);
         });
@@ -91,7 +101,7 @@ public sealed class ProfileService
         sections.Add(new PreviewSection("apps", T("Preview.Apps"), T("Preview.AppsHint"),
             apps.Select(a => new PreviewItem(a.App.Name, new DebloatMatch(a.App, a.Packages)))));
 
-        var model = new PreviewModel(F("Preview.ProfileHeading", name), T($"Profile.{kind}.Long"), T("Preview.Apply"), T("Preview.Cancel"), sections);
+        var model = new PreviewModel(F("Preview.ProfileHeading", name), intro, T("Preview.Apply"), T("Preview.Cancel"), sections);
         if (model.Sections.Count == 0)
         {
             return F("Profile.AllActive", name);
@@ -108,7 +118,7 @@ public sealed class ProfileService
         var chosenTweaks = model.Section("tweaks")?.Selected<TweakDefinition>().ToList() ?? new List<TweakDefinition>();
         if (chosenTweaks.Count > 0)
         {
-            var result = await _batch.ApplyAsync(chosenTweaks, progress, kind.ToString());
+            var result = await _batch.ApplyAsync(chosenTweaks, progress, tag);
             done += result.Applied;
             failed += result.Failed;
         }
@@ -161,9 +171,41 @@ public sealed class ProfileService
             _history.Add(HistoryAction.AppRemoved, app.App.Package, allRemoved, error);
         }
 
-        _log.LogInformation("Profil {Kind}: {Done} erledigt, {Failed} Fehler", kind, done, failed);
+        _log.LogInformation("Profil {Kind}: {Done} erledigt, {Failed} Fehler", tag, done, failed);
         return F("Profile.Done", name, done, failed);
     }
+
+    /// <summary>
+    /// Aktueller Stand als Profildatei: aktive Tweaks, Energiemodus, über die App entfernte Apps
+    /// und Programme, deren Autostart über die App ausgeschaltet wurde und noch aus ist.
+    /// </summary>
+    public Task<ProfileFile> ExportCurrentAsync(string name, string appVersion) => Task.Run(() =>
+    {
+        var ledger = _ledger.Data;
+        var tweaks = _tweaks.Tweaks.Where(t => _tweaks.GetStatus(t) == TweakStatus.Applied).Select(t => t.Id).ToList();
+        var entries = SafeStartupList();
+        var startup = AppCatalog.All
+            .Where(app =>
+            {
+                var matches = AppCatalog.MatchStartup(app, entries);
+                return matches.Count > 0 && matches.All(e => !e.Enabled && ledger.Startup.ContainsKey(e.Id));
+            })
+            .Select(app => app.Id)
+            .ToList();
+        var removed = ledger.RemovedApps
+            .Where(p => DebloatCatalog.All.Any(d => string.Equals(d.Package, p, StringComparison.OrdinalIgnoreCase)))
+            .ToList();
+        return new ProfileFile
+        {
+            Name = name,
+            CreatedWith = appVersion,
+            Created = DateTimeOffset.Now,
+            Tweaks = tweaks,
+            PowerMode = ledger.OriginalPlan is not null || ledger.OriginalOverlay is not null ? SafeGetMode() : null,
+            RemoveApps = removed,
+            DisableStartup = startup,
+        };
+    });
 
     /// <summary>Alles zurück, was die App je geändert hat: Tweaks, Energie, Autostart, Apps, Prozessregeln, Game Mode, OneDrive.</summary>
     public async Task<string> ResetAllAsync(Action<string> progress)

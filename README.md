@@ -2,7 +2,7 @@
 
 Kostenlose Windows-App von Munz IT Service. Macht Windows 10 22H2 und Windows 11 schneller und aufgeräumter. Jede Änderung ist erklärt und lässt sich zurücksetzen. Portabel, ohne Installation, ohne Werbung, ohne Konto und ohne Telemetrie.
 
-**Aktuelle Version: 1.1.0**
+**Aktuelle Version: 1.2.0**
 Download: [GitHub Releases](https://github.com/munz-its/mits-quicktweaks/releases/latest)
 Änderungen: [RELEASE_NOTES.md](RELEASE_NOTES.md)
 
@@ -10,11 +10,12 @@ Download: [GitHub Releases](https://github.com/munz-its/mits-quicktweaks/release
 
 | Bereich | Inhalt |
 | --- | --- |
-| Dashboard | Überblick über den PC und den Stand deiner Tweaks |
-| Voreinstellungen | Ein Klick für viele Einstellungen, mit Vorschau und Häkchen pro Änderung |
+| Dashboard | Überblick über den PC und den Stand deiner Tweaks, PC-Bericht als HTML |
+| Einrichten | Assistent für neue PCs: messen, Voreinstellung, Apps entfernen, Programme, Ergebnis |
+| Voreinstellungen | Ein Klick für viele Einstellungen, mit Vorschau und Häkchen pro Änderung. Eigene Profile exportieren und importieren (.mqtprofile) |
 | Tweaks, Datenschutz, Debloat | Tweaks mit Erklärung und Risiko-Stufe, Telemetrie, Copilot und Recall abschalten, vorinstallierte Apps entfernen und zurückholen |
 | Apps | Edge, Chrome, Discord, OneDrive, Steam und Epic Games gezielt einstellen |
-| Programme | Mehrere Programme auf einmal per winget installieren |
+| Programme | Installierte Programme aktualisieren, mehrere Programme auf einmal per winget installieren |
 | Autostart | Programme beim Windows-Start verwalten |
 | Energie | Energiemodus und Energieplan |
 | Prozessregeln | Feste Priorität pro Programm, Grafikkarte pro Programm |
@@ -32,6 +33,7 @@ Weitere Punkte:
 - Zwei Designs: Munz und Liquid Glass (Glaseffekt unter Windows 11). Umschalten unter Einstellungen.
 - Prüfung nach Windows-Updates: Kurz nach dem Anmelden prüft die App, ob ein Update Tweaks zurückgesetzt hat, und meldet sich nur dann.
 - Kontextmenü aufräumen, z. B. "Copilot fragen" oder "Mit Clipchamp bearbeiten" ausblenden.
+- PC-Bericht: System, Datenträger, Akku, Benchmark, Startzeit, aktive Tweaks und Treiber als HTML-Datei auf dem Desktop, mit Strg+P als PDF speicherbar. Ohne Passwörter oder persönliche Dateien.
 - Sprachen: Deutsch und Englisch.
 
 ## Sicherheit
@@ -44,7 +46,7 @@ Weitere Punkte:
 
 Die App geht nur in diesen Fällen ins Internet:
 - Update-Prüfung beim Start: Abruf von `munz-its.de/quicktweaks/version.json`. Abschaltbar in den Einstellungen.
-- Funktionen, die du selbst startest: Ping-Test, DNS-Wechsel, Programme installieren.
+- Funktionen, die du selbst startest: Ping-Test, DNS-Wechsel, Programme installieren und aktualisieren.
 
 Einstellungen und Protokolle bleiben auf dem PC. Details stehen in der App unter Hilfe, Datenschutz, und unter [munz-its.de/datenschutz](https://munz-its.de/datenschutz).
 

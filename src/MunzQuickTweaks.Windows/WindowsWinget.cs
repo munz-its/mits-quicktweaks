@@ -61,6 +61,23 @@ public static class WindowsWinget
         return InstallCatalog.Interpret(code, output);
     }
 
+    /// <summary>Programme mit verfügbarem Update. Unbekannte Versionen lässt winget hier selbst weg.</summary>
+    public static IReadOnlyList<UpgradablePackage> Upgrades(string winget, IReadOnlyCollection<string>? knownIds = null)
+    {
+        var (_, output) = Run(winget, new[] { "upgrade", "--source", "winget", "--accept-source-agreements", "--disable-interactivity" }, TimeSpan.FromMinutes(3));
+        return UpgradeParser.Parse(output, knownIds);
+    }
+
+    public static InstallResult Upgrade(string winget, string id, CancellationToken cancel)
+    {
+        var (code, output) = Run(winget, new[]
+        {
+            "upgrade", "--id", id, "--exact", "--silent", "--source", "winget",
+            "--accept-package-agreements", "--accept-source-agreements", "--disable-interactivity",
+        }, TimeSpan.FromMinutes(20), cancel);
+        return InstallCatalog.Interpret(code, output);
+    }
+
     private static (int Code, string Output) Run(string exe, IEnumerable<string> args, TimeSpan timeout, CancellationToken cancel = default)
     {
         var info = new ProcessStartInfo(exe)

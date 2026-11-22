@@ -65,5 +65,17 @@
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
+
+        <!-- Eigene Profile: aktuellen Stand speichern und auf anderen PCs übernehmen -->
+        <Border Style="{StaticResource Card}" Margin="0,6,14,0">
+            <StackPanel>
+                <TextBlock Text="{DynamicResource Profile.FileTitle}" Style="{StaticResource Label}" Margin="0,0,0,6" />
+                <TextBlock Text="{DynamicResource Profile.FileText}" Style="{StaticResource Body2}" TextWrapping="Wrap" Margin="0,0,0,12" />
+                <WrapPanel>
+                    <Button Style="{StaticResource PrimaryButton}" Content="{DynamicResource Profile.Export}" Command="{Binding ExportCommand}" Margin="0,0,10,0" />
+                    <Button Style="{StaticResource SecondaryButton}" Content="{DynamicResource Profile.Import}" Command="{Binding ImportCommand}" />
+                </WrapPanel>
+            </StackPanel>
+        </Border>
     </StackPanel>
 </UserControl>

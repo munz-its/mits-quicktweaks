@@ -50,7 +50,31 @@ public sealed partial class InstallGroupViewModel : ObservableObject
     public ObservableCollection<InstallItemViewModel> Items { get; }
 }
 
-/// <summary>Programme gesammelt über winget installieren, direkt von der offiziellen Quelle des Herstellers.</summary>
+/// <summary>Installiertes Programm mit neuerer Version bei winget.</summary>
+public sealed partial class UpdateItemViewModel : ObservableObject
+{
+    public UpdateItemViewModel(UpgradablePackage package)
+    {
+        Package = package;
+    }
+
+    public UpgradablePackage Package { get; }
+
+    public string Name => Package.Name;
+
+    public string Versions => $"{Package.Version} → {Package.Available}";
+
+    [ObservableProperty]
+    private bool _isSelected = true;
+
+    [ObservableProperty]
+    private bool _isDone;
+
+    [ObservableProperty]
+    private string _state = string.Empty;
+}
+
+/// <summary>Programme gesammelt über winget installieren und aktualisieren, direkt von der offiziellen Quelle des Herstellers.</summary>
 public sealed partial class InstallerViewModel : PageViewModel
 {
     private readonly HistoryStore _history;
@@ -75,12 +99,21 @@ public sealed partial class InstallerViewModel : PageViewModel
 
     public ObservableCollection<InstallGroupViewModel> Groups { get; }
 
+    public ObservableCollection<UpdateItemViewModel> Updates { get; } = new();
+
+    public bool HasUpdates => Updates.Count > 0;
+
+    [ObservableProperty]
+    private string _updateStatus = string.Empty;
+
+    private HashSet<string> _installedIds = new(StringComparer.OrdinalIgnoreCase);
+
     [ObservableProperty]
     private bool _wingetMissing;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsIdle))]
-    [NotifyCanExecuteChangedFor(nameof(InstallCommand), nameof(CancelCommand))]
+    [NotifyCanExecuteChangedFor(nameof(InstallCommand), nameof(CancelCommand), nameof(CheckUpdatesCommand), nameof(UpdateSelectedCommand))]
     private bool _isBusy;
 
     public bool IsIdle => !IsBusy;
@@ -114,6 +147,7 @@ public sealed partial class InstallerViewModel : PageViewModel
         try
         {
             var installed = await Task.Run(() => Windows.WindowsWinget.Installed(_winget));
+            _installedIds = installed;
             foreach (var item in Groups.SelectMany(g => g.Items))
             {
                 item.IsInstalled = installed.Contains(item.App.WingetId);
@@ -129,6 +163,123 @@ public sealed partial class InstallerViewModel : PageViewModel
         {
             _log.LogWarning(ex, "winget-Liste nicht lesbar");
             Status = string.Empty;
+        }
+
+        await CheckUpdatesAsync();
+    }
+
+    /// <summary>Für den Assistenten: Liste laden, ohne die Seite zu öffnen.</summary>
+    public Task PrepareAsync() => OnNavigatedToAsync();
+
+    [RelayCommand(CanExecute = nameof(CanInstall))]
+    private async Task CheckUpdatesAsync()
+    {
+        if (_winget is null)
+        {
+            return;
+        }
+
+        UpdateStatus = _localization.Get("Upgrade.Checking");
+        IReadOnlyList<UpgradablePackage> found;
+        try
+        {
+            var known = _installedIds;
+            found = await Task.Run(() => Windows.WindowsWinget.Upgrades(_winget, known));
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or TimeoutException or System.ComponentModel.Win32Exception or IOException)
+        {
+            _log.LogWarning(ex, "winget upgrade nicht lesbar");
+            UpdateStatus = _localization.Get("Upgrade.CheckFailed");
+            return;
+        }
+
+        Updates.Clear();
+        foreach (var package in found.OrderBy(p => p.Name, StringComparer.CurrentCultureIgnoreCase))
+        {
+            Updates.Add(new UpdateItemViewModel(package));
+        }
+
+        OnPropertyChanged(nameof(HasUpdates));
+        _log.LogInformation("Updates verfügbar: {Count}", found.Count);
+        UpdateStatus = found.Count == 0
+            ? _localization.Get("Upgrade.None")
+            : string.Format(CultureInfo.CurrentCulture, _localization.Get("Upgrade.Found"), found.Count);
+    }
+
+    [RelayCommand(CanExecute = nameof(CanInstall))]
+    private async Task UpdateSelectedAsync()
+    {
+        var selected = Updates.Where(u => u.IsSelected && !u.IsDone).ToList();
+        if (_winget is null || selected.Count == 0)
+        {
+            UpdateStatus = _localization.Get("Install.NothingSelected");
+            return;
+        }
+
+        IsBusy = true;
+        _cancel = new CancellationTokenSource();
+        int ok = 0, failed = 0;
+        try
+        {
+            for (var i = 0; i < selected.Count; i++)
+            {
+                var item = selected[i];
+                UpdateStatus = string.Format(CultureInfo.CurrentCulture, _localization.Get("Upgrade.Running"), item.Name, i + 1, selected.Count);
+                item.State = _localization.Get("Upgrade.StateRunning");
+                InstallResult result;
+                try
+                {
+                    var token = _cancel.Token;
+                    var id = item.Package.Id;
+                    result = await Task.Run(() => Windows.WindowsWinget.Upgrade(_winget, id, token));
+                }
+                catch (OperationCanceledException)
+                {
+                    item.State = string.Empty;
+                    UpdateStatus = _localization.Get("Install.Cancelled");
+                    break;
+                }
+                catch (Exception ex) when (ex is TimeoutException or InvalidOperationException or System.ComponentModel.Win32Exception)
+                {
+                    result = new InstallResult(false, false, ex.Message);
+                }
+
+                _history.Add(HistoryAction.AppAction, "upgrade." + item.Package.Id, result.Success, result.Error ?? $"{item.Package.Version} → {item.Package.Available}");
+                _log.LogInformation("Update {Id} {From} → {To}: {Success} {Error}", item.Package.Id, item.Package.Version, item.Package.Available, result.Success, result.Error);
+                item.IsSelected = false;
+                if (result.Success)
+                {
+                    ok++;
+                    item.IsDone = true;
+                    item.State = _localization.Get("Upgrade.StateDone");
+                }
+                else
+                {
+                    failed++;
+                    item.State = _localization.Get("Install.StateFailed");
+                }
+            }
+
+            if (!_cancel.IsCancellationRequested)
+            {
+                UpdateStatus = string.Format(CultureInfo.CurrentCulture, _localization.Get("Upgrade.Done"), ok, failed);
+            }
+        }
+        finally
+        {
+            IsBusy = false;
+            _cancel.Dispose();
+            _cancel = null;
+        }
+    }
+
+    [RelayCommand]
+    private void SelectAllUpdates()
+    {
+        var all = Updates.Where(u => !u.IsDone).All(u => u.IsSelected);
+        foreach (var item in Updates.Where(u => !u.IsDone))
+        {
+            item.IsSelected = !all;
         }
     }
 

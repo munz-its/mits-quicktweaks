@@ -27,4 +27,7 @@ public sealed class AppSettings
 
     /// <summary>Design: "munz" (Standard) oder "liquidglass". Gilt nach einem Neustart.</summary>
     public string Design { get; set; } = "munz";
+
+    /// <summary>Hinweis auf den Einrichtungs-Assistenten im Dashboard ausgeblendet.</summary>
+    public bool SetupHintDismissed { get; set; }
 }

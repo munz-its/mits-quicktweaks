@@ -33,6 +33,7 @@ public sealed partial class NavItem : ObservableObject
     private static readonly Dictionary<string, string> Glyphs = new()
     {
         ["Nav.Dashboard"] = "\uE80F",
+        ["Nav.Setup"] = "\uE768",
         ["Nav.Presets"] = "\uE734",
         ["Nav.Tweaks"] = "\uE9E9",
         ["Nav.Privacy"] = "\uE72E",
